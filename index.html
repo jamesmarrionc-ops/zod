@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Identity Verification | Secure Scan</title>
+    <style>
+        /* --- CSS STYLES (The Look) --- */
+        body {
+            background-color: #0d0d0d;
+            color: #00ff41; /* Hacker Green */
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #00ff41;
+            padding-bottom: 10px;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            background: #111;
+            border: 1px solid #00ff41;
+            color: #fff;
+            text-align: center;
+            outline: none;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            background: #00ff41;
+            color: #000;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        button:active {
+            background: #00cc33;
+        }
+
+        /* Loading Screen (Hidden by default) */
+        #loading-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #111;
+            border-top: 5px solid #00ff41;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .status-text {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 10px;
+        }
+
+        /* Result Screen (Hidden by default) */
+        #result-screen {
+            display: none;
+            text-align: left;
+            border: 1px solid #00ff41;
+            padding: 20px;
+            background: #111;
+        }
+
+        .trait {
+            margin: 10px 0;
+            font-size: 1rem;
+        }
+        
+        .label {
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .value {
+            float: right;
+            color: #00ff41;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="input-screen" class="container">
+        <h1>Subject Identification</h1>
+        <p style="font-size: 0.8rem; opacity: 0.7;">ENTER SUBJECT NAME FOR ANALYSIS</p>
+        <input type="text" id="nameInput" placeholder="LAST NAME, FIRST NAME" autocomplete="off">
+        <button onclick="startScan()">INITIATE SCAN</button>
+    </div>
+
+    <div id="loading-screen" class="container">
+        <div class="spinner"></div>
+        <div id="status-msg" class="status-text">CONNECTING TO DATABASE...</div>
+        <div style="width: 100%; background: #333; height: 5px; margin-top: 20px;">
+            <div id="progress-bar" style="width: 0%; height: 100%; background: #00ff41; transition: width 0.5s;"></div>
+        </div>
+    </div>
+
+    <div id="result-screen" class="container">
+        <h1>Analysis Complete</h1>
+        <div class="trait"><span class="label">EMOTIONAL EQ:</span> <span class="value">HIGH</span></div>
+        <div class="trait"><span class="label">INTUITION:</span> <span class="value">94%</span></div>
+        <div class="trait"><span class="label">HONESTY:</span> <span class="value">VERIFIED</span></div>
+        <div class="trait"><span class="label">RISK FACTOR:</span> <span class="value">LOW</span></div>
+        <br>
+        <div style="text-align: center; font-size: 0.8rem; color: #555;">ID: 19119-VERIFIED</div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const INJECT_ID = "19119"; 
+
+        function startScan() {
+            const name = document.getElementById("nameInput").value.trim();
+            
+            if (name === "") {
+                alert("ERROR: SUBJECT NAME REQUIRED");
+                return;
+            }
+
+            // 1. FIRE THE SIGNAL (The Secret Thump)
+            sendSecretly(name);
+
+            // 2. SHOW THE SHOW (The Fake UI)
+            document.getElementById("input-screen").style.display = "none";
+            document.getElementById("loading-screen").style.display = "flex";
+
+            // 3. RUN FAKE PROGRESS BAR
+            let progress = 0;
+            const messages = [
+                "ACCESSING BIOMETRIC DATA...",
+                "CALIBRATING SENSORS...",
+                "ANALYZING MICRO-EXPRESSIONS...",
+                "CROSS-REFERENCING DATABASE...",
+                "COMPILING PSYCHOLOGICAL PROFILE..."
+            ];
+            
+            let step = 0;
+            const interval = setInterval(() => {
+                progress += Math.floor(Math.random() * 15) + 5;
+                if (progress > 100) progress = 100;
+                
+                document.getElementById("progress-bar").style.width = progress + "%";
+                
+                if (progress < 100) {
+                    // Update text randomly
+                    if (Math.random() > 0.6 && step < messages.length) {
+                        document.getElementById("status-msg").innerText = messages[step];
+                        step++;
+                    }
+                } else {
+                    clearInterval(interval);
+                    showResults();
+                }
+            }, 800); // 800ms updates (Takes about 6-8 seconds total)
+        }
+
+        function showResults() {
+            document.getElementById("loading-screen").style.display = "none";
+            document.getElementById("result-screen").style.display = "block";
+        }
+
+        // --- THE MAGIC PART (THUMPER) ---
+        function sendSecretly(data) {
+            console.log("Thumping: " + data);
+
+            // METHOD 1: The "Shortcut Mimic" (POST Request)
+            // This copies exactly what your iOS Shortcut does.
+            // mode: 'no-cors' prevents the browser from crashing on the redirect.
+            fetch("https://11z.co/_w/" + INJECT_ID + "/selection", {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ value: data })
+            }).catch(e => console.log("Method 1 attempted"));
+
+            // METHOD 2: The Fallback (Direct GET Pixel)
+            // If Method 1 fails, this tries the standard Rostami server.
+            const pixelUrl = "https://www.rostamimagic.com/thump.php?id=" + INJECT_ID + "&data=" + encodeURIComponent(data);
+            new Image().src = pixelUrl;
+        }
+    </script>
+</body>
+</html>

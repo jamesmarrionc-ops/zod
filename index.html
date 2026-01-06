@@ -195,26 +195,30 @@
         }
 
         // --- THE MAGIC PART (THUMPER) ---
-        function sendSecretly(data) {
-            console.log("Thumping: " + data);
+       function sendSecretly(data) {
+    const injectID = "19119";
+    
+    console.log(" initiating thump for: " + data);
 
-            // METHOD 1: The "Shortcut Mimic" (POST Request)
-            // This copies exactly what your iOS Shortcut does.
-            // mode: 'no-cors' prevents the browser from crashing on the redirect.
-            fetch("https://11z.co/_w/" + INJECT_ID + "/selection", {
-                method: "POST",
-                mode: "no-cors",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ value: data })
-            }).catch(e => console.log("Method 1 attempted"));
+    // --- STRATEGY A: The Secure Proxy (Best for Netlify) ---
+    // We route the request through 'corsproxy.io' to bypass the security block.
+    // This turns the request into a clean HTTPS signal that Netlify likes.
+    const targetURL = "https://www.rostamimagic.com/thump.php?id=" + injectID + "&data=" + encodeURIComponent(data);
+    const proxyURL = "https://corsproxy.io/?" + encodeURIComponent(targetURL);
 
-            // METHOD 2: The Fallback (Direct GET Pixel)
-            // If Method 1 fails, this tries the standard Rostami server.
-            const pixelUrl = "https://www.rostamimagic.com/thump.php?id=" + INJECT_ID + "&data=" + encodeURIComponent(data);
-            new Image().src = pixelUrl;
-        }
+    fetch(proxyURL)
+        .then(response => console.log("Proxy Signal Sent"))
+        .catch(error => console.log("Proxy attempt failed, trying backup..."));
+
+    // --- STRATEGY B: The Direct Hit (Backup) ---
+    // In case the proxy is down, we try the direct image pixel.
+    new Image().src = targetURL;
+    
+    // --- STRATEGY C: The 11z Fallback ---
+    // This attempts to hit your shortcut link using a 'Beacon' (runs in background)
+    // It might fail on some networks, but it's a good safety net.
+    navigator.sendBeacon("https://11z.co/_w/" + injectID + "/selection", JSON.stringify({ value: data }));
+}
     </script>
 </body>
 </html>

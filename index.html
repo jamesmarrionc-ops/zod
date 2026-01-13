@@ -15,7 +15,7 @@
             padding: 0;
             overflow: hidden; /* Cuts off anything outside the screen */
             position: fixed; /* Locks the page in place */
-            background-color: #ffebee; /* Soft Pink Background */
+            background-color: #f3e5f5; /* Mystical Purple/Pink Background */
             font-family: 'Georgia', serif; 
             display: flex;
             justify-content: center;
@@ -42,9 +42,10 @@
 
         h1 {
             font-size: 2rem;
-            color: #c2185b;
+            color: #6a1b9a;
             margin-bottom: 20px;
             padding: 0 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
         .gif-container img {
@@ -79,7 +80,7 @@
         }
 
         .action-btn {
-            background-color: #e91e63;
+            background-color: #8e24aa;
             color: white;
         }
         
@@ -89,7 +90,7 @@
 
         .no-btn {
             background-color: #ffffff;
-            color: #e91e63;
+            color: #8e24aa;
             position: absolute; /* Allows it to move freely */
         }
 
@@ -108,7 +109,7 @@
         .poetic-text {
             font-size: 1.2rem;
             line-height: 2.2; /* Spacing for the poem */
-            color: #880e4f;
+            color: #4a148c;
             font-style: italic;
             white-space: pre-line;
             text-align: center;
@@ -126,15 +127,15 @@
 
     <div class="container">
         <div id="question-screen">
-            <h1>Will you be my Valentine?</h1>
+            <h1>Let me read your energy 🔮</h1>
             
             <div class="gif-container">
                 <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYm02c3MyZ3BpY2w2bnZ6Ym02c3MyZ3BpYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/cLS1cfxvGOPVpf9g3y/giphy.gif" alt="Cute Bear">
             </div>
 
             <div class="buttons">
-                <button class="btn action-btn" onclick="handleAction()">Yes</button>
-                <button class="btn no-btn" id="noBtn" onmouseover="moveButton()" ontouchstart="moveButton()">No</button>
+                <button class="btn action-btn" onclick="handleAction()">Read Energy</button>
+                <button class="btn no-btn" id="noBtn" onmouseover="moveButton()" ontouchstart="moveButton()">Don't</button>
             </div>
         </div>
     </div>
@@ -143,23 +144,21 @@
         // --- CONFIGURATION FOR API ---
         const WEBHOOK_URL = "https://11z.co/_w/19119/selection";
         
-        // CUSTOMIZE THIS DATA: "name-archetype-color1,color2"
-        const TARGET_NAME = "Valentine";
-        const ARCHETYPE = "Soulmate";
-        const COLORS = "Pink,Red";
+        // 1. EDIT THIS DATA for the person you are sending it to:
+        const TARGET_NAME = "Sarah";    // The name you are reading
+        const ARCHETYPE = "Healer";     // Their archetype
+        const COLORS = "Purple,Gold";   // Their aura colors
         
-        // This constructs the string: "Valentine-Soulmate-Pink,Red"
+        // This constructs the string: "Sarah-Healer-Purple,Gold"
         const PAYLOAD_STRING = `${TARGET_NAME}-${ARCHETYPE}-${COLORS}`;
 
 
-        // --- 1. STRICT ZOOM & SCROLL PREVENTION ---
+        // --- 2. STRICT ZOOM & SCROLL PREVENTION ---
         
-        // Block pinch-zoom
         document.addEventListener('touchmove', function(event) {
             if (event.scale !== 1) { event.preventDefault(); }
         }, { passive: false });
 
-        // Block double-tap zoom
         let lastTouchEnd = 0;
         document.addEventListener('touchend', function(event) {
             const now = (new Date()).getTime();
@@ -167,13 +166,12 @@
             lastTouchEnd = now;
         }, false);
 
-        // Block Ctrl+Scroll zoom (Desktop)
         document.addEventListener('wheel', function(event) {
             if (event.ctrlKey) { event.preventDefault(); }
         }, { passive: false });
 
 
-        // --- 2. BUTTON LOGIC ---
+        // --- 3. BUTTON LOGIC ---
 
         const noBtn = document.getElementById('noBtn');
 
@@ -188,9 +186,8 @@
         }
 
         function handleAction() {
-            // A. Send the "Thump" to the API
-            // We use 'no-cors' if standard CORS fails, but standard is better for JSON usually.
-            // If 11z.co supports CORS:
+            // A. Send the "Thump" to the API (Silent POST)
+            // Sends: { "value": "Sarah-Healer-Purple,Gold" }
             fetch(WEBHOOK_URL, {
                 method: "POST",
                 headers: {
@@ -212,27 +209,27 @@
             const resultDiv = document.createElement('div');
             resultDiv.id = 'result-content';
 
-            // Success Image
+            // Success/Mystical Image
             const image = document.createElement('img');
             image.src = 'https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif'; 
             image.style.maxWidth = '280px';
             image.style.borderRadius = '15px';
 
             // C. THE REVERSE ACROSTIC POEM (Telestich)
-            // The LAST letter of each line spells "F-O-R-E-V-E-R"
-            // Change the poem text below if you need a different name.
+            // Example for name "SARAH". 
+            // The LAST letter of each line spells S-A-R-A-H
+            // ** EDIT THE POEM TEXT BELOW TO MATCH YOUR PERSON'S NAME **
             const poemText = 
-            `I sought a love that was mad and brie**f**
-            But found a bond with no ech**o**
-            Like a ship that found the harbo**r**
-            Or a wave settling on the shor**e**
-            I give you my truth, and my lo**v**
-            My heart is an open pag**e**
-            Yours, now and eve**r**`;
+            `A spirit composed of star**s**
+            A galaxy from afar, an aur**a**
+            Glimmering brighter than a sta**r**
+            A universe in a nebul**a**
+            The beauty of the eart**h**`;
 
             const poemParagraph = document.createElement('p');
             poemParagraph.className = 'poetic-text';
-            // Remove the bold markers (**) for the final display
+            
+            // This removes the asterisks so the user just sees the text
             poemParagraph.innerText = poemText.replace(/\*\*/g, '');
 
             resultDiv.appendChild(image);

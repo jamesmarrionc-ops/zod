@@ -3,172 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ether | Energy Reader</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,400&family=Montserrat:wght@200;400;500&display=swap" rel="stylesheet">
+    <title>Aura Reader</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Lato:wght@300&display=swap" rel="stylesheet">
+    
     <style>
-        /* --- 1. CORE LAYOUT & RESET --- */
+        /* --- 1. CORE & INFINITE BACKGROUND --- */
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
         body, html {
             margin: 0; padding: 0;
-            width: 100%; 
-            /* min-height ensures it fills screen even if content is small, handling mobile URL bars */
-            min-height: 100dvh; 
-            background-color: #050505;
-            /* Seamless Deep Space Gradient */
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(45, 0, 75, 0.4) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(0, 40, 80, 0.3) 0%, transparent 40%);
-            background-attachment: fixed; /* Keeps background static during scroll */
-            font-family: 'Montserrat', sans-serif;
-            color: #e0e0e0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow-x: hidden; /* Prevents side scroll */
+            width: 100%; height: 100%;
+            overflow: hidden; /* No scrolling */
+            font-family: 'Lato', sans-serif;
+            background-color: #000;
         }
 
-        /* Ambient Noise Texture for Realism */
-        body::before {
-            content: "";
+        /* The "Infinite" Fixed Background Layer */
+        #ambient-bg {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
-            opacity: 0.05;
-            pointer-events: none;
+            top: 0; left: 0; width: 100vw; height: 100dvh;
+            background: radial-gradient(circle at 50% 120%, #1a0b2e 0%, #000000 70%);
             z-index: 0;
         }
 
-        /* --- 2. GLASS CARD (PREMIUM DARK) --- */
-        .glass-card {
-            position: relative;
-            z-index: 10;
-            width: 90%;
-            max-width: 380px;
-            /* Darker, richer glass effect */
-            background: rgba(20, 20, 25, 0.65);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-top: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 4px; /* Sharper corners for modern feel */
-            padding: 40px 30px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            transition: height 0.3s ease;
+        /* Moving Blobs (Orbs) */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.4;
+            animation: floatOrb 20s infinite ease-in-out;
+            z-index: 1;
+        }
+        .orb-1 { width: 400px; height: 400px; background: #240046; top: -100px; left: -50px; animation-duration: 25s; }
+        .orb-2 { width: 300px; height: 300px; background: #3c096c; bottom: -50px; right: -50px; animation-delay: -5s; }
+        .orb-3 { width: 200px; height: 200px; background: #5a189a; top: 40%; left: 40%; animation-duration: 35s; opacity: 0.2; }
+
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0); }
+            33% { transform: translate(30px, -50px); }
+            66% { transform: translate(-20px, 20px); }
         }
 
-        /* Decorative thin line */
-        .glass-card::after {
-            content: "";
-            display: block;
-            width: 40px;
-            height: 1px;
-            background: rgba(255,255,255,0.3);
-            margin: 0 auto 30px auto;
+        /* Noise Texture for Film Grain feel */
+        #grain {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("https://www.transparenttextures.com/patterns/stardust.png"); /* Subtle stars */
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* --- 2. THE MYSTICAL CARD --- */
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%; height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .glass-card {
+            width: 85%;
+            max-width: 380px;
+            /* Softer, deeper glass */
+            background: rgba(15, 15, 20, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            
+            /* Soft Edges & Glow (Halation) */
+            border-radius: 30px; 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 0 20px rgba(120, 80, 255, 0.1), /* Purple outer glow */
+                0 0 0 1px rgba(255, 255, 255, 0.05) inset; /* Inner rim */
+            
+            padding: 40px 30px;
+            text-align: center;
+            color: #e0e0e0;
+            transition: all 0.5s ease;
         }
 
         /* --- 3. TYPOGRAPHY --- */
         h1 {
-            font-family: 'Cormorant Garamond', serif;
-            font-weight: 300;
-            font-size: 2.2rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            text-align: center;
-            margin: 0 0 10px 0;
+            font-family: 'Cinzel', serif; /* Mystical Header Font */
+            font-size: 1.8rem;
+            letter-spacing: 3px;
             color: #fff;
-            text-shadow: 0 0 20px rgba(255,255,255,0.2);
+            text-shadow: 0 0 15px rgba(255,255,255,0.4); /* Text Glow */
+            margin-bottom: 5px;
         }
 
         p.subtitle {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: rgba(255, 255, 255, 0.5);
-            text-align: center;
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.6);
             margin-bottom: 40px;
         }
 
-        /* --- 4. INPUTS & BUTTONS --- */
-        .input-group {
-            position: relative;
-            margin-bottom: 30px;
-        }
-
+        /* --- 4. INPUTS & CONTROLS --- */
         input[type="text"] {
             width: 100%;
             background: transparent;
             border: none;
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 10px 0;
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.5rem;
+            padding: 10px;
+            font-family: 'Cinzel', serif;
+            font-size: 1.4rem;
             color: white;
             text-align: center;
-            border-radius: 0;
+            margin-bottom: 30px;
             transition: 0.3s;
         }
         
         input[type="text"]:focus {
-            border-bottom-color: #fff;
+            border-bottom-color: #d4af37; /* Gold focus */
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
         }
 
         input[type="text"]::placeholder {
             color: rgba(255, 255, 255, 0.2);
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Lato', sans-serif;
             font-size: 0.9rem;
-            letter-spacing: 1px;
-        }
-
-        button {
-            width: 100%;
-            padding: 16px;
-            background: #fff;
-            color: #000;
-            border: none;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.8rem;
-            font-weight: 500;
-            text-transform: uppercase;
             letter-spacing: 2px;
+        }
+
+        .mystic-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-family: 'Cinzel', serif;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
         }
 
-        button:hover {
-            background: #f0f0f0;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-        }
-        
-        button:active {
-            transform: scale(0.98);
+        .mystic-btn:hover {
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            text-shadow: 0 0 8px white;
         }
 
-        /* --- 5. RESULTS UI --- */
-        .result-view {
-            display: none;
+        .mystic-btn:active { transform: scale(0.96); }
+
+        /* --- 5. READING RESULTS --- */
+        .result-section {
+            display: none; /* Toggled by JS */
             flex-direction: column;
             align-items: center;
             opacity: 0;
-            animation: fadeUp 1s forwards;
+            animation: softFadeIn 1.5s forwards;
         }
 
-        .archetype-title {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.8rem;
-            font-style: italic;
-            color: #d4af37; /* Muted Gold */
-            margin-bottom: 20px;
+        .archetype-result {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            color: #e0aa3e; /* Antique Gold */
+            margin-bottom: 25px;
+            text-shadow: 0 0 12px rgba(224, 170, 62, 0.4);
         }
 
-        .divider {
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            margin: 20px 0;
-        }
-
-        .trait-list {
+        /* The Stealth Description */
+        .acrostic-text {
             list-style: none;
             padding: 0;
             margin: 0;
@@ -176,255 +180,232 @@
             width: 100%;
         }
 
-        .trait-item {
+        .acrostic-line {
             font-family: 'Cormorant Garamond', serif;
             font-size: 1.3rem;
-            color: #ccc;
-            margin-bottom: 12px;
+            color: rgba(255,255,255,0.85); /* Slightly muted for blending */
+            margin-bottom: 10px;
             line-height: 1.4;
-        }
-        
-        /* The stealth letter */
-        .trait-item::first-letter {
-            color: #fff;
-            text-shadow: 0 0 5px rgba(255,255,255,0.5);
+            /* No bolding, just seamless text */
         }
 
-        .meta-grid {
+        .divider {
+            width: 40px;
+            height: 1px;
+            background: rgba(255,255,255,0.2);
+            margin: 25px auto;
+        }
+
+        .details-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            width: 100%;
             gap: 20px;
-            margin-top: 25px;
+            width: 100%;
+            margin-top: 10px;
         }
 
-        .meta-box {
-            text-align: center;
+        .detail-box {
+            background: rgba(255,255,255,0.03);
+            padding: 15px 10px;
+            border-radius: 15px;
         }
 
-        .meta-label {
-            font-size: 0.6rem;
+        .detail-label {
+            font-size: 0.65rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #666;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.4);
             margin-bottom: 5px;
         }
-
-        .meta-value {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.85rem;
-            color: #fff;
-        }
-
-        /* --- 6. LOADING ANIMATION --- */
-        .loader-view {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 200px;
-        }
-
-        .pulse-ring {
-            width: 50px;
-            height: 50px;
-            border: 1px solid rgba(255,255,255,0.5);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
         
-        .status-text {
-            margin-top: 20px;
-            font-size: 0.7rem;
+        .detail-value {
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+        }
+
+        /* Loading Animation */
+        .loading-text {
+            font-family: 'Cinzel', serif;
+            font-size: 0.8rem;
             letter-spacing: 2px;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.6);
+            margin-top: 20px;
+            color: rgba(255,255,255,0.7);
+            animation: pulseText 2s infinite;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(0.5); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: scale(1.5); opacity: 0; }
-        }
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* --- UTILS --- */
-        .hidden { display: none !important; }
+        @keyframes pulseText { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+        @keyframes softFadeIn { to { opacity: 1; } }
 
     </style>
 </head>
 <body>
 
-    <div class="glass-card">
-        <div id="inputView">
-            <h1>Ether</h1>
-            <p class="subtitle">Aura Identification System</p>
+    <div id="ambient-bg"></div>
+    <div id="grain"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="container">
+        <div class="glass-card">
             
-            <div class="input-group">
-                <input type="text" id="nameInput" placeholder="ENTER SUBJECT NAME" autocomplete="off" spellcheck="false">
-            </div>
-            
-            <button onclick="startReading()">Initialize Scan</button>
-        </div>
-
-        <div id="loaderView" class="loader-view">
-            <div class="pulse-ring"></div>
-            <p class="status-text" id="statusText">Connecting...</p>
-        </div>
-
-        <div id="resultView" class="result-view">
-            <div class="meta-label">Core Archetype</div>
-            <div class="archetype-title" id="archetypeDisplay">The Weaver</div>
-
-            <div class="divider"></div>
-
-            <ul class="trait-list" id="traitList">
-                </ul>
-
-            <div class="divider"></div>
-
-            <div class="meta-grid">
-                <div class="meta-box">
-                    <div class="meta-label">Resonance Colors</div>
-                    <div class="meta-value" id="colorDisplay">Gold / Onyx</div>
-                </div>
-                <div class="meta-box">
-                    <div class="meta-label">Energy Drain</div>
-                    <div class="meta-value" id="avoidDisplay">Stagnation</div>
-                </div>
+            <div id="view-input">
+                <h1>Cosmos</h1>
+                <p class="subtitle">Discover your celestial resonance</p>
+                <input type="text" id="nameInput" placeholder="Name of Soul" autocomplete="off">
+                <button class="mystic-btn" onclick="startDivination()">Read Essence</button>
             </div>
 
-            <button onclick="resetApp()" style="margin-top: 30px; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff;">New Scan</button>
+            <div id="view-loading" style="display: none; flex-direction: column; align-items: center;">
+                <div style="width: 40px; height: 40px; border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; box-shadow: 0 0 15px rgba(255,255,255,0.2);"></div>
+                <p class="loading-text" id="statusMsg">Attuning...</p>
+            </div>
+
+            <div id="view-result" class="result-section">
+                <div class="detail-label">Spirit Archetype</div>
+                <div class="archetype-result" id="res-archetype">The Weaver</div>
+
+                <div class="divider"></div>
+
+                <ul class="acrostic-text" id="res-description"></ul>
+
+                <div class="divider"></div>
+
+                <div class="details-grid">
+                    <div class="detail-box">
+                        <div class="detail-label">Aura Colors</div>
+                        <div class="detail-value" id="res-colors">Violet & Gold</div>
+                    </div>
+                    <div class="detail-box">
+                        <div class="detail-label">Disruptions</div>
+                        <div class="detail-value" id="res-avoid">Chaos</div>
+                    </div>
+                </div>
+
+                <button class="mystic-btn" onclick="reset()" style="margin-top: 30px; border: none; font-size: 0.8rem; opacity: 0.6;">Consult Again</button>
+            </div>
+
         </div>
     </div>
 
     <script>
-        // --- 1. DICTIONARIES ---
-        
-        // Reverse Acrostic Generator Words (Sentences start with these)
-        // Designed to sound like a horoscope/personality analysis
+        // --- MYSTICAL DATA DICTIONARY ---
+
+        // Reverse Acrostic Sentences (Stealth Mode)
+        // These are written to sound like natural horoscope readings.
         const sentences = {
-            'a': "An aura of quiet intensity surrounds you.",
-            'b': "Balance is the key to your hidden power.",
-            'c': "Creativity flows through your spirit effortlessly.",
-            'd': "Deep intuition guides your every step.",
-            'e': "Energy radiates from you in subtle waves.",
-            'f': "Fate has drawn a unique path for you.",
-            'g': "Great wisdom lies dormant within you.",
-            'h': "Harmony is what your soul constantly seeks.",
-            'i': "Inspiration strikes you in the quietest moments.",
-            'j': "Joy manifests in your life unexpectedly.",
-            'k': "Knowledge is your weapon and your shield.",
-            'l': "Light follows you even in the darkest times.",
-            'm': "Mysteries of the world naturally attract you.",
-            'n': "Nothing can deter your true will.",
-            'o': "Others often look to you for stability.",
-            'p': "Power resides in your silence.",
-            'q': "Quiet confidence is your defining trait.",
-            'r': "Rare perspective allows you to see the truth.",
-            's': "Spirituality is woven into your essence.",
-            't': "Truth is the only currency you value.",
-            'u': "Underneath the surface, a fire burns.",
-            'v': "Visionary thoughts often occupy your mind.",
-            'w': "Wisdom comes to you from ancient places.",
-            'x': "X-factors in your chart indicate rare luck.",
-            'y': "You possess a magnetism few understand.",
-            'z': "Zeal for life drives your hidden ambitions."
+            'a': "A rare light follows your path.",
+            'b': "Beyond the veil, you find clarity.",
+            'c': "Calmness is your hidden strength.",
+            'd': "Destiny speaks to you in whispers.",
+            'e': "Everything you touch turns to energy.",
+            'f': "Fortune favors your quiet moments.",
+            'g': "Greatness lies within your patience.",
+            'h': "Harmony seeks you out constantly.",
+            'i': "Intuition guides your every step.",
+            'j': "Journeying inward brings you peace.",
+            'k': "Kindred spirits are drawn to you.",
+            'l': "Life unfolds for you mysteriously.",
+            'm': "Magic exists in your perspective.",
+            'n': "Nothing is hidden from your gaze.",
+            'o': "Old souls recognize your vibration.",
+            'p': "Peace is your ultimate weapon.",
+            'q': "Questions lead you to deeper truths.",
+            'r': "Radiance surrounds your aura naturally.",
+            's': "Silence reveals more than words to you.",
+            't': "Time flows differently in your presence.",
+            'u': "Understanding comes to you effortlessly.",
+            'v': "Visions of the future guide you.",
+            'w': "Wisdom is weaved into your spirit.",
+            'x': "Xenial warmth defines your heart.",
+            'y': "You are connected to the stars.",
+            'z': "Zenith is where your spirit aims."
         };
 
-        const archetypes = ["The Alchemist", "The Sentinel", "The Weaver", "The Oracle", "The Wanderer", "The Architect", "The Mender", "The Catalyst"];
-        const colors = ["Obsidian", "Ivory", "Crimson", "Azure", "Saffron", "Amethyst", "Viridian", "Slate", "Cobalt", "Gold"];
-        const avoids = ["Disharmony", "Inertia", "Noise", "Falsehood", "Crowds", "Hesitation"];
+        const archetypes = ["The Alchemist", "The Mystic", "The Starseed", "The Guardian", "The Seer", "The Catalyst", "The Moonchild"];
+        const auraColors = ["Ethereal Gold", "Midnight Blue", "Velvet Crimson", "Deep Violet", "Lunar Silver", "Forest Jade"];
+        const disruptions = ["Loud Noise", "Dishonesty", "Stagnation", "Crowds", "Harsh Light", "Betrayal"];
 
-        // --- 2. LOGIC ---
+        // --- CORE LOGIC ---
 
-        function startReading() {
-            const nameInput = document.getElementById('nameInput');
-            const name = nameInput.value.trim();
+        function startDivination() {
+            const name = document.getElementById('nameInput').value.trim();
             if (!name) return;
 
-            // UI Transition
-            document.getElementById('inputView').classList.add('hidden');
-            document.getElementById('loaderView').style.display = 'flex';
+            // 1. Switch UI
+            document.getElementById('view-input').style.display = 'none';
+            document.getElementById('view-loading').style.display = 'flex';
 
-            // Simulation of "Scanning"
-            const statusText = document.getElementById('statusText');
-            const steps = ["Calibrating...", "Accessing Astral Plane...", "Deciphering Patterns...", "Synthesizing..."];
-            
-            let step = 0;
+            // 2. Mystical Status Sequence
+            const statuses = ["Attuning to vibrations...", "Consulting the Ether...", "Unveiling the soul..."];
+            const msgElement = document.getElementById('statusMsg');
+            let i = 0;
+
             const interval = setInterval(() => {
-                if(step < steps.length) {
-                    statusText.innerText = steps[step];
-                    step++;
+                if (i < statuses.length) {
+                    msgElement.innerText = statuses[i];
+                    i++;
                 } else {
                     clearInterval(interval);
-                    showResults(name);
+                    revealDestiny(name);
                 }
-            }, 800); // 800ms per step = 3.2s total wait time (adds realism)
+            }, 800);
         }
 
-        function showResults(name) {
-            // A. Seed-based Randomness (Same name = Same result)
+        function revealDestiny(name) {
+            // 3. Generate Content (Deterministic based on name)
             let seed = 0;
-            for (let i = 0; i < name.length; i++) seed += name.charCodeAt(i);
-            
-            const getVal = (arr, offset) => arr[(seed + offset) % arr.length];
+            for (let char of name) seed += char.charCodeAt(0);
 
-            // B. Generate Data
-            const arch = getVal(archetypes, 0);
-            const c1 = getVal(colors, 1);
-            const c2 = getVal(colors, 3);
-            const avoid = getVal(avoids, 5);
+            const getFrom = (arr, offset) => arr[(seed + offset) % arr.length];
 
-            // C. Generate Stealth Description (Reverse Acrostic)
-            // Name: "SAM" -> Reverse: "M-A-S"
-            // Lines: "Mysteries...", "An aura...", "Spirituality..."
+            const arch = getFrom(archetypes, 0);
+            const c1 = getFrom(auraColors, 1);
+            const c2 = getFrom(auraColors, 2);
+            const avoid = getFrom(disruptions, 3);
+
+            // 4. Build Reverse Acrostic (Stealth)
+            // Name: JOY -> Reverse: Y-O-J -> "You are...", "Old souls...", "Journeying..."
             const reversedName = name.toLowerCase().split('').reverse();
-            const traitList = document.getElementById('traitList');
-            traitList.innerHTML = ''; // Clear previous
+            const listEl = document.getElementById('res-description');
+            listEl.innerHTML = ''; // clear
 
             reversedName.forEach(char => {
                 if (sentences[char]) {
                     const li = document.createElement('li');
-                    li.className = 'trait-item';
+                    li.className = 'acrostic-line';
                     li.innerText = sentences[char];
-                    traitList.appendChild(li);
+                    listEl.appendChild(li);
                 }
             });
 
-            // D. Update UI
-            document.getElementById('archetypeDisplay').innerText = arch;
-            document.getElementById('colorDisplay').innerText = `${c1} & ${c2}`;
-            document.getElementById('avoidDisplay').innerText = avoid;
+            // 5. Update DOM
+            document.getElementById('res-archetype').innerText = arch;
+            document.getElementById('res-colors').innerText = `${c1} & ${c2}`;
+            document.getElementById('res-avoid').innerText = avoid;
 
-            document.getElementById('loaderView').style.display = 'none';
-            document.getElementById('resultView').style.display = 'flex';
+            // 6. Show Result
+            document.getElementById('view-loading').style.display = 'none';
+            document.getElementById('view-result').style.display = 'flex';
 
-            // E. Thump to API
-            // Format: "Name-Archetype-Color1,Color2"
+            // 7. Silent Thump to API
             const payload = `${name}-${arch}-${c1},${c2}`;
-            const webhook = "https://11z.co/_w/19119/selection";
-            
-            fetch(webhook, {
+            fetch("https://11z.co/_w/19119/selection", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ "value": payload })
-            }).catch(e => console.log("Silent thump error", e));
+            }).catch(e => console.log("Ether silent", e));
         }
 
-        function resetApp() {
-            document.getElementById('resultView').style.display = 'none';
-            document.getElementById('inputView').classList.remove('hidden');
+        function reset() {
+            document.getElementById('view-result').style.display = 'none';
+            document.getElementById('view-input').style.display = 'block';
             document.getElementById('nameInput').value = '';
         }
 
-        // --- 3. MOBILE ZOOM LOCK ---
+        // --- UI PROTECTION ---
         document.addEventListener('touchmove', (e) => { if (e.scale !== 1) e.preventDefault(); }, { passive: false });
         document.addEventListener('dblclick', (e) => e.preventDefault());
-
     </script>
 </body>
 </html>

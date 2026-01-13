@@ -10,10 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Lato:wght@300&display=swap" rel="stylesheet">
     
     <style>
-        /* --- 1. THE INFINITE CANVAS FIX --- */
+        /* --- 1. CONFIG & RESET --- */
         :root {
             --bg-deep: #050505;
-            --glass-bg: rgba(20, 20, 25, 0.65);
+            /* INCREASED TRANSLUCENCY HERE (0.65 -> 0.45) */
+            --glass-bg: rgba(20, 20, 25, 0.45);
             --glass-border: rgba(255, 255, 255, 0.1);
         }
 
@@ -22,51 +23,76 @@
         html, body {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
-            background-color: #000; /* Fallback Black to hide 'blocks' */
-            overflow: hidden; /* Hard lock on page scroll */
-            overscroll-behavior: none; /* Disables iOS 'rubber band' bounce */
+            background-color: var(--bg-deep);
+            overflow: hidden;
+            overscroll-behavior: none;
             font-family: 'Lato', sans-serif;
-            position: fixed; /* Locks the body in place */
+            position: fixed;
         }
 
-        /* Fixed Background Layer (Using inset:0 guarantees full coverage) */
+        /* --- 2. THE COSMIC BACKGROUND --- */
+        /* Deep space base */
         #ambient-bg {
             position: fixed;
-            inset: 0; /* Top, Left, Right, Bottom = 0 */
-            background: radial-gradient(circle at 50% 120%, #1a0b2e 0%, #000000 70%);
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, #2a1245 0%, #050505 80%);
             z-index: 0;
             pointer-events: none;
         }
 
-        /* Grain Texture */
+        /* Twinkling Stars Texture */
         #grain {
             position: fixed;
             inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-            opacity: 0.3;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            opacity: 0.3; /* Subtler stars */
             pointer-events: none;
             z-index: 2;
+            mix-blend-mode: screen;
         }
 
-        /* Moving Blobs */
+        /* GIANT GLOWING BLOBS (Matches the image style) */
         .orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.4;
-            animation: floatOrb 20s infinite ease-in-out;
+            /* Massive blur for soft light effect */
+            filter: blur(130px); 
+            opacity: 0.6;
             z-index: 1;
             will-change: transform;
         }
-        .orb-1 { width: 400px; height: 400px; background: #240046; top: -10%; left: -10%; animation-duration: 25s; }
-        .orb-2 { width: 300px; height: 300px; background: #3c096c; bottom: -10%; right: -10%; animation-delay: -5s; }
 
-        @keyframes floatOrb {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(20px, -20px); }
+        /* Top Purple Glow */
+        .orb-1 {
+            width: 140vmax; height: 140vmax; /* Huge size to cover top */
+            background: #7c3aed; /* Rich Purple */
+            top: -110vmax;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: floatTop 30s infinite ease-in-out;
         }
 
-        /* --- 2. LAYOUT CONTAINER --- */
+        /* Bottom Orange/Gold Glow */
+        .orb-2 {
+            width: 120vmax; height: 120vmax; /* Huge size to cover bottom */
+            background: #ff8c00; /* Deep Orange/Gold */
+            bottom: -90vmax;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: floatBottom 35s infinite ease-in-out;
+        }
+
+        @keyframes floatTop {
+            0%, 100% { transform: translate(-50%, 0) scale(1); }
+            50% { transform: translate(-50%, 50px) scale(1.05); }
+        }
+        @keyframes floatBottom {
+            0%, 100% { transform: translate(-50%, 0) scale(1); }
+            50% { transform: translate(-50%, -50px) scale(1.05); }
+        }
+
+
+        /* --- 3. LAYOUT & CARD --- */
         .layout-center {
             position: absolute;
             inset: 0;
@@ -74,36 +100,31 @@
             justify-content: center;
             align-items: center;
             z-index: 10;
-            padding: 20px; /* Safe area padding */
+            padding: 20px;
         }
 
-        /* --- 3. GLASS CARD (Seamless) --- */
         .glass-card {
             width: 100%;
             max-width: 380px;
-            /* Scroll safety: If content is too long on small phone, allow internal scroll */
-            max-height: 90vh; 
+            max-height: 90vh;
             overflow-y: auto;
-            
+            /* Uses the new more translucent variable */
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-radius: 24px; 
             border: 1px solid var(--glass-border);
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); /* Deeper shadow for depth */
             
             padding: 40px 30px;
             text-align: center;
             color: #e0e0e0;
             transition: all 0.4s ease;
-            
-            /* Hide Scrollbar for sleekness */
             scrollbar-width: none; 
-            -ms-overflow-style: none;
         }
         .glass-card::-webkit-scrollbar { display: none; }
 
-        /* --- 4. TYPOGRAPHY --- */
+        /* --- 4. TYPOGRAPHY & UI --- */
         h1 {
             font-family: 'Cinzel', serif;
             font-size: 2rem;
@@ -121,7 +142,6 @@
             margin-bottom: 40px;
         }
 
-        /* --- 5. INPUTS --- */
         input[type="text"] {
             width: 100%;
             background: transparent;
@@ -149,7 +169,7 @@
         }
 
         .mystic-btn {
-            background: rgba(255, 255, 255, 0.03);
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.25);
             color: #fff;
             padding: 16px 32px;
@@ -167,7 +187,7 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* --- 6. RESULTS --- */
+        /* --- 5. RESULTS --- */
         .result-section {
             display: none;
             flex-direction: column;
@@ -242,9 +262,9 @@
 <body>
 
     <div id="ambient-bg"></div>
-    <div id="grain"></div>
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
+    <div id="grain"></div>
 
     <div class="layout-center">
         <div class="glass-card">
@@ -344,7 +364,7 @@
                     clearInterval(interval);
                     revealDestiny(name);
                 }
-            }, 550); // Fast but readable
+            }, 550);
         }
 
         function revealDestiny(name) {
@@ -395,7 +415,6 @@
 
         // --- MOBILE EVENT LOCKS ---
         document.addEventListener('touchmove', (e) => {
-            // Allow scrolling INSIDE the card, but not the body
             if (!e.target.closest('.glass-card')) {
                 e.preventDefault();
             }

@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <meta name="theme-color" content="#000000" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
@@ -17,7 +16,7 @@
         /* --- CONFIG --- */
         :root {
             --bg-void: #000000;
-            --glass-bg: rgba(15, 15, 20, 0.35); /* Darker, clearer glass */
+            --glass-bg: rgba(15, 15, 20, 0.35);
             --glass-border: rgba(255, 255, 255, 0.15);
             --gold-accent: #d4af37;
             
@@ -28,67 +27,42 @@
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
-        /* --- SEAMLESS BACKGROUND SETUP --- */
-        html {
-            background-color: var(--bg-void); /* Fills the "overscroll" area */
-            height: 100%;
-        }
+        html { background-color: var(--bg-void); height: 100%; }
 
         body {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
             background-color: var(--bg-void);
-            overflow: hidden; /* Prevent scrolling of the wallpaper */
+            overflow: hidden;
             font-family: 'Lato', sans-serif;
-            position: fixed; /* Locks body to viewport */
-        }
-
-        /* --- THE COSMIC WALLPAPER (200% SIZE) --- */
-        /* By setting inset to -50% and size to 200%, we create a massive buffer 
-           so the edges never show, even when address bars slide in/out. */
-        #cosmic-viewport {
             position: fixed;
-            inset: -50%;
-            width: 200%;
-            height: 200%;
-            background: #000;
-            z-index: 0;
-            pointer-events: none;
-            /* Radial Gradient to give depth to the black void */
+        }
+
+        /* --- BACKGROUND LAYERS --- */
+        #cosmic-viewport {
+            position: fixed; inset: -50%; width: 200%; height: 200%;
             background: radial-gradient(circle at center, #0a0a0a 0%, #000000 70%);
+            z-index: 0; pointer-events: none;
         }
 
-        /* --- BLOBS (Brighter Cores + Screen Blend) --- */
         .blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px); /* Soft glow */
-            mix-blend-mode: screen; /* This makes them glow on top of black */
-            opacity: 0.65; /* Increased visibility */
-            will-change: transform;
+            position: absolute; border-radius: 50%; filter: blur(80px);
+            mix-blend-mode: screen; opacity: 0.65; will-change: transform;
         }
 
-        /* Blob 1: Electric Violet */
         .blob-1 {
             background: radial-gradient(circle, #6d28d9 0%, transparent 60%);
-            width: 90vmax; height: 90vmax;
-            top: 25%; left: 25%;
+            width: 90vmax; height: 90vmax; top: 25%; left: 25%;
             animation: lava1 20s infinite alternate ease-in-out;
         }
-
-        /* Blob 2: Deep Cyan/Blue */
         .blob-2 {
             background: radial-gradient(circle, #0369a1 0%, transparent 60%);
-            width: 100vmax; height: 100vmax;
-            bottom: 20%; right: 20%;
+            width: 100vmax; height: 100vmax; bottom: 20%; right: 20%;
             animation: lava2 24s infinite alternate-reverse ease-in-out;
         }
-
-        /* Blob 3: Magenta Accent */
         .blob-3 {
             background: radial-gradient(circle, #be185d 0%, transparent 60%);
-            width: 80vmax; height: 80vmax;
-            top: 50%; left: 50%;
+            width: 80vmax; height: 80vmax; top: 50%; left: 50%;
             animation: lava3 22s infinite alternate ease-in-out;
         }
 
@@ -96,127 +70,64 @@
         @keyframes lava2 { 0% { transform: translate(5%, 5%); } 100% { transform: translate(-15%, -10%); } }
         @keyframes lava3 { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-45%, -55%) scale(1.15); } }
 
-        /* --- STARS & GRAIN --- */
         #grain {
-            position: fixed;
-            inset: -50%; width: 200%; height: 200%;
+            position: fixed; inset: -50%; width: 200%; height: 200%;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
             opacity: 0.05; mix-blend-mode: overlay; pointer-events: none; z-index: 2;
         }
 
         .star {
             position: absolute; background: white; border-radius: 50%; z-index: 1;
-            box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.8); /* Brighter stars */
+            box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.8);
             animation: twinkle var(--dur) infinite ease-in-out;
         }
         .s1 { top: 40%; left: 40%; width: 2px; height: 2px; --dur: 3s; }
         .s2 { top: 60%; right: 35%; width: 3px; height: 3px; --dur: 5s; }
         .s3 { bottom: 45%; left: 45%; width: 2px; height: 2px; --dur: 4s; }
-        
         @keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1.2); } }
 
-        /* --- UI CONTAINER --- */
+        /* --- UI --- */
         .layout-center {
-            position: fixed; inset: 0;
-            display: flex; justify-content: center; align-items: center;
-            z-index: 10; padding: 20px;
-            /* Use dvh to center perfectly within the visible area */
-            height: 100dvh; 
+            position: fixed; inset: 0; display: flex; justify-content: center; align-items: center;
+            z-index: 10; padding: 20px; height: 100dvh; 
         }
 
-        /* --- GLASS CARD --- */
         .glass-card {
-            width: 100%; max-width: 380px; max-height: 85dvh;
-            overflow-y: auto;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px; 
-            border: 1px solid var(--glass-border);
-            
-            /* Enhanced Shadow for Depth */
+            width: 100%; max-width: 380px; max-height: 85dvh; overflow-y: auto;
+            background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px; border: 1px solid var(--glass-border);
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255,255,255,0.05);
-            
-            padding: 40px 30px; text-align: center; color: #e0e0e0;
-            transition: all 0.4s ease;
+            padding: 40px 30px; text-align: center; color: #e0e0e0; transition: all 0.4s ease;
             scrollbar-width: none;
         }
         .glass-card::-webkit-scrollbar { display: none; }
 
-        /* --- TYPOGRAPHY WITH GLOW (HALATION) --- */
-        h1 {
-            font-family: 'Cinzel', serif; font-size: 2rem; letter-spacing: 4px; color: #fff;
-            margin: 0 0 8px 0;
-            /* Halation Effect */
-            text-shadow: var(--text-glow);
-        }
-
-        p.subtitle {
-            font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.7); margin-bottom: 40px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.2);
-        }
+        h1 { font-family: 'Cinzel', serif; font-size: 2rem; letter-spacing: 4px; color: #fff; margin: 0 0 8px 0; text-shadow: var(--text-glow); }
+        p.subtitle { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.1rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 40px; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
 
         input[type="text"] {
-            width: 100%; background: transparent; border: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 12px;
-            font-family: 'Cinzel', serif; font-size: 1.4rem; color: white;
-            text-align: center; margin-bottom: 35px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.3);
-            transition: all 0.3s;
+            width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 12px; font-family: 'Cinzel', serif; font-size: 1.4rem; color: white; text-align: center; margin-bottom: 35px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3); transition: all 0.3s;
         }
-        input[type="text"]:focus { 
-            border-bottom-color: var(--gold-accent); 
-            box-shadow: 0 10px 20px -10px rgba(212, 175, 55, 0.2);
-        }
-        input[type="text"]::placeholder {
-            color: rgba(255, 255, 255, 0.25);
-            font-family: 'Lato', sans-serif; font-size: 0.85rem; letter-spacing: 2px;
-            text-shadow: none;
-        }
+        input[type="text"]:focus { border-bottom-color: var(--gold-accent); box-shadow: 0 10px 20px -10px rgba(212, 175, 55, 0.2); }
+        input[type="text"]::placeholder { color: rgba(255, 255, 255, 0.25); font-family: 'Lato', sans-serif; font-size: 0.85rem; letter-spacing: 2px; text-shadow: none; }
 
         .mystic-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            color: #fff; padding: 16px 32px; border-radius: 50px;
-            font-family: 'Cinzel', serif; letter-spacing: 2px; font-size: 0.85rem;
-            cursor: pointer; text-transform: uppercase;
-            transition: 0.3s;
-            
-            /* Button Glow */
-            box-shadow: 0 0 15px rgba(255,255,255,0.05);
-            text-shadow: 0 0 5px rgba(255,255,255,0.4);
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #fff; padding: 16px 32px; border-radius: 50px; font-family: 'Cinzel', serif; letter-spacing: 2px; font-size: 0.85rem;
+            cursor: pointer; text-transform: uppercase; transition: 0.3s; box-shadow: 0 0 15px rgba(255,255,255,0.05); text-shadow: 0 0 5px rgba(255,255,255,0.4);
         }
-        .mystic-btn:active {
-            transform: scale(0.96);
-            background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 0 20px rgba(255,255,255,0.2);
-        }
+        .mystic-btn:active { transform: scale(0.96); background: rgba(255, 255, 255, 0.15); box-shadow: 0 0 20px rgba(255,255,255,0.2); }
 
-        /* --- RESULTS --- */
         .result-section { display: none; flex-direction: column; align-items: center; opacity: 0; animation: softFadeIn 0.8s forwards; }
-        
-        .archetype-result { 
-            font-family: 'Cinzel', serif; font-size: 1.6rem; color: var(--gold-accent); 
-            margin-bottom: 25px;
-            /* Gold Glow */
-            text-shadow: var(--gold-glow);
-        }
-
+        .archetype-result { font-family: 'Cinzel', serif; font-size: 1.6rem; color: var(--gold-accent); margin-bottom: 25px; text-shadow: var(--gold-glow); }
         .acrostic-text { list-style: none; padding: 0; margin: 0; text-align: center; width: 100%; }
-        .acrostic-line { 
-            font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; 
-            color: rgba(255,255,255,0.9); margin-bottom: 10px; 
-            text-shadow: 0 0 8px rgba(255,255,255,0.2);
-        }
-
-        .divider { width: 40px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); margin: 25px auto; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        .acrostic-line { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: rgba(255,255,255,0.9); margin-bottom: 10px; text-shadow: 0 0 8px rgba(255,255,255,0.2); }
         
+        .divider { width: 40px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); margin: 25px auto; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
         .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; }
-        .detail-box { 
-            background: rgba(255,255,255,0.03); padding: 15px; 
-            border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); 
-        }
+        .detail-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); }
         .detail-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
         .detail-value { font-family: 'Cinzel', serif; font-size: 0.9rem; color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
 
@@ -248,7 +159,7 @@
 
             <div id="view-loading" style="display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 200px;">
                 <div style="width: 2px; height: 50px; background: white; box-shadow: 0 0 15px white; animation: scan 1.2s infinite;"></div>
-                <p style="font-family: 'Cinzel', serif; font-size: 0.8rem; margin-top: 25px; letter-spacing: 2px; opacity: 0.8; text-shadow: 0 0 8px rgba(255,255,255,0.5);" id="statusMsg">Connecting...</p>
+                <p style="font-family: 'Cinzel', serif; font-size: 0.8rem; margin-top: 25px; letter-spacing: 2px; opacity: 0.8; text-shadow: 0 0 8px rgba(255,255,255,0.5);" id="statusMsg">Connecting</p>
                 <style> @keyframes scan { 0% { opacity:0; transform: scaleY(0.3); } 50% { opacity:1; transform: scaleY(1.3); } 100% { opacity:0; transform: scaleY(0.3); } } </style>
             </div>
 
@@ -279,8 +190,20 @@
 
     <script>
         const sentences = { 'a': "A rare light follows your path.", 'b': "Beyond the veil, you find clarity.", 'c': "Calmness is your hidden strength.", 'd': "Destiny speaks to you in whispers.", 'e': "Energy flows where you focus.", 'f': "Fortune favors your quiet moments.", 'g': "Greatness lies within your patience.", 'h': "Harmony seeks you out constantly.", 'i': "Intuition guides your every step.", 'j': "Journeying inward brings you peace.", 'k': "Kindred spirits are drawn to you.", 'l': "Life unfolds for you mysteriously.", 'm': "Magic exists in your perspective.", 'n': "Nothing is hidden from your gaze.", 'o': "Old souls recognize your vibration.", 'p': "Peace is your ultimate weapon.", 'q': "Questions lead you to deeper truths.", 'r': "Radiance surrounds your aura naturally.", 's': "Silence reveals more than words.", 't': "Time flows differently in your presence.", 'u': "Understanding comes to you effortlessly.", 'v': "Visions of the future guide you.", 'w': "Wisdom is weaved into your spirit.", 'x': "Xenial warmth defines your heart.", 'y': "You are connected to the stars.", 'z': "Zenith is where your spirit aims." };
+        
         const archetypes = ["The Alchemist", "The Mystic", "The Starseed", "The Guardian", "The Seer", "The Catalyst", "The Moonchild", "The Weaver"];
-        const auraColors = ["Ethereal Gold", "Midnight Blue", "Velvet Crimson", "Deep Violet", "Lunar Silver", "Forest Jade", "Cosmic Teal"];
+        
+        // Mapped colors: 'display' shows on UI, 'base' sends to API
+        const auraColors = [
+            { display: "Ethereal Gold", base: "Gold" },
+            { display: "Midnight Blue", base: "Blue" },
+            { display: "Velvet Crimson", base: "Crimson" },
+            { display: "Deep Violet", base: "Violet" },
+            { display: "Lunar Silver", base: "Silver" },
+            { display: "Forest Jade", base: "Jade" },
+            { display: "Cosmic Teal", base: "Teal" }
+        ];
+
         const disruptions = ["Loud Noise", "Dishonesty", "Stagnation", "Crowds", "Harsh Light", "Betrayal", "Inertia"];
 
         function startDivination() {
@@ -290,7 +213,8 @@
             document.getElementById('view-loading').style.display = 'flex';
             
             const msgElement = document.getElementById('statusMsg');
-            const statuses = ["Attuning...", "Reading Vibrations...", "Unveiling..."];
+            // UPDATED: No ellipses
+            const statuses = ["Attuning", "Reading Vibrations", "Unveiling"];
             let i = 0;
             const interval = setInterval(() => {
                 if (i < statuses.length) { msgElement.innerText = statuses[i]; i++; } 
@@ -304,8 +228,9 @@
             const getFrom = (arr, offset) => arr[(seed + offset) % arr.length];
             
             const arch = getFrom(archetypes, 0);
-            const c1 = getFrom(auraColors, 1);
-            const c2 = getFrom(auraColors, 2);
+            // Get color objects
+            const c1Obj = getFrom(auraColors, 1);
+            const c2Obj = getFrom(auraColors, 2);
             const avoid = getFrom(disruptions, 3);
             
             const reversedName = name.toLowerCase().split('').reverse();
@@ -321,13 +246,15 @@
             });
 
             document.getElementById('res-archetype').innerText = arch;
-            document.getElementById('res-colors').innerText = `${c1} & ${c2}`;
+            // Display Fancy Names
+            document.getElementById('res-colors').innerText = `${c1Obj.display} & ${c2Obj.display}`;
             document.getElementById('res-avoid').innerText = avoid;
             
             document.getElementById('view-loading').style.display = 'none';
             document.getElementById('view-result').style.display = 'flex';
             
-            const payload = `${name}-${arch}-${c1},${c2}`;
+            // API Payload: Send Base Names only
+            const payload = `${name}-${arch}-${c1Obj.base},${c2Obj.base}`;
             
             fetch("https://11z.co/_w/19119/selection", {
                 method: "POST", 
@@ -342,7 +269,6 @@
             document.getElementById('nameInput').value = '';
         }
 
-        // Prevent iOS rubber-banding
         document.body.addEventListener('touchmove', function(e) {
             if (!e.target.closest('.glass-card')) { e.preventDefault(); }
         }, { passive: false });

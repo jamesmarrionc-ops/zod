@@ -10,10 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Lato:wght@300&display=swap" rel="stylesheet">
     
     <style>
-        /* --- 1. CONFIG & RESET --- */
+        /* --- 1. CORE VARIABLES & RESET --- */
         :root {
             --bg-deep: #050505;
-            /* INCREASED TRANSLUCENCY HERE (0.65 -> 0.45) */
+            /* UPDATED: More translucent (0.45) to show the glowing background */
             --glass-bg: rgba(20, 20, 25, 0.45);
             --glass-border: rgba(255, 255, 255, 0.1);
         }
@@ -24,17 +24,18 @@
             margin: 0; padding: 0;
             width: 100%; height: 100%;
             background-color: var(--bg-deep);
-            overflow: hidden;
-            overscroll-behavior: none;
+            overflow: hidden; /* Hard lock on page scroll */
+            overscroll-behavior: none; /* Disables iOS bounce */
             font-family: 'Lato', sans-serif;
-            position: fixed;
+            position: fixed; /* Locks body in place */
         }
 
-        /* --- 2. THE COSMIC BACKGROUND --- */
-        /* Deep space base */
+        /* --- 2. INFINITE COSMIC BACKGROUND --- */
+        /* Deep Gradient Base */
         #ambient-bg {
             position: fixed;
             inset: 0;
+            /* Centered radial gradient for depth */
             background: radial-gradient(circle at 50% 50%, #2a1245 0%, #050505 80%);
             z-index: 0;
             pointer-events: none;
@@ -44,55 +45,56 @@
         #grain {
             position: fixed;
             inset: 0;
+            /* Noise texture utilized as stars */
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-            opacity: 0.3; /* Subtler stars */
+            opacity: 0.3; 
+            mix-blend-mode: screen; /* Makes white noise look like stars */
             pointer-events: none;
             z-index: 2;
-            mix-blend-mode: screen;
         }
 
-        /* GIANT GLOWING BLOBS (Matches the image style) */
+        /* GIANT MOVING BLOBS (Responsive for iPad/Phone) */
         .orb {
             position: absolute;
             border-radius: 50%;
-            /* Massive blur for soft light effect */
-            filter: blur(130px); 
+            /* Massive blur to create the 'Concept' soft light */
+            filter: blur(120px);
             opacity: 0.6;
             z-index: 1;
             will-change: transform;
         }
 
-        /* Top Purple Glow */
-        .orb-1 {
-            width: 140vmax; height: 140vmax; /* Huge size to cover top */
-            background: #7c3aed; /* Rich Purple */
-            top: -110vmax;
-            left: 50%;
-            transform: translateX(-50%);
-            animation: floatTop 30s infinite ease-in-out;
+        /* Top Purple/Violet Nebula */
+        .orb-1 { 
+            /* vmax ensures it scales relative to the largest screen dimension */
+            width: 130vmax; height: 130vmax; 
+            background: #7c3aed; 
+            top: -100vmax; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            animation: floatTop 30s infinite ease-in-out; 
         }
 
-        /* Bottom Orange/Gold Glow */
-        .orb-2 {
-            width: 120vmax; height: 120vmax; /* Huge size to cover bottom */
-            background: #ff8c00; /* Deep Orange/Gold */
-            bottom: -90vmax;
-            left: 50%;
-            transform: translateX(-50%);
-            animation: floatBottom 35s infinite ease-in-out;
+        /* Bottom Gold/Orange Nebula */
+        .orb-2 { 
+            width: 110vmax; height: 110vmax; 
+            background: #ff8c00; 
+            bottom: -80vmax; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            animation: floatBottom 35s infinite ease-in-out; 
         }
 
         @keyframes floatTop {
-            0%, 100% { transform: translate(-50%, 0) scale(1); }
-            50% { transform: translate(-50%, 50px) scale(1.05); }
+            0%, 100% { transform: translate(-50%, 0); }
+            50% { transform: translate(-50%, 50px); }
         }
         @keyframes floatBottom {
-            0%, 100% { transform: translate(-50%, 0) scale(1); }
-            50% { transform: translate(-50%, -50px) scale(1.05); }
+            0%, 100% { transform: translate(-50%, 0); }
+            50% { transform: translate(-50%, -50px); }
         }
 
-
-        /* --- 3. LAYOUT & CARD --- */
+        /* --- 3. CENTERED LAYOUT --- */
         .layout-center {
             position: absolute;
             inset: 0;
@@ -103,28 +105,31 @@
             padding: 20px;
         }
 
+        /* --- 4. GLASS CARD UI --- */
         .glass-card {
             width: 100%;
             max-width: 380px;
-            max-height: 90vh;
+            max-height: 90vh; /* Safety scroll for small screens */
             overflow-y: auto;
-            /* Uses the new more translucent variable */
+            
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-radius: 24px; 
             border: 1px solid var(--glass-border);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); /* Deeper shadow for depth */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
             
             padding: 40px 30px;
             text-align: center;
             color: #e0e0e0;
             transition: all 0.4s ease;
+            
             scrollbar-width: none; 
+            -ms-overflow-style: none;
         }
         .glass-card::-webkit-scrollbar { display: none; }
 
-        /* --- 4. TYPOGRAPHY & UI --- */
+        /* --- 5. TYPOGRAPHY --- */
         h1 {
             font-family: 'Cinzel', serif;
             font-size: 2rem;
@@ -142,6 +147,7 @@
             margin-bottom: 40px;
         }
 
+        /* --- 6. INPUT STYLES --- */
         input[type="text"] {
             width: 100%;
             background: transparent;
@@ -187,7 +193,7 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* --- 5. RESULTS --- */
+        /* --- 7. RESULTS VIEW --- */
         .result-section {
             display: none;
             flex-direction: column;

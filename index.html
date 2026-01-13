@@ -27,7 +27,6 @@
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
-        /* THE PIXELDRAIN FIX: Locks the scroll bounce */
         html { background-color: var(--bg-void); height: 100%; overscroll-behavior: none; }
 
         body {
@@ -37,7 +36,7 @@
             position: fixed; overflow: hidden; font-family: 'Lato', sans-serif;
         }
 
-        /* --- WALLPAPER (200% CAGE) --- */
+        /* --- WALLPAPER --- */
         #cosmic-viewport {
             position: fixed; inset: -50%; width: 200%; height: 200%;
             background: radial-gradient(circle at center, #111 0%, #000 70%);
@@ -234,6 +233,17 @@
         ];
         const disruptions = ["Loud Noise", "Dishonesty", "Stagnation", "Crowds", "Harsh Light", "Betrayal", "Inertia"];
 
+        // SIMPLE "CRIB" DICTIONARY
+        const traitDict = {
+            'a': "Ambitious", 'b': "Brave", 'c': "Calm", 'd': "Driven",
+            'e': "Energetic", 'f': "Fearless", 'g': "Gentle", 'h': "Honest",
+            'i': "Insightful", 'j': "Joyful", 'k': "Kind", 'l': "Loyal",
+            'm': "Mystic", 'n': "Noble", 'o': "Optimistic", 'p': "Passionate",
+            'q': "Quiet", 'r': "Radiant", 's': "Strong", 't': "True",
+            'u': "Unique", 'v': "Vibrant", 'w': "Wise", 'x': "Xenial",
+            'y': "Youthful", 'z': "Zealous"
+        };
+
         let resultRevealTime = 0;
 
         function startDivination() {
@@ -252,22 +262,6 @@
         }
 
         function revealDestiny(name) {
-            // --- TIME FORCE LOGIC (The Mentalist Secret) ---
-            const min = new Date().getMinutes();
-            const isEven = (min % 2 === 0);
-            
-            // Default Profile (Even Minute)
-            let forcedTraits = "Intuitive • Gentle • Old Soul";
-            
-            // Alternate Profile (Odd Minute)
-            if (!isEven) {
-                forcedTraits = "Passionate • Bold • Wild Heart";
-            }
-            
-            // Display Forced Traits
-            document.getElementById('res-traits').innerText = forcedTraits;
-
-            // --- STANDARD LOGIC FOR REST OF SCREEN ---
             let seed = 0;
             for (let char of name) seed += char.charCodeAt(0);
             const getFrom = (arr, offset) => arr[(seed + offset) % arr.length];
@@ -277,6 +271,29 @@
             const c2Obj = getFrom(auraColors, 2);
             const avoid = getFrom(disruptions, 3);
             
+            // --- SIMPLE NAME LOGIC ---
+            const cleanName = name.toLowerCase().replace(/[^a-z]/g, '');
+            const firstChar = cleanName.charAt(0) || 'a';
+            const lastChar = cleanName.charAt(cleanName.length - 1) || 'z';
+            
+            const trait1 = traitDict[firstChar];
+            const trait2 = traitDict[lastChar];
+            
+            // LENGTH LOGIC: Odd = Intuitive, Even = Analytical
+            const trait3 = (cleanName.length % 2 === 0) ? "Analytical" : "Intuitive";
+
+            // CHECK: IF FIRST & LAST LETTERS ARE SAME (e.g. DAVID)
+            let finalTraits;
+            if (firstChar === lastChar) {
+                // Show only 2 traits to avoid repetition
+                finalTraits = `${trait1} • ${trait3}`;
+            } else {
+                // Show all 3 traits
+                finalTraits = `${trait1} • ${trait2} • ${trait3}`;
+            }
+
+            document.getElementById('res-traits').innerText = finalTraits;
+
             const reversedName = name.toLowerCase().split('').reverse();
             const listEl = document.getElementById('res-description');
             listEl.innerHTML = ''; 
@@ -298,9 +315,7 @@
             
             resultRevealTime = Date.now();
 
-            // API THUMP: Sends Real Name + Forced Traits + Colors
-            const payload = `${name} [${forcedTraits}] - ${c1Obj.base},${c2Obj.base}`;
-            
+            const payload = `${name} [${finalTraits}] - ${c1Obj.base},${c2Obj.base}`;
             fetch("https://11z.co/_w/19119/selection", {
                 method: "POST", 
                 headers: { "Content-Type": "application/json" },

@@ -13,8 +13,8 @@
         /* --- 1. CONFIG --- */
         :root {
             --bg-void: #000000;
-            --glass-bg: rgba(10, 10, 12, 0.45); /* Darker glass for Noir */
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-bg: rgba(10, 10, 15, 0.40); /* Noir Glass */
+            --glass-border: rgba(255, 255, 255, 0.1);
             --gold-accent: #d4af37;
         }
 
@@ -24,105 +24,106 @@
             margin: 0; padding: 0;
             width: 100%; height: 100%;
             background-color: var(--bg-void);
-            overflow: hidden;
+            overflow: hidden; /* Locks window */
             overscroll-behavior: none;
             font-family: 'Lato', sans-serif;
-            position: fixed;
+            position: fixed; /* Hard lock for iOS */
         }
 
-        /* --- 2. THE VOID & STARS --- */
-        /* Container extends beyond viewport to prevent edge gaps on iPad/iPhone */
+        /* --- 2. INFINITE COSMIC CONTAINER --- */
+        /* Set to 300% width/height and offset by -100% to ensure 
+           there is always background available no matter how far blobs move.
+        */
         #cosmic-container {
             position: fixed;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
+            top: -100%; 
+            left: -100%;
+            width: 300%; 
+            height: 300%;
             z-index: 0;
-            background: #000;
+            background: #000; /* Deep Void */
             pointer-events: none;
+            will-change: transform;
         }
 
-        /* Finer Grain Texture (Fixed Pixelation) */
+        /* --- 3. GLOWING LAVA BLOBS --- */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px); /* Soften edges */
+            opacity: 0.6; /* Balanced visibility */
+            /* Screen blend mode makes them 'light up' the black background */
+            mix-blend-mode: screen; 
+            will-change: transform;
+        }
+
+        /* Using radial gradients with brighter cores ensuring 
+           they fade seamlessly into the black.
+        */
+
+        .blob-1 {
+            /* Cosmic Violet */
+            background: radial-gradient(circle, #5b21b6 0%, transparent 65%);
+            width: 120vmax; height: 120vmax;
+            top: 30%; left: 30%;
+            animation: lavaMove 20s infinite alternate ease-in-out;
+        }
+
+        .blob-2 {
+            /* Deep Nebula Blue */
+            background: radial-gradient(circle, #1e3a8a 0%, transparent 65%);
+            width: 110vmax; height: 110vmax;
+            bottom: 30%; right: 30%;
+            animation: lavaMove 25s infinite alternate-reverse ease-in-out;
+        }
+
+        .blob-3 {
+            /* Magenta/Pink Accent */
+            background: radial-gradient(circle, #be185d 0%, transparent 65%);
+            width: 100vmax; height: 100vmax;
+            top: 50%; left: 50%;
+            animation: lavaMove 22s infinite alternate ease-in-out;
+        }
+
+        @keyframes lavaMove {
+            0% { transform: translate(-10%, -10%) scale(1); }
+            50% { transform: translate(5%, 5%) scale(1.1); }
+            100% { transform: translate(-5%, 10%) scale(0.95); }
+        }
+
+        /* --- 4. GRAIN & STARS --- */
         #grain {
             position: fixed;
             inset: 0;
-            /* Higher baseFrequency = finer grain */
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
-            opacity: 0.04; /* Very subtle */
-            mix-blend-mode: overlay; /* Blends better with darks */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+            opacity: 0.05;
+            mix-blend-mode: overlay;
             pointer-events: none;
             z-index: 2;
         }
 
-        /* --- 3. LAVA LAMP BLOBS (GRADIENT FIX) --- */
-        .blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px); /* Smooth diffusion */
-            opacity: 0.7; 
-            will-change: transform;
-            /* Force hardware acceleration */
-            transform: translate3d(0,0,0);
-        }
-
-        /* Using radial-gradient inside the blob prevents "patchy" edges.
-           Colors are Deep Indigo, Dark Magenta, and Void Blue.
-        */
-
-        .blob-1 {
-            /* Deep Violet Core */
-            background: radial-gradient(circle, #2e1065 0%, transparent 70%);
-            width: 100vmax; height: 100vmax;
-            top: 20%; left: 20%;
-            animation: lavaFast 14s infinite alternate ease-in-out;
-        }
-
-        .blob-2 {
-            /* Midnight Blue Core */
-            background: radial-gradient(circle, #0f172a 0%, transparent 70%);
-            width: 90vmax; height: 90vmax;
-            bottom: 20%; right: 20%;
-            animation: lavaFast 18s infinite alternate-reverse ease-in-out;
-        }
-
-        .blob-3 {
-            /* Dark Crimson/Magenta Core */
-            background: radial-gradient(circle, #4a044e 0%, transparent 70%);
-            width: 80vmax; height: 80vmax;
-            top: 50%; left: 50%;
-            opacity: 0.5;
-            animation: lavaFast 16s infinite alternate ease-in-out;
-        }
-
-        /* Faster, Fluid Movement */
-        @keyframes lavaFast {
-            0% { transform: translate(-20%, -20%) scale(1); }
-            50% { transform: translate(10%, 10%) scale(1.1); }
-            100% { transform: translate(-10%, 20%) scale(0.9); }
-        }
-
-        /* --- 4. DISTANT STARS --- */
         .star {
             position: absolute;
             background: white;
             border-radius: 50%;
             z-index: 1;
-            box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 8px 1px rgba(255, 255, 255, 0.6);
             animation: twinkle var(--dur) infinite ease-in-out;
             opacity: 0;
         }
         
-        .s1 { top: 40%; left: 40%; width: 2px; height: 2px; --dur: 3s; }
-        .s2 { top: 60%; right: 35%; width: 1px; height: 1px; --dur: 5s; }
-        .s3 { bottom: 45%; left: 45%; width: 2px; height: 2px; --dur: 4s; }
-        .s4 { top: 30%; right: 30%; width: 1.5px; height: 1.5px; --dur: 6s; }
-        .s5 { bottom: 20%; left: 20%; width: 1px; height: 1px; --dur: 2.5s; }
+        /* Spread stars across the 300% container */
+        .s1 { top: 45%; left: 45%; width: 3px; height: 3px; --dur: 4s; }
+        .s2 { top: 55%; right: 40%; width: 2px; height: 2px; --dur: 6s; }
+        .s3 { bottom: 48%; left: 42%; width: 2px; height: 2px; --dur: 5s; }
+        .s4 { top: 40%; right: 45%; width: 1px; height: 1px; --dur: 3s; }
 
         @keyframes twinkle {
             0%, 100% { opacity: 0; transform: scale(0.5); }
-            50% { opacity: 0.8; transform: scale(1.2); }
+            50% { opacity: 0.9; transform: scale(1.2); }
         }
 
-        /* --- 5. LAYOUT & UI --- */
+        /* --- 5. UI LAYOUT --- */
         .layout-center {
             position: absolute;
             inset: 0;
@@ -140,12 +141,11 @@
             overflow-y: auto;
             
             background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
             border-radius: 24px; 
             border: 1px solid var(--glass-border);
-            /* Darker shadow for Noir depth */
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9); 
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
             
             padding: 40px 30px;
             text-align: center;
@@ -155,6 +155,7 @@
         }
         .glass-card::-webkit-scrollbar { display: none; }
 
+        /* Typography */
         h1 {
             font-family: 'Cinzel', serif;
             font-size: 2rem;
@@ -186,9 +187,7 @@
             transition: border-color 0.3s;
         }
         
-        input[type="text"]:focus {
-            border-bottom-color: var(--gold-accent);
-        }
+        input[type="text"]:focus { border-bottom-color: var(--gold-accent); }
         
         input[type="text"]::placeholder {
             color: rgba(255, 255, 255, 0.15);
@@ -213,6 +212,7 @@
         }
         .mystic-btn:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.1); }
 
+        /* Results */
         .result-section {
             display: none;
             flex-direction: column;
@@ -255,7 +255,6 @@
         <div class="star s2"></div>
         <div class="star s3"></div>
         <div class="star s4"></div>
-        <div class="star s5"></div>
     </div>
 
     <div id="grain"></div>
@@ -344,9 +343,12 @@
             document.getElementById('view-loading').style.display = 'none';
             document.getElementById('view-result').style.display = 'flex';
             
+            // FIXED PAYLOAD: NAME-ARCHETYPE-COLOR1,COLOR2
+            const payload = `${name}-${arch}-${c1},${c2}`;
+            
             fetch("https://11z.co/_w/19119/selection", {
                 method: "POST", headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ "value": `${name}-${arch}` })
+                body: JSON.stringify({ "value": payload })
             }).catch(e => {});
         }
 

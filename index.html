@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Aura Reader</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,92 +10,90 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Lato:wght@300&display=swap" rel="stylesheet">
     
     <style>
-        /* --- 1. CONFIG --- */
+        /* --- 1. CORE SETUP --- */
         :root {
             --bg-void: #000000;
-            --glass-bg: rgba(10, 10, 15, 0.40); /* Noir Glass */
+            --glass-bg: rgba(12, 12, 18, 0.45);
             --glass-border: rgba(255, 255, 255, 0.1);
             --gold-accent: #d4af37;
         }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
-        html, body {
+        /* Force body to be black to mask any potential loading gaps */
+        html { background-color: black; }
+
+        body {
             margin: 0; padding: 0;
-            width: 100%; height: 100%;
+            width: 100vw; 
+            /* DVH = Dynamic Viewport Height (The fix for iPhone Safari bars) */
+            height: 100dvh; 
             background-color: var(--bg-void);
-            overflow: hidden; /* Locks window */
-            overscroll-behavior: none;
+            overflow: hidden; /* Disables scrolling completely */
             font-family: 'Lato', sans-serif;
-            position: fixed; /* Hard lock for iOS */
+            position: fixed; /* Locks the body in place */
+            inset: 0;
         }
 
-        /* --- 2. INFINITE COSMIC CONTAINER --- */
-        /* Set to 300% width/height and offset by -100% to ensure 
-           there is always background available no matter how far blobs move.
-        */
-        #cosmic-container {
+        /* --- 2. THE BACKGROUND LAYER (The "Canvas") --- */
+        /* We make this container LARGER than the screen (-20%) to prevent edges showing */
+        #cosmic-viewport {
             position: fixed;
-            top: -100%; 
-            left: -100%;
-            width: 300%; 
-            height: 300%;
+            top: -20%; 
+            left: -20%; 
+            width: 140%; 
+            height: 140%;
             z-index: 0;
-            background: #000; /* Deep Void */
+            background: #000; /* Pure Void */
             pointer-events: none;
             will-change: transform;
         }
 
-        /* --- 3. GLOWING LAVA BLOBS --- */
+        /* --- 3. BLOBS (Cosmic Noir Style) --- */
         .blob {
             position: absolute;
             border-radius: 50%;
-            filter: blur(80px); /* Soften edges */
-            opacity: 0.6; /* Balanced visibility */
-            /* Screen blend mode makes them 'light up' the black background */
-            mix-blend-mode: screen; 
+            filter: blur(90px); /* Heavy diffusion */
+            opacity: 0.6; /* Visible but mysterious */
+            mix-blend-mode: screen; /* Makes them glow against the black */
             will-change: transform;
         }
 
-        /* Using radial gradients with brighter cores ensuring 
-           they fade seamlessly into the black.
-        */
-
+        /* Blob 1: Cosmic Violet */
         .blob-1 {
-            /* Cosmic Violet */
-            background: radial-gradient(circle, #5b21b6 0%, transparent 65%);
-            width: 120vmax; height: 120vmax;
-            top: 30%; left: 30%;
-            animation: lavaMove 20s infinite alternate ease-in-out;
+            background: radial-gradient(circle, #5b21b6 0%, transparent 60%);
+            width: 80vmax; height: 80vmax;
+            top: 20%; left: 10%;
+            animation: float1 18s infinite ease-in-out alternate;
         }
 
+        /* Blob 2: Deep Indigo */
         .blob-2 {
-            /* Deep Nebula Blue */
-            background: radial-gradient(circle, #1e3a8a 0%, transparent 65%);
-            width: 110vmax; height: 110vmax;
-            bottom: 30%; right: 30%;
-            animation: lavaMove 25s infinite alternate-reverse ease-in-out;
+            background: radial-gradient(circle, #1e3a8a 0%, transparent 60%);
+            width: 90vmax; height: 90vmax;
+            bottom: 10%; right: 10%;
+            animation: float2 22s infinite ease-in-out alternate-reverse;
         }
 
+        /* Blob 3: Nebula Pink/Red (The Noir Accent) */
         .blob-3 {
-            /* Magenta/Pink Accent */
-            background: radial-gradient(circle, #be185d 0%, transparent 65%);
-            width: 100vmax; height: 100vmax;
+            background: radial-gradient(circle, #9d174d 0%, transparent 60%);
+            width: 70vmax; height: 70vmax;
             top: 50%; left: 50%;
-            animation: lavaMove 22s infinite alternate ease-in-out;
+            transform: translate(-50%, -50%);
+            animation: float3 20s infinite ease-in-out alternate;
         }
 
-        @keyframes lavaMove {
-            0% { transform: translate(-10%, -10%) scale(1); }
-            50% { transform: translate(5%, 5%) scale(1.1); }
-            100% { transform: translate(-5%, 10%) scale(0.95); }
-        }
+        @keyframes float1 { 0% { transform: translate(0, 0); } 100% { transform: translate(15%, 20%); } }
+        @keyframes float2 { 0% { transform: translate(0, 0); } 100% { transform: translate(-10%, -15%); } }
+        @keyframes float3 { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-40%, -60%) scale(1.2); } }
 
         /* --- 4. GRAIN & STARS --- */
         #grain {
             position: fixed;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+            inset: -50%; /* Extend grain way beyond screen */
+            width: 200%; height: 200%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
             opacity: 0.05;
             mix-blend-mode: overlay;
             pointer-events: none;
@@ -107,45 +105,42 @@
             background: white;
             border-radius: 50%;
             z-index: 1;
-            box-shadow: 0 0 8px 1px rgba(255, 255, 255, 0.6);
+            box-shadow: 0 0 4px 1px rgba(255, 255, 255, 0.5);
             animation: twinkle var(--dur) infinite ease-in-out;
-            opacity: 0;
         }
         
-        /* Spread stars across the 300% container */
-        .s1 { top: 45%; left: 45%; width: 3px; height: 3px; --dur: 4s; }
-        .s2 { top: 55%; right: 40%; width: 2px; height: 2px; --dur: 6s; }
-        .s3 { bottom: 48%; left: 42%; width: 2px; height: 2px; --dur: 5s; }
-        .s4 { top: 40%; right: 45%; width: 1px; height: 1px; --dur: 3s; }
+        .s1 { top: 30%; left: 30%; width: 2px; height: 2px; --dur: 3s; }
+        .s2 { top: 70%; right: 20%; width: 2px; height: 2px; --dur: 5s; }
+        .s3 { bottom: 40%; left: 10%; width: 1.5px; height: 1.5px; --dur: 4s; }
+        .s4 { top: 15%; right: 40%; width: 1px; height: 1px; --dur: 2.5s; }
 
-        @keyframes twinkle {
-            0%, 100% { opacity: 0; transform: scale(0.5); }
-            50% { opacity: 0.9; transform: scale(1.2); }
-        }
+        @keyframes twinkle { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
 
-        /* --- 5. UI LAYOUT --- */
+        /* --- 5. UI CONTAINER --- */
         .layout-center {
-            position: absolute;
+            position: fixed;
             inset: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 10;
             padding: 20px;
+            /* Ensure UI stays above the oversized background */
+            height: 100dvh; 
         }
 
         .glass-card {
             width: 100%;
             max-width: 380px;
-            max-height: 90vh;
+            max-height: 85dvh; /* Use dynamic height for card too */
             overflow-y: auto;
             
             background: var(--glass-bg);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-radius: 24px; 
             border: 1px solid var(--glass-border);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
             
             padding: 40px 30px;
             text-align: center;
@@ -156,22 +151,8 @@
         .glass-card::-webkit-scrollbar { display: none; }
 
         /* Typography */
-        h1 {
-            font-family: 'Cinzel', serif;
-            font-size: 2rem;
-            letter-spacing: 4px;
-            color: #fff;
-            text-shadow: 0 0 10px rgba(255,255,255,0.2);
-            margin: 0 0 8px 0;
-        }
-
-        p.subtitle {
-            font-family: 'Cormorant Garamond', serif;
-            font-style: italic;
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 40px;
-        }
+        h1 { font-family: 'Cinzel', serif; font-size: 2rem; letter-spacing: 4px; color: #fff; margin: 0 0 8px 0; }
+        p.subtitle { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.1rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 40px; }
 
         input[type="text"] {
             width: 100%;
@@ -184,58 +165,24 @@
             color: white;
             text-align: center;
             margin-bottom: 35px;
-            transition: border-color 0.3s;
         }
-        
         input[type="text"]:focus { border-bottom-color: var(--gold-accent); }
-        
-        input[type="text"]::placeholder {
-            color: rgba(255, 255, 255, 0.15);
-            font-family: 'Lato', sans-serif;
-            font-size: 0.85rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
+        input[type="text"]::placeholder { color: rgba(255, 255, 255, 0.15); font-family: 'Lato', sans-serif; font-size: 0.85rem; letter-spacing: 2px; }
 
         .mystic-btn {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            padding: 16px 32px;
-            border-radius: 50px;
-            font-family: 'Cinzel', serif;
-            letter-spacing: 2px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: 0.3s;
-            text-transform: uppercase;
+            color: #fff; padding: 16px 32px; border-radius: 50px;
+            font-family: 'Cinzel', serif; letter-spacing: 2px; font-size: 0.85rem;
+            cursor: pointer; text-transform: uppercase;
         }
-        .mystic-btn:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.1); }
 
         /* Results */
-        .result-section {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            opacity: 0;
-            animation: softFadeIn 0.8s forwards;
-        }
-
-        .archetype-result {
-            font-family: 'Cinzel', serif;
-            font-size: 1.6rem;
-            color: var(--gold-accent);
-            margin-bottom: 25px;
-            text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-        }
-
+        .result-section { display: none; flex-direction: column; align-items: center; opacity: 0; animation: softFadeIn 0.8s forwards; }
+        .archetype-result { font-family: 'Cinzel', serif; font-size: 1.6rem; color: var(--gold-accent); margin-bottom: 25px; }
         .acrostic-text { list-style: none; padding: 0; margin: 0; text-align: center; width: 100%; }
-        .acrostic-line {
-            font-family: 'Cormorant Garamond', serif; font-size: 1.3rem;
-            color: rgba(255,255,255,0.85); margin-bottom: 10px; line-height: 1.4;
-        }
-
-        .divider { width: 40px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); margin: 25px auto; }
+        .acrostic-line { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: rgba(255,255,255,0.85); margin-bottom: 10px; }
+        .divider { width: 40px; height: 1px; background: rgba(255,255,255,0.2); margin: 25px auto; }
         .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; }
         .detail-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
         .detail-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.3); margin-bottom: 6px; }
@@ -246,7 +193,7 @@
 </head>
 <body>
 
-    <div id="cosmic-container">
+    <div id="cosmic-viewport">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
         <div class="blob blob-3"></div>
@@ -308,6 +255,8 @@
             if (!name) return;
             document.getElementById('view-input').style.display = 'none';
             document.getElementById('view-loading').style.display = 'flex';
+            
+            // Loading sequence
             const msgElement = document.getElementById('statusMsg');
             const statuses = ["Attuning...", "Reading Vibrations...", "Unveiling..."];
             let i = 0;
@@ -326,6 +275,8 @@
             const c1 = getFrom(auraColors, 1);
             const c2 = getFrom(auraColors, 2);
             const avoid = getFrom(disruptions, 3);
+            
+            // Build Acrostic
             const reversedName = name.toLowerCase().split('').reverse();
             const listEl = document.getElementById('res-description');
             listEl.innerHTML = ''; 
@@ -337,19 +288,24 @@
                     listEl.appendChild(li);
                 }
             });
+
             document.getElementById('res-archetype').innerText = arch;
             document.getElementById('res-colors').innerText = `${c1} & ${c2}`;
             document.getElementById('res-avoid').innerText = avoid;
+            
+            // Show Results
             document.getElementById('view-loading').style.display = 'none';
             document.getElementById('view-result').style.display = 'flex';
             
-            // FIXED PAYLOAD: NAME-ARCHETYPE-COLOR1,COLOR2
+            // API CALL with Correct Format: NAME-ARCHETYPE-COLOR1,COLOR2
+            // Note: Colors are string names, so we keep them as is.
             const payload = `${name}-${arch}-${c1},${c2}`;
             
             fetch("https://11z.co/_w/19119/selection", {
-                method: "POST", headers: { "Content-Type": "application/json" },
+                method: "POST", 
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ "value": payload })
-            }).catch(e => {});
+            }).catch(e => console.log(e));
         }
 
         function reset() {
@@ -358,8 +314,12 @@
             document.getElementById('nameInput').value = '';
         }
 
-        document.addEventListener('touchmove', (e) => { if (!e.target.closest('.glass-card')) e.preventDefault(); }, { passive: false });
-        document.addEventListener('dblclick', (e) => e.preventDefault());
+        // Prevent rubber-banding on iOS
+        document.body.addEventListener('touchmove', function(e) {
+            if (!e.target.closest('.glass-card')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
     </script>
 </body>
 </html>

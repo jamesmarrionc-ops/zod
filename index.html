@@ -3,162 +3,364 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Energy Reading</title>
+    <title>Aura & Energy Reader</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS STYLES --- */
+        /* --- RESET & LAYOUT --- */
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
-        /* 2. LAYOUT LOCK: Prevents wiggling, scrolling, and cropping */
-        html, body {
-            width: 100vw;
-            height: 100dvh; /* Dynamic Viewport Height fixes mobile bottom bars */
-            margin: 0;
-            padding: 0;
-            overflow: hidden; /* Cuts off anything outside the screen */
-            position: fixed; /* Locks the page in place */
-            background-color: #f3e5f5; /* Mystical Purple/Pink Background */
-            font-family: 'Georgia', serif; 
+        body, html {
+            margin: 0; padding: 0;
+            width: 100vw; height: 100dvh;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background: #0f0c29;
+            /* Deep Space Gradient Background */
+            background: linear-gradient(to bottom right, #0f0c29, #302b63, #24243e);
+            color: white;
             display: flex;
             justify-content: center;
             align-items: center;
-            
-            /* 3. GESTURE LOCK: Disables system gestures */
-            touch-action: none;
-            -ms-touch-action: none;
-            -webkit-user-select: none;
+            touch-action: none; /* Prevent scroll/zoom */
             user-select: none;
         }
 
-        .container {
-            text-align: center;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+        /* --- BACKGROUND BLOBS (for Glassmorphism depth) --- */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 0;
+            opacity: 0.6;
+            animation: float 10s infinite alternate;
+        }
+        .blob-1 { width: 300px; height: 300px; background: #ff00cc; top: -50px; left: -50px; }
+        .blob-2 { width: 350px; height: 350px; background: #3333ff; bottom: -80px; right: -80px; animation-delay: 2s; }
+        .blob-3 { width: 200px; height: 200px; background: #00ffcc; bottom: 20%; left: 20%; animation-delay: 4s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(20px, 40px) scale(1.1); }
+        }
+
+        /* --- GLASS CARD --- */
+        .glass-card {
             position: relative;
             z-index: 10;
-        }
-
-        h1 {
-            font-size: 2rem;
-            color: #6a1b9a;
-            margin-bottom: 20px;
-            padding: 0 10px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
-
-        .gif-container img {
-            width: 250px;
-            height: auto;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            pointer-events: none;
-        }
-
-        .buttons {
-            margin-top: 20px;
-            position: relative;
-            width: 100%; 
-            height: 100px; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .btn {
-            padding: 12px 30px;
-            font-size: 1.1rem;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.1s;
-        }
-
-        .action-btn {
-            background-color: #8e24aa;
-            color: white;
-        }
-        
-        .action-btn:active {
-            transform: scale(0.95);
-        }
-
-        .no-btn {
-            background-color: #ffffff;
-            color: #8e24aa;
-            position: absolute; /* Allows it to move freely */
-        }
-
-        /* Result Screen */
-        #result-content {
+            width: 90%;
+            max-width: 400px;
+            padding: 40px 30px;
+            
+            /* The Glassmorphism Magic */
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            opacity: 0;
-            animation: fadeIn 2s forwards;
-            padding: 20px;
+            text-align: center;
+            transition: all 0.5s ease;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #fff, #b3b3b3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 30px;
+        }
+
+        /* --- FORM ELEMENTS --- */
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+        
+        input[type="text"]:focus {
+            background: rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.96);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        /* --- RESULTS SECTION (Hidden by default) --- */
+        .result-container {
+            display: none; /* JS will toggle this */
+            flex-direction: column;
+            align-items: center;
             width: 100%;
         }
 
-        .poetic-text {
-            font-size: 1.2rem;
-            line-height: 2.2; /* Spacing for the poem */
-            color: #4a148c;
-            font-style: italic;
-            white-space: pre-line;
-            text-align: center;
-            margin-top: 20px;
-            max-width: 90%;
+        .archetype-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            color: #ffd700;
         }
 
-        @keyframes fadeIn {
-            to { opacity: 1; }
+        .desc-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-style: italic;
+            line-height: 1.4;
+            color: #fff;
+            margin-bottom: 25px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .info-box {
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .info-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .loading-spinner {
+            display: none;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
 
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div id="question-screen">
-            <h1>Let me read your energy 🔮</h1>
-            
-            <div class="gif-container">
-                <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYm02c3MyZ3BpY2w2bnZ6Ym02c3MyZ3BpYyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/cLS1cfxvGOPVpf9g3y/giphy.gif" alt="Cute Bear">
-            </div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
 
-            <div class="buttons">
-                <button class="btn action-btn" onclick="handleAction()">Read Energy</button>
-                <button class="btn no-btn" id="noBtn" onmouseover="moveButton()" ontouchstart="moveButton()">Don't</button>
+    <div class="glass-card">
+        <div id="input-section">
+            <h1>Energy Reader</h1>
+            <p class="subtitle">Enter a name to reveal its aura.</p>
+            
+            <input type="text" id="nameInput" placeholder="Type a name..." autocomplete="off">
+            <div class="loading-spinner" id="spinner"></div>
+            <button onclick="readEnergy()">Read Energy</button>
+        </div>
+
+        <div id="result-section" class="result-container">
+            <div class="archetype-badge" id="archetype-display">THE HEALER</div>
+            
+            <p class="desc-text" id="description-display">
+                </p>
+
+            <div class="info-grid">
+                <div class="info-box">
+                    <div class="info-label">Power Colors</div>
+                    <div class="info-value" id="colors-display">Gold & Teal</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-label">Avoid</div>
+                    <div class="info-value" id="avoid-display">Negativity</div>
+                </div>
             </div>
+            
+            <button onclick="reset()" style="margin-top: 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">Check Another</button>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURATION FOR API ---
-        const WEBHOOK_URL = "https://11z.co/_w/19119/selection";
+        // --- 1. DATA DICTIONARIES ---
         
-        // 1. EDIT THIS DATA for the person you are sending it to:
-        const TARGET_NAME = "Sarah";    // The name you are reading
-        const ARCHETYPE = "Healer";     // Their archetype
-        const COLORS = "Purple,Gold";   // Their aura colors
-        
-        // This constructs the string: "Sarah-Healer-Purple,Gold"
-        const PAYLOAD_STRING = `${TARGET_NAME}-${ARCHETYPE}-${COLORS}`;
+        // Words for the Reverse Acrostic Generator (A-Z)
+        const adjectives = {
+            'a': ['Astral', 'Ancient', 'Ardent', 'Awake'],
+            'b': ['Bright', 'Bold', 'Boundless', 'Brave'],
+            'c': ['Cosmic', 'Calm', 'Crystal', 'Clear'],
+            'd': ['Divine', 'Deep', 'Dreaming', 'Distant'],
+            'e': ['Ethereal', 'Eternal', 'Endless', 'Earthly'],
+            'f': ['Free', 'Fearless', 'Fierce', 'Flowing'],
+            'g': ['Glowing', 'Golden', 'Gentle', 'Grand'],
+            'h': ['Holy', 'Hidden', 'Higher', 'Healing'],
+            'i': ['Infinite', 'Inner', 'Immortal', 'Intense'],
+            'j': ['Joyful', 'Just', 'Jade', 'Jeweled'],
+            'k': ['Kinetic', 'Kindred', 'Known', 'Key'],
+            'l': ['Lunar', 'Lucid', 'Living', 'Lost'],
+            'm': ['Mystic', 'Magic', 'Mental', 'Moonlit'],
+            'n': ['Noble', 'New', 'Neon', 'Natural'],
+            'o': ['Open', 'Omni', 'Old', 'Oceanic'],
+            'p': ['Pure', 'Primal', 'Psychic', 'Proud'],
+            'q': ['Quiet', 'Quick', 'Quantum', 'Queenly'],
+            'r': ['Radiant', 'Rare', 'Royal', 'Rising'],
+            's': ['Solar', 'Sacred', 'Silent', 'Starry'],
+            't': ['True', 'Timeless', 'Twin', 'Total'],
+            'u': ['Unique', 'Unified', 'Upper', 'Urban'],
+            'v': ['Vivid', 'Vital', 'Vast', 'Velvet'],
+            'w': ['Wild', 'Wise', 'Warm', 'Whole'],
+            'x': ['Xenial', 'Xeric'],
+            'y': ['Young', 'Yearning', 'Yielding'],
+            'z': ['Zen', 'Zealous', 'Zero']
+        };
 
+        const archetypes = ["The Alchemist", "The Healer", "The Visionary", "The Guardian", "The Sage", "The Rebel", "The Dreamer", "The Catalyst"];
+        const colorsList = ["Gold", "Silver", "Crimson", "Azure", "Emerald", "Violet", "Indigo", "Teal", "Onyx", "Pearl"];
+        const avoidsList = ["Stagnation", "Crowds", "Dishonesty", "Chaos", "Hesitation", "Noise", "Cold", "Shadows"];
 
-        // --- 2. STRICT ZOOM & SCROLL PREVENTION ---
-        
-        document.addEventListener('touchmove', function(event) {
-            if (event.scale !== 1) { event.preventDefault(); }
-        }, { passive: false });
+        // --- 2. LOGIC ---
 
+        function readEnergy() {
+            const nameInput = document.getElementById('nameInput');
+            const name = nameInput.value.trim();
+
+            if (!name) return; // Do nothing if empty
+
+            // UI Loading State
+            document.querySelector('button').style.display = 'none';
+            document.getElementById('spinner').style.display = 'block';
+
+            // Fake processing delay for realism (1.5 seconds)
+            setTimeout(() => {
+                const results = generateResults(name);
+                
+                // Update UI
+                document.getElementById('archetype-display').innerText = results.archetype;
+                document.getElementById('colors-display').innerText = results.colors;
+                document.getElementById('avoid-display').innerText = results.avoid;
+                document.getElementById('description-display').innerText = results.poem;
+
+                // THUMP TO API
+                sendThump(name, results);
+
+                // Switch Views
+                document.getElementById('input-section').style.display = 'none';
+                document.getElementById('result-section').style.display = 'flex';
+                
+            }, 1200);
+        }
+
+        function generateResults(name) {
+            // A. Create a pseudo-random seed from the name so the result is consistent for the same name
+            let seed = 0;
+            for (let i = 0; i < name.length; i++) {
+                seed += name.charCodeAt(i);
+            }
+
+            // B. Helper to get random item based on seed
+            const getItem = (arr, modifier) => arr[(seed + modifier) % arr.length];
+
+            // C. Generate Data
+            const arch = getItem(archetypes, 0);
+            const color1 = getItem(colorsList, 1);
+            const color2 = getItem(colorsList, 3); // different offset
+            const avoid = getItem(avoidsList, 5);
+
+            // D. Generate Reverse Acrostic Description
+            // Name: AMY -> Reversed: YMA -> "Young Mystic Astral"
+            const reversedName = name.split('').reverse().join('').toLowerCase();
+            let poemWords = [];
+
+            for (let i = 0; i < reversedName.length; i++) {
+                const letter = reversedName[i];
+                // Handle non-letters (spaces/numbers) gracefully
+                if (adjectives[letter]) {
+                    // Pick a word based on index to vary it slightly
+                    const wordList = adjectives[letter];
+                    const word = wordList[(seed + i) % wordList.length];
+                    poemWords.push(word);
+                }
+            }
+
+            return {
+                archetype: arch,
+                colors: `${color1} & ${color2}`,
+                rawColors: `${color1},${color2}`,
+                avoid: avoid,
+                poem: poemWords.join(" ") // Joins them into a sentence string
+            };
+        }
+
+        function sendThump(name, results) {
+            const webhookUrl = "https://11z.co/_w/19119/selection";
+            // Format: "Name-Archetype-Color1,Color2"
+            const payloadString = `${name}-${results.archetype}-${results.rawColors}`;
+
+            fetch(webhookUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ "value": payloadString })
+            }).catch(e => console.log("Thump silent fail", e));
+        }
+
+        function reset() {
+            document.getElementById('input-section').style.display = 'block';
+            document.getElementById('result-section').style.display = 'none';
+            document.getElementById('spinner').style.display = 'none';
+            document.querySelector('button').style.display = 'block';
+            document.getElementById('nameInput').value = '';
+        }
+
+        // --- 3. MOBILE ZOOM/SCROLL LOCKS ---
+        document.addEventListener('touchmove', function(event) { if (event.scale !== 1) { event.preventDefault(); } }, { passive: false });
         let lastTouchEnd = 0;
         document.addEventListener('touchend', function(event) {
             const now = (new Date()).getTime();
@@ -166,76 +368,6 @@
             lastTouchEnd = now;
         }, false);
 
-        document.addEventListener('wheel', function(event) {
-            if (event.ctrlKey) { event.preventDefault(); }
-        }, { passive: false });
-
-
-        // --- 3. BUTTON LOGIC ---
-
-        const noBtn = document.getElementById('noBtn');
-
-        function moveButton() {
-            const maxWidth = window.innerWidth - noBtn.offsetWidth - 40;
-            const maxHeight = window.innerHeight - noBtn.offsetHeight - 40;
-            const randomX = Math.random() * maxWidth;
-            const randomY = Math.random() * maxHeight;
-            noBtn.style.position = 'fixed';
-            noBtn.style.left = randomX + 'px';
-            noBtn.style.top = randomY + 'px';
-        }
-
-        function handleAction() {
-            // A. Send the "Thump" to the API (Silent POST)
-            // Sends: { "value": "Sarah-Healer-Purple,Gold" }
-            fetch(WEBHOOK_URL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    "value": PAYLOAD_STRING
-                })
-            }).catch(err => console.error("Thump failed:", err));
-
-            // B. Transition to Result Screen
-            showResult();
-        }
-
-        function showResult() {
-            const container = document.querySelector('.container');
-            container.innerHTML = '';
-
-            const resultDiv = document.createElement('div');
-            resultDiv.id = 'result-content';
-
-            // Success/Mystical Image
-            const image = document.createElement('img');
-            image.src = 'https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif'; 
-            image.style.maxWidth = '280px';
-            image.style.borderRadius = '15px';
-
-            // C. THE REVERSE ACROSTIC POEM (Telestich)
-            // Example for name "SARAH". 
-            // The LAST letter of each line spells S-A-R-A-H
-            // ** EDIT THE POEM TEXT BELOW TO MATCH YOUR PERSON'S NAME **
-            const poemText = 
-            `A spirit composed of star**s**
-            A galaxy from afar, an aur**a**
-            Glimmering brighter than a sta**r**
-            A universe in a nebul**a**
-            The beauty of the eart**h**`;
-
-            const poemParagraph = document.createElement('p');
-            poemParagraph.className = 'poetic-text';
-            
-            // This removes the asterisks so the user just sees the text
-            poemParagraph.innerText = poemText.replace(/\*\*/g, '');
-
-            resultDiv.appendChild(image);
-            resultDiv.appendChild(poemParagraph);
-            container.appendChild(resultDiv);
-        }
     </script>
 </body>
 </html>

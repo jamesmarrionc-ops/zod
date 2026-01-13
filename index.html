@@ -2,223 +2,331 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Identity Verification | Secure Scan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASTRALIS | Cosmic Readings</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <style>
-        /* --- CSS STYLES (The Look) --- */
-        body {
-            background-color: #0d0d0d;
-            color: #00ff41; /* Hacker Green */
-            font-family: 'Courier New', Courier, monospace;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
+        :root {
+            --bg-dark: #050505;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-gold: #d4af37;
+            --accent-purple: #bb86fc;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- Dynamic Background --- */
+        .stars {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+            z-index: -1;
+        }
+        
+        /* Subtle glowing orbs in background */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            animation: float 10s infinite ease-in-out alternate;
+        }
+        .orb-1 { width: 300px; height: 300px; background: #4a148c; top: -50px; left: -50px; opacity: 0.4; }
+        .orb-2 { width: 400px; height: 400px; background: #1a237e; bottom: 0; right: -100px; opacity: 0.3; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(30px, 50px); }
+        }
+
+        /* --- UI Container --- */
         .container {
             width: 90%;
-            max-width: 400px;
+            max-width: 600px;
+            margin-top: 80px;
+            margin-bottom: 50px;
+            z-index: 2;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
         }
 
         h1 {
-            font-size: 1.2rem;
-            text-transform: uppercase;
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, var(--accent-gold), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             letter-spacing: 2px;
-            margin-bottom: 30px;
-            border-bottom: 1px solid #00ff41;
-            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        /* --- Glassmorphism Card (Form) --- */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: transform 0.3s ease;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--accent-gold);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         input {
             width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
             padding: 15px;
-            font-size: 1.2rem;
-            background: #111;
-            border: 1px solid #00ff41;
+            border-radius: 12px;
             color: #fff;
-            text-align: center;
-            outline: none;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-
-        button {
-            width: 100%;
-            padding: 15px;
-            font-size: 1.1rem;
-            background: #00ff41;
-            color: #000;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-
-        button:active {
-            background: #00cc33;
-        }
-
-        /* Loading Screen (Hidden by default) */
-        #loading-screen {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #111;
-            border-top: 5px solid #00ff41;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .status-text {
-            font-size: 0.9rem;
-            opacity: 0.8;
-            margin-top: 10px;
-        }
-
-        /* Result Screen (Hidden by default) */
-        #result-screen {
-            display: none;
-            text-align: left;
-            border: 1px solid #00ff41;
-            padding: 20px;
-            background: #111;
-        }
-
-        .trait {
-            margin: 10px 0;
+            font-family: 'Inter', sans-serif;
             font-size: 1rem;
-        }
-        
-        .label {
-            font-weight: bold;
-            color: #fff;
+            outline: none;
+            transition: border 0.3s;
         }
 
-        .value {
-            float: right;
-            color: #00ff41;
+        input:focus {
+            border-color: var(--accent-purple);
+        }
+
+        /* --- The Cosmic Button --- */
+        .btn-main {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #4a148c, #311b92);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(103, 58, 183, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(103, 58, 183, 0.6);
+        }
+
+        .btn-main::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-main:hover::after {
+            left: 100%;
+        }
+
+        /* --- Result Section (Hidden by default) --- */
+        #result-section {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        .sign-icon {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px var(--accent-gold);
+        }
+
+        .reading-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            color: var(--accent-gold);
+            margin-bottom: 15px;
+        }
+
+        .reading-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        .trait-tags {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: rgba(255,255,255,0.1);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: 1px solid var(--accent-purple);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 480px) {
+            h1 { font-size: 2rem; }
+            .card { padding: 30px 20px; }
         }
     </style>
 </head>
 <body>
 
-    <div id="input-screen" class="container">
-        <h1>Subject Identification</h1>
-        <p style="font-size: 0.8rem; opacity: 0.7;">ENTER SUBJECT NAME FOR ANALYSIS</p>
-        <input type="text" id="nameInput" placeholder="LAST NAME, FIRST NAME" autocomplete="off">
-        <button onclick="startScan()">INITIATE SCAN</button>
-    </div>
+    <div class="stars"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
 
-    <div id="loading-screen" class="container">
-        <div class="spinner"></div>
-        <div id="status-msg" class="status-text">CONNECTING TO DATABASE...</div>
-        <div style="width: 100%; background: #333; height: 5px; margin-top: 20px;">
-            <div id="progress-bar" style="width: 0%; height: 100%; background: #00ff41; transition: width 0.5s;"></div>
+    <div class="container">
+        <header>
+            <h1>ASTRALIS</h1>
+            <div class="subtitle">Decode Your Celestial Signature</div>
+        </header>
+
+        <div class="card" id="input-card">
+            <div class="input-group">
+                <label for="nameInput">Your Name</label>
+                <input type="text" id="nameInput" placeholder="e.g. Atlas" autocomplete="off">
+            </div>
+            
+            <div class="input-group">
+                <label for="dateInput">Date of Birth</label>
+                <input type="date" id="dateInput">
+            </div>
+
+            <button class="btn-main" onclick="generateReading()">Align Stars</button>
+        </div>
+
+        <div id="result-section" class="card" style="text-align: center;">
+            <div id="sign-icon" class="sign-icon">✨</div>
+            <h2 id="reading-header" class="reading-title"></h2>
+            <p id="reading-body" class="reading-text"></p>
+            <div id="traits" class="trait-tags"></div>
+            <br>
+            <button class="btn-main" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); margin-top: 10px;" onclick="reset()">New Reading</button>
         </div>
     </div>
 
-    <div id="result-screen" class="container">
-        <h1>Analysis Complete</h1>
-        <div class="trait"><span class="label">EMOTIONAL EQ:</span> <span class="value">HIGH</span></div>
-        <div class="trait"><span class="label">INTUITION:</span> <span class="value">94%</span></div>
-        <div class="trait"><span class="label">HONESTY:</span> <span class="value">VERIFIED</span></div>
-        <div class="trait"><span class="label">RISK FACTOR:</span> <span class="value">LOW</span></div>
-        <br>
-        <div style="text-align: center; font-size: 0.8rem; color: #555;">ID: 19119-VERIFIED</div>
-    </div>
-
     <script>
-        // --- CONFIGURATION ---
-        const INJECT_ID = "19119"; 
+        const zodiacData = {
+            aries: { name: "Aries", icon: "♈", traits: ["Bold", "Ambitious", "Dynamic"], text: "Your energy is burning brighter than usual. The cosmos suggests a time of action. Trust your instincts, but beware of impulsive decisions." },
+            taurus: { name: "Taurus", icon: "♉", traits: ["Reliable", "Devoted", "Grounded"], text: "Stability is your fortress. The stars align to bring you comfort, but challenge you to step slightly outside your garden walls today." },
+            gemini: { name: "Gemini", icon: "♊", traits: ["Adaptable", "Curious", "Gentle"], text: "Communication is your key. Two paths lie before you; your dual nature allows you to see the merits of both. Choose the one that feeds your mind." },
+            cancer: { name: "Cancer", icon: "♋", traits: ["Intuitive", "Emotional", "Protective"], text: "The moon guides your tides today. Your intuition is at its peak—listen to what isn't being said. Protect your energy." },
+            leo: { name: "Leo", icon: "♌", traits: ["Creative", "Passionate", "Generous"], text: "The sun shines upon your house. It is time to step into the light and lead, but remember that true royalty serves the people." },
+            virgo: { name: "Virgo", icon: "♍", traits: ["Analytical", "Kind", "Hardworking"], text: "Details matter, but don't lose sight of the horizon. Your ability to create order from chaos will be your greatest asset this cycle." },
+            libra: { name: "Libra", icon: "♎", traits: ["Diplomatic", "Fair", "Social"], text: "Balance is not a destination, but a practice. You are the mediator of your own destiny today. Seek harmony in conflict." },
+            scorpio: { name: "Scorpio", icon: "♏", traits: ["Resourceful", "Brave", "Passionate"], text: "Still waters run deep. Your transformative power is awakening. Do not fear the changes coming; you were built to survive the fire." },
+            sagittarius: { name: "Sagittarius", icon: "♐", traits: ["Generous", "Idealistic", "Funny"], text: "The arrow points toward a new adventure. Your quest for truth will open doors that were previously locked. Keep moving." },
+            capricorn: { name: "Capricorn", icon: "♑", traits: ["Disciplined", "Responsible", "Managerial"], text: "The mountain is steep, but your footing is sure. Patience is your weapon. What you build now will last for generations." },
+            aquarius: { name: "Aquarius", icon: "♒", traits: ["Original", "Independent", "Progressive"], text: "The winds of change are blowing. Your unique vision is needed now more than ever. Do not conform; innovate." },
+            pisces: { name: "Pisces", icon: "♓", traits: ["Artistic", "Compassionate", "Musical"], text: "The lines between reality and dreams blur for you. Use this creativity to manifest what you desire. Trust the flow." }
+        };
 
-        function startScan() {
-            const name = document.getElementById("nameInput").value.trim();
-            
-            if (name === "") {
-                alert("ERROR: SUBJECT NAME REQUIRED");
+        function getZodiacSign(day, month) {
+            if((month == 1 && day <= 19) || (month == 12 && day >=22)) return "capricorn";
+            if((month == 1 && day >= 20) || (month == 2 && day <= 18)) return "aquarius";
+            if((month == 2 && day >= 19) || (month == 3 && day <= 20)) return "pisces";
+            if((month == 3 && day >= 21) || (month == 4 && day <= 19)) return "aries";
+            if((month == 4 && day >= 20) || (month == 5 && day <= 20)) return "taurus";
+            if((month == 5 && day >= 21) || (month == 6 && day <= 20)) return "gemini";
+            if((month == 6 && day >= 21) || (month == 7 && day <= 22)) return "cancer";
+            if((month == 7 && day >= 23) || (month == 8 && day <= 22)) return "leo";
+            if((month == 8 && day >= 23) || (month == 9 && day <= 22)) return "virgo";
+            if((month == 9 && day >= 23) || (month == 10 && day <= 22)) return "libra";
+            if((month == 10 && day >= 23) || (month == 11 && day <= 21)) return "scorpio";
+            if((month == 11 && day >= 22) || (month == 12 && day <= 21)) return "sagittarius";
+        }
+
+        function generateReading() {
+            const name = document.getElementById('nameInput').value.trim();
+            const dateStr = document.getElementById('dateInput').value;
+
+            if (!name || !dateStr) {
+                alert("Please enter both your name and date of birth.");
                 return;
             }
 
-            // 1. FIRE THE SIGNAL (The Secret Thump)
-            sendSecretly(name);
+            const date = new Date(dateStr);
+            const signKey = getZodiacSign(date.getDate() + 1, date.getMonth() + 1); // +1 to fix JS date index
+            const data = zodiacData[signKey];
 
-            // 2. SHOW THE SHOW (The Fake UI)
-            document.getElementById("input-screen").style.display = "none";
-            document.getElementById("loading-screen").style.display = "flex";
+            // Update UI
+            document.getElementById('input-card').style.display = 'none';
+            document.getElementById('result-section').style.display = 'block';
 
-            // 3. RUN FAKE PROGRESS BAR
-            let progress = 0;
-            const messages = [
-                "ACCESSING BIOMETRIC DATA...",
-                "CALIBRATING SENSORS...",
-                "ANALYZING MICRO-EXPRESSIONS...",
-                "CROSS-REFERENCING DATABASE...",
-                "COMPILING PSYCHOLOGICAL PROFILE..."
-            ];
-            
-            let step = 0;
-            const interval = setInterval(() => {
-                progress += Math.floor(Math.random() * 15) + 5;
-                if (progress > 100) progress = 100;
-                
-                document.getElementById("progress-bar").style.width = progress + "%";
-                
-                if (progress < 100) {
-                    // Update text randomly
-                    if (Math.random() > 0.6 && step < messages.length) {
-                        document.getElementById("status-msg").innerText = messages[step];
-                        step++;
-                    }
-                } else {
-                    clearInterval(interval);
-                    showResults();
-                }
-            }, 800); // 800ms updates (Takes about 6-8 seconds total)
+            document.getElementById('sign-icon').textContent = data.icon;
+            document.getElementById('reading-header').textContent = `${data.name} & ${name}`;
+            document.getElementById('reading-body').textContent = data.text;
+
+            // Generate Tags
+            const traitsContainer = document.getElementById('traits');
+            traitsContainer.innerHTML = '';
+            data.traits.forEach(trait => {
+                const span = document.createElement('span');
+                span.className = 'tag';
+                span.textContent = trait;
+                traitsContainer.appendChild(span);
+            });
         }
 
-        function showResults() {
-            document.getElementById("loading-screen").style.display = "none";
-            document.getElementById("result-screen").style.display = "block";
+        function reset() {
+            document.getElementById('input-card').style.display = 'block';
+            document.getElementById('result-section').style.display = 'none';
+            document.getElementById('nameInput').value = '';
+            document.getElementById('dateInput').value = '';
         }
-
-        // --- THE MAGIC PART (THUMPER) ---
-       function sendSecretly(data) {
-    const injectID = "19119";
-    
-    console.log(" initiating thump for: " + data);
-
-    // --- STRATEGY A: The Secure Proxy (Best for Netlify) ---
-    // We route the request through 'corsproxy.io' to bypass the security block.
-    // This turns the request into a clean HTTPS signal that Netlify likes.
-    const targetURL = "https://www.rostamimagic.com/thump.php?id=" + injectID + "&data=" + encodeURIComponent(data);
-    const proxyURL = "https://corsproxy.io/?" + encodeURIComponent(targetURL);
-
-    fetch(proxyURL)
-        .then(response => console.log("Proxy Signal Sent"))
-        .catch(error => console.log("Proxy attempt failed, trying backup..."));
-
-    // --- STRATEGY B: The Direct Hit (Backup) ---
-    // In case the proxy is down, we try the direct image pixel.
-    new Image().src = targetURL;
-    
-    // --- STRATEGY C: The 11z Fallback ---
-    // This attempts to hit your shortcut link using a 'Beacon' (runs in background)
-    // It might fail on some networks, but it's a good safety net.
-    navigator.sendBeacon("https://11z.co/_w/" + injectID + "/selection", JSON.stringify({ value: data }));
-}
     </script>
 </body>
 </html>

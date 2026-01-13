@@ -2,330 +2,364 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASTRALIS | Cosmic Readings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AURA | Name Reader</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Grotesk:wght@300;400;600&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-dark: #050505;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --accent-gold: #d4af37;
-            --accent-purple: #bb86fc;
-            --text-main: #e0e0e0;
-            --text-muted: #a0a0a0;
+            --bg: #030303;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #00ff88;
+            --text-main: #ffffff;
+            --text-mute: #888888;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg);
             color: var(--text-main);
-            min-height: 100vh;
-            overflow-x: hidden;
+            height: 100dvh; /* Dynamic height for mobile browsers */
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- Background Effects --- */
+        .grid-bg {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.2;
+            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+            animation: gridMove 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes gridMove { 
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(40px) translateZ(-200px); }
+        }
+
+        .glow-spot {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw; height: 80vw;
+            background: radial-gradient(circle, rgba(0,255,136,0.1) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        /* --- Main Container --- */
+        .app-view {
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-
-        /* --- Dynamic Background --- */
-        .stars {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
-            z-index: -1;
-        }
-        
-        /* Subtle glowing orbs in background */
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            z-index: -1;
-            animation: float 10s infinite ease-in-out alternate;
-        }
-        .orb-1 { width: 300px; height: 300px; background: #4a148c; top: -50px; left: -50px; opacity: 0.4; }
-        .orb-2 { width: 400px; height: 400px; background: #1a237e; bottom: 0; right: -100px; opacity: 0.3; }
-
-        @keyframes float {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(30px, 50px); }
-        }
-
-        /* --- UI Container --- */
-        .container {
-            width: 90%;
-            max-width: 600px;
-            margin-top: 80px;
-            margin-bottom: 50px;
-            z-index: 2;
-        }
-
-        header {
+            justify-content: center;
+            height: 100%;
             text-align: center;
-            margin-bottom: 40px;
+        }
+
+        /* --- Input Screen --- */
+        #input-screen {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            transition: opacity 0.5s ease;
         }
 
         h1 {
-            font-family: 'Cinzel', serif;
+            font-family: 'Syncopate', sans-serif;
+            font-weight: 700;
             font-size: 2.5rem;
-            background: linear-gradient(45deg, var(--accent-gold), #fff);
+            letter-spacing: -2px;
+            margin-bottom: 10px;
+            background: linear-gradient(to bottom, #fff, #666);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
         }
 
-        .subtitle {
-            color: var(--text-muted);
+        p.tagline {
+            color: var(--text-mute);
             font-size: 0.9rem;
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
+            margin-bottom: 60px;
         }
 
-        /* --- Glassmorphism Card (Form) --- */
-        .card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 40px 30px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            transition: transform 0.3s ease;
-        }
-
-        .input-group {
-            margin-bottom: 25px;
-            text-align: left;
-        }
-
-        label {
-            display: block;
-            font-size: 0.8rem;
-            color: var(--accent-gold);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .input-box {
+            position: relative;
+            width: 100%;
+            margin-bottom: 40px;
         }
 
         input {
             width: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--glass-border);
-            padding: 15px;
-            border-radius: 12px;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid #333;
             color: #fff;
-            font-family: 'Inter', sans-serif;
-            font-size: 1rem;
+            font-family: 'Syncopate', sans-serif;
+            font-size: 1.5rem;
+            text-align: center;
+            padding: 15px 0;
             outline: none;
-            transition: border 0.3s;
+            transition: 0.3s;
+            text-transform: uppercase;
         }
 
         input:focus {
-            border-color: var(--accent-purple);
+            border-bottom-color: var(--accent);
         }
 
-        /* --- The Cosmic Button --- */
-        .btn-main {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #4a148c, #311b92);
-            color: white;
+        .btn-scan {
+            background: var(--text-main);
+            color: #000;
             border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
+            padding: 18px 0;
+            width: 100%;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(103, 58, 183, 0.4);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            transition: 0.2s;
         }
 
-        .btn-main:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(103, 58, 183, 0.6);
+        .btn-scan:active {
+            transform: scale(0.98);
+            background: var(--accent);
         }
 
-        .btn-main::after {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: 0.5s;
-        }
-
-        .btn-main:hover::after {
-            left: 100%;
-        }
-
-        /* --- Result Section (Hidden by default) --- */
-        #result-section {
+        /* --- Result Screen --- */
+        #result-screen {
             display: none;
-            margin-top: 30px;
-            animation: fadeIn 0.8s ease forwards;
+            width: 100%;
+            opacity: 0;
+            animation: fadeIn 0.8s forwards;
+            text-align: left;
         }
 
-        .sign-icon {
-            font-size: 4rem;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px var(--accent-gold);
-        }
-
-        .reading-title {
-            font-family: 'Cinzel', serif;
+        .archetype-title {
+            font-family: 'Syncopate', sans-serif;
             font-size: 1.8rem;
-            color: var(--accent-gold);
-            margin-bottom: 15px;
+            color: var(--accent);
+            margin-bottom: 5px;
+            line-height: 1.1;
+        }
+
+        .name-display {
+            font-size: 0.9rem;
+            color: var(--text-mute);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #222;
+            padding-bottom: 15px;
+        }
+
+        .section-label {
+            font-size: 0.7rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            margin-top: 25px;
         }
 
         .reading-text {
-            font-size: 1rem;
-            line-height: 1.6;
+            font-size: 1.1rem;
+            line-height: 1.5;
             color: #ddd;
-            margin-bottom: 20px;
         }
 
-        .trait-tags {
+        /* Lucky Colors */
+        .color-palette {
             display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .color-dot {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
-        .tag {
-            background: rgba(255,255,255,0.1);
-            padding: 5px 15px;
-            border-radius: 20px;
+        /* Avoid Box */
+        .avoid-box {
+            margin-top: 10px;
+            padding: 15px;
+            background: rgba(255, 50, 50, 0.05);
+            border-left: 2px solid #ff3333;
+            color: #ffcccc;
+            font-size: 0.95rem;
+        }
+
+        .btn-back {
+            margin-top: 40px;
+            background: transparent;
+            border: 1px solid #333;
+            color: #666;
+            padding: 15px;
+            width: 100%;
+            text-transform: uppercase;
             font-size: 0.8rem;
-            border: 1px solid var(--accent-purple);
+            cursor: pointer;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { to { opacity: 1; } }
 
-        /* Mobile Adjustments */
-        @media (max-width: 480px) {
-            h1 { font-size: 2rem; }
-            .card { padding: 30px 20px; }
-        }
     </style>
 </head>
 <body>
 
-    <div class="stars"></div>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
+    <div class="grid-bg"></div>
+    <div class="glow-spot"></div>
 
-    <div class="container">
-        <header>
-            <h1>ASTRALIS</h1>
-            <div class="subtitle">Decode Your Celestial Signature</div>
-        </header>
+    <div class="app-view">
+        
+        <div id="input-screen">
+            <h1>Identity<br>Scan</h1>
+            <p class="tagline">Decode the frequency of your name</p>
 
-        <div class="card" id="input-card">
-            <div class="input-group">
-                <label for="nameInput">Your Name</label>
-                <input type="text" id="nameInput" placeholder="e.g. Atlas" autocomplete="off">
-            </div>
-            
-            <div class="input-group">
-                <label for="dateInput">Date of Birth</label>
-                <input type="date" id="dateInput">
+            <div class="input-box">
+                <input type="text" id="nameInput" placeholder="ENTER NAME" autocomplete="off" onkeydown="checkEnter(event)">
             </div>
 
-            <button class="btn-main" onclick="generateReading()">Align Stars</button>
+            <button class="btn-scan" onclick="analyzeName()">Initialize Reading</button>
         </div>
 
-        <div id="result-section" class="card" style="text-align: center;">
-            <div id="sign-icon" class="sign-icon">✨</div>
-            <h2 id="reading-header" class="reading-title"></h2>
-            <p id="reading-body" class="reading-text"></p>
-            <div id="traits" class="trait-tags"></div>
-            <br>
-            <button class="btn-main" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); margin-top: 10px;" onclick="reset()">New Reading</button>
+        <div id="result-screen">
+            <h2 id="r-archetype" class="archetype-title"></h2>
+            <div id="r-name" class="name-display"></div>
+
+            <div class="section-label">Core Essence</div>
+            <p id="r-essence" class="reading-text"></p>
+
+            <div class="section-label">Lucky Colors</div>
+            <div id="r-colors" class="color-palette"></div>
+
+            <div class="section-label" style="color:#ff5555;">⚠️ Avoid / Weakness</div>
+            <div id="r-avoid" class="avoid-box"></div>
+
+            <button class="btn-back" onclick="reset()">Scan Another</button>
         </div>
+
     </div>
 
     <script>
-        const zodiacData = {
-            aries: { name: "Aries", icon: "♈", traits: ["Bold", "Ambitious", "Dynamic"], text: "Your energy is burning brighter than usual. The cosmos suggests a time of action. Trust your instincts, but beware of impulsive decisions." },
-            taurus: { name: "Taurus", icon: "♉", traits: ["Reliable", "Devoted", "Grounded"], text: "Stability is your fortress. The stars align to bring you comfort, but challenge you to step slightly outside your garden walls today." },
-            gemini: { name: "Gemini", icon: "♊", traits: ["Adaptable", "Curious", "Gentle"], text: "Communication is your key. Two paths lie before you; your dual nature allows you to see the merits of both. Choose the one that feeds your mind." },
-            cancer: { name: "Cancer", icon: "♋", traits: ["Intuitive", "Emotional", "Protective"], text: "The moon guides your tides today. Your intuition is at its peak—listen to what isn't being said. Protect your energy." },
-            leo: { name: "Leo", icon: "♌", traits: ["Creative", "Passionate", "Generous"], text: "The sun shines upon your house. It is time to step into the light and lead, but remember that true royalty serves the people." },
-            virgo: { name: "Virgo", icon: "♍", traits: ["Analytical", "Kind", "Hardworking"], text: "Details matter, but don't lose sight of the horizon. Your ability to create order from chaos will be your greatest asset this cycle." },
-            libra: { name: "Libra", icon: "♎", traits: ["Diplomatic", "Fair", "Social"], text: "Balance is not a destination, but a practice. You are the mediator of your own destiny today. Seek harmony in conflict." },
-            scorpio: { name: "Scorpio", icon: "♏", traits: ["Resourceful", "Brave", "Passionate"], text: "Still waters run deep. Your transformative power is awakening. Do not fear the changes coming; you were built to survive the fire." },
-            sagittarius: { name: "Sagittarius", icon: "♐", traits: ["Generous", "Idealistic", "Funny"], text: "The arrow points toward a new adventure. Your quest for truth will open doors that were previously locked. Keep moving." },
-            capricorn: { name: "Capricorn", icon: "♑", traits: ["Disciplined", "Responsible", "Managerial"], text: "The mountain is steep, but your footing is sure. Patience is your weapon. What you build now will last for generations." },
-            aquarius: { name: "Aquarius", icon: "♒", traits: ["Original", "Independent", "Progressive"], text: "The winds of change are blowing. Your unique vision is needed now more than ever. Do not conform; innovate." },
-            pisces: { name: "Pisces", icon: "♓", traits: ["Artistic", "Compassionate", "Musical"], text: "The lines between reality and dreams blur for you. Use this creativity to manifest what you desire. Trust the flow." }
-        };
+        // DATA: The 10 "Vibes"
+        const database = [
+            {
+                title: "THE CATALYST",
+                essence: "You are the spark that starts the fire. Your name carries a high-frequency energy that inspires action in others. You don't wait for permission.",
+                colors: ["#ff3b30", "#ffffff"], // Red, White
+                avoid: "Stagnation. Staying in one place or job for too long will drain your spirit."
+            },
+            {
+                title: "THE ARCHITECT",
+                essence: "Structure and logic flow through you. You see the world as a puzzle to be solved. People trust you because you always have a plan.",
+                colors: ["#34c759", "#323232"], // Green, Dark Grey
+                avoid: "Chaos. Unpredictable people and disorganized environments are your kryptonite."
+            },
+            {
+                title: "THE MYSTIC",
+                essence: "You operate on intuition rather than logic. Your name suggests a deep connection to the unseen. You often know things before they happen.",
+                colors: ["#bf5af2", "#000000"], // Purple, Black
+                avoid: "Surface-level gossip. Small talk drains your battery instantly."
+            },
+            {
+                title: "THE GUARDIAN",
+                essence: "A shield for those you love. Your energy is warm, protective, and incredibly resilient. You are the rock in the storm.",
+                colors: ["#0a84ff", "#d1d1d6"], // Blue, Silver
+                avoid: "Self-sacrifice. Do not set yourself on fire just to keep others warm."
+            },
+            {
+                title: "THE MAVERICK",
+                essence: "Freedom is your oxygen. You reject rules that don't make sense. Your name vibrates with the energy of change and rebellion.",
+                colors: ["#ffcc00", "#ff9500"], // Yellow, Orange
+                avoid: "Micromanagement. Being controlled or watched closely will make you lash out."
+            },
+            {
+                title: "THE HEALER",
+                essence: "Your presence calms the room. People naturally tell you their secrets. You have a gift for turning pain into wisdom.",
+                colors: ["#30d158", "#64d2ff"], // Mint, Light Blue
+                avoid: "Negative News. Your empathy absorbs pain; protect your mental intake."
+            },
+            {
+                title: "THE ROYAL",
+                essence: "You have a natural command of attention. It's not arrogance; it's gravity. You are meant to lead and enjoy the finer things.",
+                colors: ["#ffd700", "#5e5ce6"], // Gold, Royal Purple
+                avoid: "Cheap shortcuts. If it isn't quality, it isn't for you. Don't settle."
+            },
+            {
+                title: "THE SCHOLAR",
+                essence: "A thirst for truth defines you. You are constantly observing, learning, and analyzing. You value competence above all else.",
+                colors: ["#8e8e93", "#f2f2f7"], // Grey, White
+                avoid: "Ignorance. You have zero tolerance for people who refuse to learn."
+            }
+        ];
 
-        function getZodiacSign(day, month) {
-            if((month == 1 && day <= 19) || (month == 12 && day >=22)) return "capricorn";
-            if((month == 1 && day >= 20) || (month == 2 && day <= 18)) return "aquarius";
-            if((month == 2 && day >= 19) || (month == 3 && day <= 20)) return "pisces";
-            if((month == 3 && day >= 21) || (month == 4 && day <= 19)) return "aries";
-            if((month == 4 && day >= 20) || (month == 5 && day <= 20)) return "taurus";
-            if((month == 5 && day >= 21) || (month == 6 && day <= 20)) return "gemini";
-            if((month == 6 && day >= 21) || (month == 7 && day <= 22)) return "cancer";
-            if((month == 7 && day >= 23) || (month == 8 && day <= 22)) return "leo";
-            if((month == 8 && day >= 23) || (month == 9 && day <= 22)) return "virgo";
-            if((month == 9 && day >= 23) || (month == 10 && day <= 22)) return "libra";
-            if((month == 10 && day >= 23) || (month == 11 && day <= 21)) return "scorpio";
-            if((month == 11 && day >= 22) || (month == 12 && day <= 21)) return "sagittarius";
+        function checkEnter(e) {
+            if(e.key === "Enter") analyzeName();
         }
 
-        function generateReading() {
+        function analyzeName() {
             const name = document.getElementById('nameInput').value.trim();
-            const dateStr = document.getElementById('dateInput').value;
+            if(!name) return;
 
-            if (!name || !dateStr) {
-                alert("Please enter both your name and date of birth.");
-                return;
+            // 1. Calculate Hash from Name
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash += name.charCodeAt(i);
             }
+            
+            // 2. Select Result Deterministically
+            const index = hash % database.length;
+            const data = database[index];
 
-            const date = new Date(dateStr);
-            const signKey = getZodiacSign(date.getDate() + 1, date.getMonth() + 1); // +1 to fix JS date index
-            const data = zodiacData[signKey];
+            // 3. Populate Data
+            document.getElementById('r-archetype').innerText = data.title;
+            document.getElementById('r-name').innerText = "Subject: " + name;
+            document.getElementById('r-essence').innerText = data.essence;
+            document.getElementById('r-avoid').innerText = data.avoid;
 
-            // Update UI
-            document.getElementById('input-card').style.display = 'none';
-            document.getElementById('result-section').style.display = 'block';
-
-            document.getElementById('sign-icon').textContent = data.icon;
-            document.getElementById('reading-header').textContent = `${data.name} & ${name}`;
-            document.getElementById('reading-body').textContent = data.text;
-
-            // Generate Tags
-            const traitsContainer = document.getElementById('traits');
-            traitsContainer.innerHTML = '';
-            data.traits.forEach(trait => {
-                const span = document.createElement('span');
-                span.className = 'tag';
-                span.textContent = trait;
-                traitsContainer.appendChild(span);
+            // 4. Render Colors
+            const colorBox = document.getElementById('r-colors');
+            colorBox.innerHTML = ''; // Clear old
+            data.colors.forEach(c => {
+                let dot = document.createElement('div');
+                dot.className = 'color-dot';
+                dot.style.backgroundColor = c;
+                colorBox.appendChild(dot);
             });
+
+            // 5. Switch Screens
+            document.getElementById('input-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'block';
         }
 
         function reset() {
-            document.getElementById('input-card').style.display = 'block';
-            document.getElementById('result-section').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'none';
+            document.getElementById('input-screen').style.display = 'flex';
             document.getElementById('nameInput').value = '';
-            document.getElementById('dateInput').value = '';
         }
     </script>
 </body>

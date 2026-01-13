@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
     <title>Aura Reader</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,32 +10,40 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Lato:wght@300&display=swap" rel="stylesheet">
     
     <style>
-        /* --- 1. CORE & INFINITE BACKGROUND --- */
+        /* --- 1. THE INFINITE CANVAS FIX --- */
+        :root {
+            --bg-deep: #050505;
+            --glass-bg: rgba(20, 20, 25, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
         
-        body, html {
+        html, body {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
-            overflow: hidden;
+            background-color: #000; /* Fallback Black to hide 'blocks' */
+            overflow: hidden; /* Hard lock on page scroll */
+            overscroll-behavior: none; /* Disables iOS 'rubber band' bounce */
             font-family: 'Lato', sans-serif;
-            background-color: #000;
+            position: fixed; /* Locks the body in place */
         }
 
-        /* Fixed Background Gradient (Instant Load) */
+        /* Fixed Background Layer (Using inset:0 guarantees full coverage) */
         #ambient-bg {
             position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100dvh;
-            background: radial-gradient(circle at 50% 120%, #1a0b2e 0%, #050505 80%);
+            inset: 0; /* Top, Left, Right, Bottom = 0 */
+            background: radial-gradient(circle at 50% 120%, #1a0b2e 0%, #000000 70%);
             z-index: 0;
+            pointer-events: none;
         }
 
-        /* OPTIMIZED: CSS-only Grain (No external image request) */
+        /* Grain Texture */
         #grain {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            /* Lightweight SVG Data URI for instant loading */
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-            opacity: 0.4;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            opacity: 0.3;
             pointer-events: none;
             z-index: 2;
         }
@@ -44,13 +52,13 @@
         .orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(80px); /* Increased blur for smoother look */
+            filter: blur(80px);
             opacity: 0.4;
             animation: floatOrb 20s infinite ease-in-out;
             z-index: 1;
-            will-change: transform; /* Performance optimization */
+            will-change: transform;
         }
-        .orb-1 { width: 350px; height: 350px; background: #240046; top: -10%; left: -10%; animation-duration: 25s; }
+        .orb-1 { width: 400px; height: 400px; background: #240046; top: -10%; left: -10%; animation-duration: 25s; }
         .orb-2 { width: 300px; height: 300px; background: #3c096c; bottom: -10%; right: -10%; animation-delay: -5s; }
 
         @keyframes floatOrb {
@@ -58,39 +66,51 @@
             50% { transform: translate(20px, -20px); }
         }
 
-        /* --- 2. CARD UI --- */
-        .container {
-            position: relative;
-            z-index: 10;
-            width: 100%; height: 100dvh;
+        /* --- 2. LAYOUT CONTAINER --- */
+        .layout-center {
+            position: absolute;
+            inset: 0;
             display: flex;
             justify-content: center;
             align-items: center;
+            z-index: 10;
+            padding: 20px; /* Safe area padding */
         }
 
+        /* --- 3. GLASS CARD (Seamless) --- */
         .glass-card {
-            width: 85%;
+            width: 100%;
             max-width: 380px;
-            background: rgba(15, 15, 20, 0.5); /* Slightly darker for contrast */
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 30px; 
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            /* Scroll safety: If content is too long on small phone, allow internal scroll */
+            max-height: 90vh; 
+            overflow-y: auto;
+            
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px; 
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+            
             padding: 40px 30px;
             text-align: center;
             color: #e0e0e0;
             transition: all 0.4s ease;
+            
+            /* Hide Scrollbar for sleekness */
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
         }
+        .glass-card::-webkit-scrollbar { display: none; }
 
-        /* --- 3. TYPOGRAPHY --- */
+        /* --- 4. TYPOGRAPHY --- */
         h1 {
             font-family: 'Cinzel', serif;
-            font-size: 1.8rem;
-            letter-spacing: 3px;
+            font-size: 2rem;
+            letter-spacing: 4px;
             color: #fff;
-            text-shadow: 0 0 10px rgba(255,255,255,0.3);
-            margin: 0 0 5px 0;
+            text-shadow: 0 0 12px rgba(255,255,255,0.4);
+            margin: 0 0 8px 0;
         }
 
         p.subtitle {
@@ -98,64 +118,70 @@
             font-style: italic;
             font-size: 1.1rem;
             color: rgba(255, 255, 255, 0.6);
-            margin-bottom: 35px;
+            margin-bottom: 40px;
         }
 
-        /* --- 4. INPUTS --- */
+        /* --- 5. INPUTS --- */
         input[type="text"] {
             width: 100%;
             background: transparent;
             border: none;
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 10px;
+            padding: 12px;
             font-family: 'Cinzel', serif;
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             color: white;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
+            transition: border-color 0.3s;
         }
         
         input[type="text"]:focus {
             border-bottom-color: #d4af37;
         }
-
+        
         input[type="text"]::placeholder {
             color: rgba(255, 255, 255, 0.2);
             font-family: 'Lato', sans-serif;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .mystic-btn {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             color: #fff;
-            padding: 14px 30px;
+            padding: 16px 32px;
             border-radius: 50px;
             font-family: 'Cinzel', serif;
-            letter-spacing: 1px;
-            font-size: 0.9rem;
+            letter-spacing: 2px;
+            font-size: 0.85rem;
             cursor: pointer;
             transition: 0.3s;
+            text-transform: uppercase;
         }
 
-        .mystic-btn:active { transform: scale(0.96); background: rgba(255,255,255,0.05); }
+        .mystic-btn:active {
+            transform: scale(0.97);
+            background: rgba(255, 255, 255, 0.1);
+        }
 
-        /* --- 5. RESULTS --- */
+        /* --- 6. RESULTS --- */
         .result-section {
             display: none;
             flex-direction: column;
             align-items: center;
             opacity: 0;
-            animation: softFadeIn 1s forwards;
+            animation: softFadeIn 0.8s forwards;
         }
 
         .archetype-result {
             font-family: 'Cinzel', serif;
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             color: #e0aa3e;
-            margin-bottom: 20px;
-            text-shadow: 0 0 10px rgba(224, 170, 62, 0.3);
+            margin-bottom: 25px;
+            text-shadow: 0 0 15px rgba(224, 170, 62, 0.3);
         }
 
         .acrostic-text {
@@ -168,17 +194,17 @@
 
         .acrostic-line {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 1.25rem;
-            color: rgba(255,255,255,0.8);
-            margin-bottom: 8px;
-            line-height: 1.3;
+            font-size: 1.3rem;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 10px;
+            line-height: 1.4;
         }
 
         .divider {
-            width: 30px;
+            width: 40px;
             height: 1px;
-            background: rgba(255,255,255,0.2);
-            margin: 20px auto;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            margin: 25px auto;
         }
 
         .details-grid {
@@ -186,26 +212,27 @@
             grid-template-columns: 1fr 1fr;
             gap: 15px;
             width: 100%;
-            margin-top: 5px;
         }
 
         .detail-box {
             background: rgba(255,255,255,0.03);
-            padding: 12px;
+            padding: 15px;
             border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .detail-label {
             font-size: 0.6rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             color: rgba(255,255,255,0.4);
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
         
         .detail-value {
             font-family: 'Cinzel', serif;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            color: #fff;
         }
 
         @keyframes softFadeIn { to { opacity: 1; } }
@@ -219,24 +246,25 @@
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
 
-    <div class="container">
+    <div class="layout-center">
         <div class="glass-card">
             
             <div id="view-input">
                 <h1>Cosmos</h1>
-                <p class="subtitle">Discover your celestial resonance</p>
-                <input type="text" id="nameInput" placeholder="Name of Soul" autocomplete="off">
-                <button class="mystic-btn" onclick="startDivination()">Reveal Essence</button>
+                <p class="subtitle">Enter the name to be read</p>
+                <input type="text" id="nameInput" placeholder="SUBJECT NAME" autocomplete="off" spellcheck="false">
+                <button class="mystic-btn" onclick="startDivination()">Initialize</button>
             </div>
 
-            <div id="view-loading" style="display: none; flex-direction: column; align-items: center;">
-                <div style="width: 30px; height: 30px; border: 1px solid rgba(255,255,255,0.4); border-radius: 50%; box-shadow: 0 0 10px rgba(255,255,255,0.2);"></div>
-                <p style="font-family: 'Cinzel', serif; font-size: 0.8rem; margin-top: 15px; opacity: 0.7;" id="statusMsg">Attuning...</p>
+            <div id="view-loading" style="display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 200px;">
+                <div style="width: 1px; height: 40px; background: linear-gradient(to bottom, transparent, #fff, transparent); animation: scan 1.5s infinite;"></div>
+                <p style="font-family: 'Cinzel', serif; font-size: 0.8rem; margin-top: 20px; letter-spacing: 2px; opacity: 0.7;" id="statusMsg">Connecting...</p>
+                <style> @keyframes scan { 0% { opacity:0; transform: scaleY(0.5); } 50% { opacity:1; transform: scaleY(1.5); } 100% { opacity:0; transform: scaleY(0.5); } } </style>
             </div>
 
             <div id="view-result" class="result-section">
-                <div class="detail-label">Spirit Archetype</div>
-                <div class="archetype-result" id="res-archetype">The Weaver</div>
+                <div class="detail-label">Essence Identified</div>
+                <div class="archetype-result" id="res-archetype"></div>
 
                 <div class="divider"></div>
 
@@ -246,29 +274,29 @@
 
                 <div class="details-grid">
                     <div class="detail-box">
-                        <div class="detail-label">Aura Colors</div>
-                        <div class="detail-value" id="res-colors">Violet & Gold</div>
+                        <div class="detail-label">Aura Palette</div>
+                        <div class="detail-value" id="res-colors"></div>
                     </div>
                     <div class="detail-box">
-                        <div class="detail-label">Disruptions</div>
-                        <div class="detail-value" id="res-avoid">Chaos</div>
+                        <div class="detail-label">Interference</div>
+                        <div class="detail-value" id="res-avoid"></div>
                     </div>
                 </div>
 
-                <button class="mystic-btn" onclick="reset()" style="margin-top: 25px; border: none; font-size: 0.75rem; opacity: 0.6;">Consult Again</button>
+                <button class="mystic-btn" onclick="reset()" style="margin-top: 30px; border: none; font-size: 0.7rem; opacity: 0.5;">New Reading</button>
             </div>
 
         </div>
     </div>
 
     <script>
-        // --- DATA ---
+        // --- DATA DICTIONARY ---
         const sentences = {
             'a': "A rare light follows your path.",
             'b': "Beyond the veil, you find clarity.",
             'c': "Calmness is your hidden strength.",
             'd': "Destiny speaks to you in whispers.",
-            'e': "Everything you touch turns to energy.",
+            'e': "Energy flows where you focus.",
             'f': "Fortune favors your quiet moments.",
             'g': "Greatness lies within your patience.",
             'h': "Harmony seeks you out constantly.",
@@ -282,7 +310,7 @@
             'p': "Peace is your ultimate weapon.",
             'q': "Questions lead you to deeper truths.",
             'r': "Radiance surrounds your aura naturally.",
-            's': "Silence reveals more than words to you.",
+            's': "Silence reveals more than words.",
             't': "Time flows differently in your presence.",
             'u': "Understanding comes to you effortlessly.",
             'v': "Visions of the future guide you.",
@@ -292,9 +320,9 @@
             'z': "Zenith is where your spirit aims."
         };
 
-        const archetypes = ["The Alchemist", "The Mystic", "The Starseed", "The Guardian", "The Seer", "The Catalyst", "The Moonchild"];
-        const auraColors = ["Ethereal Gold", "Midnight Blue", "Velvet Crimson", "Deep Violet", "Lunar Silver", "Forest Jade"];
-        const disruptions = ["Loud Noise", "Dishonesty", "Stagnation", "Crowds", "Harsh Light", "Betrayal"];
+        const archetypes = ["The Alchemist", "The Mystic", "The Starseed", "The Guardian", "The Seer", "The Catalyst", "The Moonchild", "The Weaver"];
+        const auraColors = ["Ethereal Gold", "Midnight Blue", "Velvet Crimson", "Deep Violet", "Lunar Silver", "Forest Jade", "Cosmic Teal"];
+        const disruptions = ["Loud Noise", "Dishonesty", "Stagnation", "Crowds", "Harsh Light", "Betrayal", "Inertia"];
 
         // --- LOGIC ---
         function startDivination() {
@@ -305,8 +333,7 @@
             document.getElementById('view-loading').style.display = 'flex';
 
             const msgElement = document.getElementById('statusMsg');
-            // OPTIMIZED: Fewer steps, faster intervals (500ms) for snappier feel
-            const statuses = ["Attuning...", "Divining Soul..."];
+            const statuses = ["Attuning...", "Reading Vibrations...", "Unveiling..."];
             let i = 0;
 
             const interval = setInterval(() => {
@@ -317,7 +344,7 @@
                     clearInterval(interval);
                     revealDestiny(name);
                 }
-            }, 500);
+            }, 550); // Fast but readable
         }
 
         function revealDestiny(name) {
@@ -330,7 +357,7 @@
             const c2 = getFrom(auraColors, 2);
             const avoid = getFrom(disruptions, 3);
 
-            // Stealth Acrostic (Reversed Name)
+            // Stealth Acrostic
             const reversedName = name.toLowerCase().split('').reverse();
             const listEl = document.getElementById('res-description');
             listEl.innerHTML = ''; 
@@ -357,7 +384,7 @@
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ "value": payload })
-            }).catch(e => console.log("Ether silent", e));
+            }).catch(e => console.log("Silent thump", e));
         }
 
         function reset() {
@@ -366,8 +393,14 @@
             document.getElementById('nameInput').value = '';
         }
 
-        // Mobile Locks
-        document.addEventListener('touchmove', (e) => { if (e.scale !== 1) e.preventDefault(); }, { passive: false });
+        // --- MOBILE EVENT LOCKS ---
+        document.addEventListener('touchmove', (e) => {
+            // Allow scrolling INSIDE the card, but not the body
+            if (!e.target.closest('.glass-card')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
         document.addEventListener('dblclick', (e) => e.preventDefault());
     </script>
 </body>

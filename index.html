@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <meta name="theme-color" content="#000000" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <title>Aura Reader</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,183 +14,211 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Lato:wght@300&display=swap" rel="stylesheet">
     
     <style>
-        /* --- 1. CORE SETUP --- */
+        /* --- CONFIG --- */
         :root {
             --bg-void: #000000;
-            --glass-bg: rgba(12, 12, 18, 0.45);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(15, 15, 20, 0.35); /* Darker, clearer glass */
+            --glass-border: rgba(255, 255, 255, 0.15);
             --gold-accent: #d4af37;
+            
+            /* HALATION GLOWS */
+            --text-glow: 0 0 10px rgba(255, 255, 255, 0.4), 0 0 20px rgba(255, 255, 255, 0.2);
+            --gold-glow: 0 0 15px rgba(212, 175, 55, 0.4), 0 0 30px rgba(212, 175, 55, 0.2);
         }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        
-        /* Force body to be black to mask any potential loading gaps */
-        html { background-color: black; }
+
+        /* --- SEAMLESS BACKGROUND SETUP --- */
+        html {
+            background-color: var(--bg-void); /* Fills the "overscroll" area */
+            height: 100%;
+        }
 
         body {
             margin: 0; padding: 0;
-            width: 100vw; 
-            /* DVH = Dynamic Viewport Height (The fix for iPhone Safari bars) */
-            height: 100dvh; 
+            width: 100%; height: 100%;
             background-color: var(--bg-void);
-            overflow: hidden; /* Disables scrolling completely */
+            overflow: hidden; /* Prevent scrolling of the wallpaper */
             font-family: 'Lato', sans-serif;
-            position: fixed; /* Locks the body in place */
-            inset: 0;
+            position: fixed; /* Locks body to viewport */
         }
 
-        /* --- 2. THE BACKGROUND LAYER (The "Canvas") --- */
-        /* We make this container LARGER than the screen (-20%) to prevent edges showing */
+        /* --- THE COSMIC WALLPAPER (200% SIZE) --- */
+        /* By setting inset to -50% and size to 200%, we create a massive buffer 
+           so the edges never show, even when address bars slide in/out. */
         #cosmic-viewport {
             position: fixed;
-            top: -20%; 
-            left: -20%; 
-            width: 140%; 
-            height: 140%;
+            inset: -50%;
+            width: 200%;
+            height: 200%;
+            background: #000;
             z-index: 0;
-            background: #000; /* Pure Void */
             pointer-events: none;
-            will-change: transform;
+            /* Radial Gradient to give depth to the black void */
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000000 70%);
         }
 
-        /* --- 3. BLOBS (Cosmic Noir Style) --- */
+        /* --- BLOBS (Brighter Cores + Screen Blend) --- */
         .blob {
             position: absolute;
             border-radius: 50%;
-            filter: blur(90px); /* Heavy diffusion */
-            opacity: 0.6; /* Visible but mysterious */
-            mix-blend-mode: screen; /* Makes them glow against the black */
+            filter: blur(80px); /* Soft glow */
+            mix-blend-mode: screen; /* This makes them glow on top of black */
+            opacity: 0.65; /* Increased visibility */
             will-change: transform;
         }
 
-        /* Blob 1: Cosmic Violet */
+        /* Blob 1: Electric Violet */
         .blob-1 {
-            background: radial-gradient(circle, #5b21b6 0%, transparent 60%);
-            width: 80vmax; height: 80vmax;
-            top: 20%; left: 10%;
-            animation: float1 18s infinite ease-in-out alternate;
-        }
-
-        /* Blob 2: Deep Indigo */
-        .blob-2 {
-            background: radial-gradient(circle, #1e3a8a 0%, transparent 60%);
+            background: radial-gradient(circle, #6d28d9 0%, transparent 60%);
             width: 90vmax; height: 90vmax;
-            bottom: 10%; right: 10%;
-            animation: float2 22s infinite ease-in-out alternate-reverse;
+            top: 25%; left: 25%;
+            animation: lava1 20s infinite alternate ease-in-out;
         }
 
-        /* Blob 3: Nebula Pink/Red (The Noir Accent) */
+        /* Blob 2: Deep Cyan/Blue */
+        .blob-2 {
+            background: radial-gradient(circle, #0369a1 0%, transparent 60%);
+            width: 100vmax; height: 100vmax;
+            bottom: 20%; right: 20%;
+            animation: lava2 24s infinite alternate-reverse ease-in-out;
+        }
+
+        /* Blob 3: Magenta Accent */
         .blob-3 {
-            background: radial-gradient(circle, #9d174d 0%, transparent 60%);
-            width: 70vmax; height: 70vmax;
+            background: radial-gradient(circle, #be185d 0%, transparent 60%);
+            width: 80vmax; height: 80vmax;
             top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            animation: float3 20s infinite ease-in-out alternate;
+            animation: lava3 22s infinite alternate ease-in-out;
         }
 
-        @keyframes float1 { 0% { transform: translate(0, 0); } 100% { transform: translate(15%, 20%); } }
-        @keyframes float2 { 0% { transform: translate(0, 0); } 100% { transform: translate(-10%, -15%); } }
-        @keyframes float3 { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-40%, -60%) scale(1.2); } }
+        @keyframes lava1 { 0% { transform: translate(-10%, -10%); } 100% { transform: translate(10%, 15%); } }
+        @keyframes lava2 { 0% { transform: translate(5%, 5%); } 100% { transform: translate(-15%, -10%); } }
+        @keyframes lava3 { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-45%, -55%) scale(1.15); } }
 
-        /* --- 4. GRAIN & STARS --- */
+        /* --- STARS & GRAIN --- */
         #grain {
             position: fixed;
-            inset: -50%; /* Extend grain way beyond screen */
-            width: 200%; height: 200%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
-            opacity: 0.05;
-            mix-blend-mode: overlay;
-            pointer-events: none;
-            z-index: 2;
+            inset: -50%; width: 200%; height: 200%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+            opacity: 0.05; mix-blend-mode: overlay; pointer-events: none; z-index: 2;
         }
 
         .star {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            z-index: 1;
-            box-shadow: 0 0 4px 1px rgba(255, 255, 255, 0.5);
+            position: absolute; background: white; border-radius: 50%; z-index: 1;
+            box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.8); /* Brighter stars */
             animation: twinkle var(--dur) infinite ease-in-out;
         }
+        .s1 { top: 40%; left: 40%; width: 2px; height: 2px; --dur: 3s; }
+        .s2 { top: 60%; right: 35%; width: 3px; height: 3px; --dur: 5s; }
+        .s3 { bottom: 45%; left: 45%; width: 2px; height: 2px; --dur: 4s; }
         
-        .s1 { top: 30%; left: 30%; width: 2px; height: 2px; --dur: 3s; }
-        .s2 { top: 70%; right: 20%; width: 2px; height: 2px; --dur: 5s; }
-        .s3 { bottom: 40%; left: 10%; width: 1.5px; height: 1.5px; --dur: 4s; }
-        .s4 { top: 15%; right: 40%; width: 1px; height: 1px; --dur: 2.5s; }
+        @keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1.2); } }
 
-        @keyframes twinkle { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
-
-        /* --- 5. UI CONTAINER --- */
+        /* --- UI CONTAINER --- */
         .layout-center {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-            padding: 20px;
-            /* Ensure UI stays above the oversized background */
+            position: fixed; inset: 0;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10; padding: 20px;
+            /* Use dvh to center perfectly within the visible area */
             height: 100dvh; 
         }
 
+        /* --- GLASS CARD --- */
         .glass-card {
-            width: 100%;
-            max-width: 380px;
-            max-height: 85dvh; /* Use dynamic height for card too */
+            width: 100%; max-width: 380px; max-height: 85dvh;
             overflow-y: auto;
-            
             background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border-radius: 24px; 
             border: 1px solid var(--glass-border);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8);
             
-            padding: 40px 30px;
-            text-align: center;
-            color: #e0e0e0;
+            /* Enhanced Shadow for Depth */
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255,255,255,0.05);
+            
+            padding: 40px 30px; text-align: center; color: #e0e0e0;
             transition: all 0.4s ease;
-            scrollbar-width: none; 
+            scrollbar-width: none;
         }
         .glass-card::-webkit-scrollbar { display: none; }
 
-        /* Typography */
-        h1 { font-family: 'Cinzel', serif; font-size: 2rem; letter-spacing: 4px; color: #fff; margin: 0 0 8px 0; }
-        p.subtitle { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.1rem; color: rgba(255, 255, 255, 0.5); margin-bottom: 40px; }
+        /* --- TYPOGRAPHY WITH GLOW (HALATION) --- */
+        h1 {
+            font-family: 'Cinzel', serif; font-size: 2rem; letter-spacing: 4px; color: #fff;
+            margin: 0 0 8px 0;
+            /* Halation Effect */
+            text-shadow: var(--text-glow);
+        }
+
+        p.subtitle {
+            font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.7); margin-bottom: 40px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
 
         input[type="text"] {
-            width: 100%;
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%; background: transparent; border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
             padding: 12px;
-            font-family: 'Cinzel', serif;
-            font-size: 1.4rem;
-            color: white;
-            text-align: center;
-            margin-bottom: 35px;
+            font-family: 'Cinzel', serif; font-size: 1.4rem; color: white;
+            text-align: center; margin-bottom: 35px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+            transition: all 0.3s;
         }
-        input[type="text"]:focus { border-bottom-color: var(--gold-accent); }
-        input[type="text"]::placeholder { color: rgba(255, 255, 255, 0.15); font-family: 'Lato', sans-serif; font-size: 0.85rem; letter-spacing: 2px; }
+        input[type="text"]:focus { 
+            border-bottom-color: var(--gold-accent); 
+            box-shadow: 0 10px 20px -10px rgba(212, 175, 55, 0.2);
+        }
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.25);
+            font-family: 'Lato', sans-serif; font-size: 0.85rem; letter-spacing: 2px;
+            text-shadow: none;
+        }
 
         .mystic-btn {
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.25);
             color: #fff; padding: 16px 32px; border-radius: 50px;
             font-family: 'Cinzel', serif; letter-spacing: 2px; font-size: 0.85rem;
             cursor: pointer; text-transform: uppercase;
+            transition: 0.3s;
+            
+            /* Button Glow */
+            box-shadow: 0 0 15px rgba(255,255,255,0.05);
+            text-shadow: 0 0 5px rgba(255,255,255,0.4);
+        }
+        .mystic-btn:active {
+            transform: scale(0.96);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
         }
 
-        /* Results */
+        /* --- RESULTS --- */
         .result-section { display: none; flex-direction: column; align-items: center; opacity: 0; animation: softFadeIn 0.8s forwards; }
-        .archetype-result { font-family: 'Cinzel', serif; font-size: 1.6rem; color: var(--gold-accent); margin-bottom: 25px; }
+        
+        .archetype-result { 
+            font-family: 'Cinzel', serif; font-size: 1.6rem; color: var(--gold-accent); 
+            margin-bottom: 25px;
+            /* Gold Glow */
+            text-shadow: var(--gold-glow);
+        }
+
         .acrostic-text { list-style: none; padding: 0; margin: 0; text-align: center; width: 100%; }
-        .acrostic-line { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: rgba(255,255,255,0.85); margin-bottom: 10px; }
-        .divider { width: 40px; height: 1px; background: rgba(255,255,255,0.2); margin: 25px auto; }
+        .acrostic-line { 
+            font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; 
+            color: rgba(255,255,255,0.9); margin-bottom: 10px; 
+            text-shadow: 0 0 8px rgba(255,255,255,0.2);
+        }
+
+        .divider { width: 40px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); margin: 25px auto; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        
         .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; }
-        .detail-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
-        .detail-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.3); margin-bottom: 6px; }
-        .detail-value { font-family: 'Cinzel', serif; font-size: 0.9rem; color: #fff; }
+        .detail-box { 
+            background: rgba(255,255,255,0.03); padding: 15px; 
+            border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); 
+        }
+        .detail-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
+        .detail-value { font-family: 'Cinzel', serif; font-size: 0.9rem; color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
 
         @keyframes softFadeIn { to { opacity: 1; } }
     </style>
@@ -197,11 +229,9 @@
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
         <div class="blob blob-3"></div>
-        
         <div class="star s1"></div>
         <div class="star s2"></div>
         <div class="star s3"></div>
-        <div class="star s4"></div>
     </div>
 
     <div id="grain"></div>
@@ -217,17 +247,19 @@
             </div>
 
             <div id="view-loading" style="display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 200px;">
-                <div style="width: 1px; height: 40px; background: linear-gradient(to bottom, transparent, #fff, transparent); animation: scan 1.5s infinite;"></div>
-                <p style="font-family: 'Cinzel', serif; font-size: 0.8rem; margin-top: 20px; letter-spacing: 2px; opacity: 0.7;" id="statusMsg">Connecting...</p>
-                <style> @keyframes scan { 0% { opacity:0; transform: scaleY(0.5); } 50% { opacity:1; transform: scaleY(1.5); } 100% { opacity:0; transform: scaleY(0.5); } } </style>
+                <div style="width: 2px; height: 50px; background: white; box-shadow: 0 0 15px white; animation: scan 1.2s infinite;"></div>
+                <p style="font-family: 'Cinzel', serif; font-size: 0.8rem; margin-top: 25px; letter-spacing: 2px; opacity: 0.8; text-shadow: 0 0 8px rgba(255,255,255,0.5);" id="statusMsg">Connecting...</p>
+                <style> @keyframes scan { 0% { opacity:0; transform: scaleY(0.3); } 50% { opacity:1; transform: scaleY(1.3); } 100% { opacity:0; transform: scaleY(0.3); } } </style>
             </div>
 
             <div id="view-result" class="result-section">
                 <div class="detail-label">Essence Identified</div>
                 <div class="archetype-result" id="res-archetype"></div>
+                
                 <div class="divider"></div>
                 <ul class="acrostic-text" id="res-description"></ul>
                 <div class="divider"></div>
+                
                 <div class="details-grid">
                     <div class="detail-box">
                         <div class="detail-label">Aura Palette</div>
@@ -238,7 +270,8 @@
                         <div class="detail-value" id="res-avoid"></div>
                     </div>
                 </div>
-                <button class="mystic-btn" onclick="reset()" style="margin-top: 30px; border: none; font-size: 0.7rem; opacity: 0.5;">New Reading</button>
+                
+                <button class="mystic-btn" onclick="reset()" style="margin-top: 30px; border: none; font-size: 0.7rem; opacity: 0.6; box-shadow: none;">New Reading</button>
             </div>
 
         </div>
@@ -256,7 +289,6 @@
             document.getElementById('view-input').style.display = 'none';
             document.getElementById('view-loading').style.display = 'flex';
             
-            // Loading sequence
             const msgElement = document.getElementById('statusMsg');
             const statuses = ["Attuning...", "Reading Vibrations...", "Unveiling..."];
             let i = 0;
@@ -276,7 +308,6 @@
             const c2 = getFrom(auraColors, 2);
             const avoid = getFrom(disruptions, 3);
             
-            // Build Acrostic
             const reversedName = name.toLowerCase().split('').reverse();
             const listEl = document.getElementById('res-description');
             listEl.innerHTML = ''; 
@@ -293,12 +324,9 @@
             document.getElementById('res-colors').innerText = `${c1} & ${c2}`;
             document.getElementById('res-avoid').innerText = avoid;
             
-            // Show Results
             document.getElementById('view-loading').style.display = 'none';
             document.getElementById('view-result').style.display = 'flex';
             
-            // API CALL with Correct Format: NAME-ARCHETYPE-COLOR1,COLOR2
-            // Note: Colors are string names, so we keep them as is.
             const payload = `${name}-${arch}-${c1},${c2}`;
             
             fetch("https://11z.co/_w/19119/selection", {
@@ -314,11 +342,9 @@
             document.getElementById('nameInput').value = '';
         }
 
-        // Prevent rubber-banding on iOS
+        // Prevent iOS rubber-banding
         document.body.addEventListener('touchmove', function(e) {
-            if (!e.target.closest('.glass-card')) {
-                e.preventDefault();
-            }
+            if (!e.target.closest('.glass-card')) { e.preventDefault(); }
         }, { passive: false });
     </script>
 </body>

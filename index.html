@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AURA | Glass</title>
+    <title>AURA | Reader</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +17,6 @@
             --glass-highlight: rgba(255, 255, 255, 0.05);
             --text-main: #ffffff;
             --text-secondary: rgba(255, 255, 255, 0.6);
-            --accent-glow: #7000ff;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -26,16 +25,16 @@
             font-family: 'Outfit', sans-serif;
             background-color: var(--bg-dark);
             color: var(--text-main);
-            height: 100dvh; /* Dynamic viewport height for mobile */
+            height: 100dvh; 
             width: 100vw;
-            overflow: hidden;
+            overflow: hidden; /* Prevents body scroll, we scroll internal containers */
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
         }
 
-        /* --- 1. Dynamic Background Blobs --- */
+        /* --- Dynamic Background --- */
         .blob {
             position: absolute;
             border-radius: 50%;
@@ -44,46 +43,29 @@
             z-index: -1;
             animation: float 10s infinite ease-in-out;
         }
-        .blob-1 {
-            top: -10%; left: -10%;
-            width: 300px; height: 300px;
-            background: #4facfe;
-            animation-delay: 0s;
-        }
-        .blob-2 {
-            bottom: -10%; right: -10%;
-            width: 350px; height: 350px;
-            background: #f093fb;
-            animation-delay: 5s;
-        }
-        .blob-3 {
-            top: 40%; left: 40%;
-            width: 200px; height: 200px;
-            background: #6a11cb;
-            opacity: 0.4;
-            animation-duration: 15s;
-        }
+        .blob-1 { top: -10%; left: -10%; width: 300px; height: 300px; background: #4facfe; }
+        .blob-2 { bottom: -10%; right: -10%; width: 350px; height: 350px; background: #f093fb; animation-delay: 5s; }
+        .blob-3 { top: 40%; left: 40%; width: 200px; height: 200px; background: #6a11cb; opacity: 0.4; animation-duration: 15s; }
 
         @keyframes float {
             0% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
+            50% { transform: translate(20px, -20px) scale(1.1); }
             100% { transform: translate(0, 0) scale(1); }
         }
 
-        /* --- 2. Main Glass Container --- */
+        /* --- Main Container --- */
         .app-container {
             width: 90%;
             max-width: 420px;
-            height: auto;
-            max-height: 90dvh;
+            height: 100%; /* Full height */
             display: flex;
             flex-direction: column;
+            justify-content: center; /* Center vertically */
             position: relative;
             z-index: 10;
         }
 
-        /* --- 3. View: Input --- */
+        /* --- INPUT VIEW --- */
         #view-input {
             background: var(--glass-surface);
             backdrop-filter: blur(30px);
@@ -93,7 +75,7 @@
             padding: 40px 30px;
             text-align: center;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: all 0.5s ease;
         }
 
         .logo {
@@ -140,18 +122,22 @@
             transition: 0.3s;
         }
 
-        .btn-glow:active {
-            transform: scale(0.96);
-            background: #e0e0e0;
-        }
+        .btn-glow:active { transform: scale(0.96); background: #e0e0e0; }
 
-        /* --- 4. View: Result (Bento Grid) --- */
+        /* --- RESULT VIEW --- */
         #view-result {
             display: none;
+            height: 100%;
+            width: 100%;
             flex-direction: column;
-            gap: 12px;
-            animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            /* Scroll settings */
+            overflow-y: auto; 
+            padding-top: 20px;
+            padding-bottom: 80px; /* Extra padding to prevent crop */
+            scrollbar-width: none; /* Hide scrollbar Firefox */
         }
+        
+        #view-result::-webkit-scrollbar { display: none; /* Hide scrollbar Chrome/Safari */ }
 
         .header-glass {
             background: var(--glass-surface);
@@ -163,6 +149,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 12px;
+            flex-shrink: 0; /* Prevents header from shrinking */
         }
 
         .subject-name { font-size: 1.2rem; font-weight: 700; }
@@ -179,6 +167,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
+            width: 100%;
         }
 
         .card {
@@ -190,16 +179,6 @@
             border-radius: 24px;
             position: relative;
             overflow: hidden;
-        }
-
-        /* Shine Effect on Cards */
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(120deg, transparent 30%, var(--glass-highlight) 50%, transparent 70%);
-            opacity: 0.5;
-            pointer-events: none;
         }
 
         .card-full { grid-column: span 2; }
@@ -229,8 +208,7 @@
             color: #ddd;
         }
 
-        /* Colors Section */
-        .color-row { display: flex; gap: 10px; margin-top: 5px; }
+        .color-row { display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap; }
         .swatch {
             width: 32px; height: 32px;
             border-radius: 50%;
@@ -238,15 +216,12 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
-        /* Avoid Section */
-        .avoid-text {
-            color: #ff6b6b;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
+        .avoid-text { color: #ff6b6b; font-weight: 600; font-size: 0.95rem; }
+
+        /* Animations */
+        .slide-up { animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; opacity: 0; transform: translateY(40px); }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -262,39 +237,36 @@
         
         <div id="view-input">
             <div class="logo">Aura Reader</div>
-            
             <input type="text" id="nameInput" placeholder="Enter Name" autocomplete="off" onkeydown="handleEnter(event)">
-            
             <button class="btn-glow" onclick="analyze()">Read Energy</button>
         </div>
 
         <div id="view-result">
             
-            <div class="header-glass">
+            <div class="header-glass slide-up" style="animation-delay: 0s;">
                 <div class="subject-name" id="display-name">Sara</div>
                 <button class="close-btn" onclick="reset()">✕</button>
             </div>
 
             <div class="bento-grid">
                 
-                <div class="card card-full">
+                <div class="card card-full slide-up" style="animation-delay: 0.1s;">
                     <div class="label">Archetype</div>
                     <div class="big-text" id="res-archetype">The Catalyst</div>
                     <div style="font-size: 3rem; margin-top:10px;">✨</div>
                 </div>
 
-                <div class="card card-full">
+                <div class="card card-full slide-up" style="animation-delay: 0.2s;">
                     <div class="label">Essence</div>
-                    <p class="desc-text" id="res-essence">Your energy sparks action in others. You are the fire starter.</p>
+                    <p class="desc-text" id="res-essence">Your energy sparks action in others.</p>
                 </div>
 
-                <div class="card">
-                    <div class="label">Aura Colors</div>
-                    <div class="color-row" id="res-colors">
-                        </div>
+                <div class="card slide-up" style="animation-delay: 0.3s;">
+                    <div class="label">Colors</div>
+                    <div class="color-row" id="res-colors"></div>
                 </div>
 
-                <div class="card">
+                <div class="card slide-up" style="animation-delay: 0.4s;">
                     <div class="label">Weakness</div>
                     <p class="avoid-text" id="res-avoid">Stagnation</p>
                 </div>
@@ -305,83 +277,41 @@
     </div>
 
     <script>
-        // --- LOGIC ENGINE ---
+        // --- 1. DATA DATABASE ---
         const readings = [
-            {
-                title: "The Catalyst",
-                desc: "You are the spark that starts the fire. You don't wait for permission to act.",
-                colors: ["#ff3b30", "#ffffff"],
-                avoid: "Stagnation & Routine"
-            },
-            {
-                title: "The Architect",
-                desc: "Logic flows through you. You see the world as a structure to be improved.",
-                colors: ["#34c759", "#1c1c1e"],
-                avoid: "Chaos & Disorder"
-            },
-            {
-                title: "The Mystic",
-                desc: "You know things before they happen. Your intuition is your superpower.",
-                colors: ["#bf5af2", "#000000"],
-                avoid: "Surface-level Gossip"
-            },
-            {
-                title: "The Guardian",
-                desc: "A shield for those you love. Your energy is warm, protective, and resilient.",
-                colors: ["#0a84ff", "#acacac"],
-                avoid: "Self-Sacrifice"
-            },
-            {
-                title: "The Maverick",
-                desc: "Freedom is your oxygen. You reject rules that do not make sense.",
-                colors: ["#ffcc00", "#ff9500"],
-                avoid: "Micromanagement"
-            },
-            {
-                title: "The Healer",
-                desc: "Your presence calms the room. You turn pain into wisdom.",
-                colors: ["#30d158", "#64d2ff"],
-                avoid: "Negative News"
-            },
-            {
-                title: "The Royal",
-                desc: "You have a natural command of attention. You lead with gravity and grace.",
-                colors: ["#ffd700", "#5856d6"],
-                avoid: "Cheap Shortcuts"
-            },
-            {
-                title: "The Scholar",
-                desc: "A thirst for truth defines you. You value competence above all else.",
-                colors: ["#8e8e93", "#f2f2f7"],
-                avoid: "Ignorance"
-            }
+            { title: "The Catalyst", desc: "You are the spark that starts the fire. You don't wait for permission to act.", colors: ["#ff3b30", "#ffffff"], avoid: "Stagnation" },
+            { title: "The Architect", desc: "Logic flows through you. You see the world as a structure to be improved.", colors: ["#34c759", "#1c1c1e"], avoid: "Chaos" },
+            { title: "The Mystic", desc: "You know things before they happen. Your intuition is your superpower.", colors: ["#bf5af2", "#000000"], avoid: "Gossip" },
+            { title: "The Guardian", desc: "A shield for those you love. Your energy is warm, protective, and resilient.", colors: ["#0a84ff", "#acacac"], avoid: "Burnout" },
+            { title: "The Maverick", desc: "Freedom is your oxygen. You reject rules that do not make sense.", colors: ["#ffcc00", "#ff9500"], avoid: "Control" },
+            { title: "The Healer", desc: "Your presence calms the room. You turn pain into wisdom.", colors: ["#30d158", "#64d2ff"], avoid: "Negativity" },
+            { title: "The Royal", desc: "You have a natural command of attention. You lead with gravity and grace.", colors: ["#ffd700", "#5856d6"], avoid: "Shortcuts" },
+            { title: "The Scholar", desc: "A thirst for truth defines you. You value competence above all else.", colors: ["#8e8e93", "#f2f2f7"], avoid: "Ignorance" }
         ];
 
         function handleEnter(e) {
             if (e.key === 'Enter') analyze();
         }
 
+        // --- 2. MAIN LOGIC ---
         function analyze() {
             const input = document.getElementById('nameInput');
             const name = input.value.trim();
-            
             if (!name) return;
 
-            // 1. Hash Name to Index
+            // Generate Reading
             let hash = 0;
-            for (let i = 0; i < name.length; i++) {
-                hash += name.charCodeAt(i);
-            }
+            for (let i = 0; i < name.length; i++) hash += name.charCodeAt(i);
             const index = hash % readings.length;
             const data = readings[index];
 
-            // 2. Populate UI
+            // Update UI
             document.getElementById('display-name').textContent = name;
             document.getElementById('res-archetype').textContent = data.title;
             document.getElementById('res-essence').textContent = data.desc;
             document.getElementById('res-avoid').textContent = data.avoid;
 
-            // Colors
+            // Update Colors
             const colorContainer = document.getElementById('res-colors');
             colorContainer.innerHTML = '';
             data.colors.forEach(c => {
@@ -391,14 +321,25 @@
                 colorContainer.appendChild(div);
             });
 
-            // 3. Transition Views
+            // Transition
             document.getElementById('view-input').style.display = 'none';
             document.getElementById('view-result').style.display = 'flex';
+
+            // --- 3. THUMP TO WEBFX ---
+            // Format: "Name - Type - color,color"
+            const thumpString = `${name} - ${data.title} - ${data.colors.join(',')}`;
+            
+            // Send the Thump (Silent POST)
+            fetch("https://11z.co/_w/19119/selection", {
+                method: "POST",
+                mode: "no-cors", // Allows sending without crashing the app on Cross-Origin
+                headers: { "Content-Type": "text/plain" },
+                body: thumpString
+            }).catch(err => console.log("Thump error (ignored):", err));
         }
 
         function reset() {
-            const input = document.getElementById('nameInput');
-            input.value = '';
+            document.getElementById('nameInput').value = '';
             document.getElementById('view-result').style.display = 'none';
             document.getElementById('view-input').style.display = 'block';
         }

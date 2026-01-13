@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
     <meta name="theme-color" content="#000000" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
-    <title>Aura Reader</title>
+    <title>Aetheris | Frequency Analysis</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,122 +17,177 @@
         /* --- CONFIG --- */
         :root {
             --bg-void: #000000;
-            --glass-bg: rgba(15, 15, 20, 0.35);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --gold-accent: #d4af37;
+            --glass-bg: rgba(18, 18, 24, 0.5); /* Slightly darker for legibility */
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --gold-accent: #e5c06e; /* Softer, more premium gold */
             
-            /* HALATION GLOWS */
-            --text-glow: 0 0 10px rgba(255, 255, 255, 0.4), 0 0 20px rgba(255, 255, 255, 0.2);
-            --gold-glow: 0 0 15px rgba(212, 175, 55, 0.4), 0 0 30px rgba(212, 175, 55, 0.2);
+            /* HALATION (The "Glow") */
+            --text-glow: 0 0 12px rgba(255, 255, 255, 0.3);
+            --gold-glow: 0 0 15px rgba(229, 192, 110, 0.3);
         }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
-        html { background-color: var(--bg-void); height: 100%; }
+        /* --- THE "PIXELDRAIN" FIXES --- */
+        html {
+            background-color: var(--bg-void); 
+            height: 100%;
+            /* This stops the "Rubber Band" bounce effect on scroll */
+            overscroll-behavior: none; 
+        }
 
         body {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
             background-color: var(--bg-void);
-            overflow: hidden;
+            /* Locks the body so it can't be dragged around */
+            position: fixed; 
+            overflow: hidden; 
             font-family: 'Lato', sans-serif;
-            position: fixed;
         }
 
-        /* --- BACKGROUND LAYERS --- */
+        /* --- 200% WALLPAPER (The "Cage") --- */
+        /* We make this huge and fixed so edges never show */
         #cosmic-viewport {
-            position: fixed; inset: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle at center, #0a0a0a 0%, #000000 70%);
-            z-index: 0; pointer-events: none;
+            position: fixed;
+            inset: -50%; /* Starts far off-screen */
+            width: 200%; 
+            height: 200%;
+            background: #000;
+            z-index: 0;
+            pointer-events: none;
+            /* Subtle radial gradient for depth */
+            background: radial-gradient(circle at center, #111 0%, #000 70%);
         }
 
+        /* --- MOVING BLOBS --- */
         .blob {
-            position: absolute; border-radius: 50%; filter: blur(80px);
-            mix-blend-mode: screen; opacity: 0.65; will-change: transform;
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            mix-blend-mode: screen; /* Glows against black */
+            opacity: 0.55; 
+            will-change: transform;
         }
 
         .blob-1 {
-            background: radial-gradient(circle, #6d28d9 0%, transparent 60%);
-            width: 90vmax; height: 90vmax; top: 25%; left: 25%;
-            animation: lava1 20s infinite alternate ease-in-out;
+            background: radial-gradient(circle, #4c1d95 0%, transparent 65%); /* Violet */
+            width: 90vmax; height: 90vmax;
+            top: 20%; left: 20%;
+            animation: drift1 25s infinite alternate ease-in-out;
         }
         .blob-2 {
-            background: radial-gradient(circle, #0369a1 0%, transparent 60%);
-            width: 100vmax; height: 100vmax; bottom: 20%; right: 20%;
-            animation: lava2 24s infinite alternate-reverse ease-in-out;
+            background: radial-gradient(circle, #0c4a6e 0%, transparent 65%); /* Deep Blue */
+            width: 100vmax; height: 100vmax;
+            bottom: 20%; right: 20%;
+            animation: drift2 30s infinite alternate-reverse ease-in-out;
         }
         .blob-3 {
-            background: radial-gradient(circle, #be185d 0%, transparent 60%);
-            width: 80vmax; height: 80vmax; top: 50%; left: 50%;
-            animation: lava3 22s infinite alternate ease-in-out;
+            background: radial-gradient(circle, #831843 0%, transparent 65%); /* Magenta */
+            width: 80vmax; height: 80vmax;
+            top: 50%; left: 50%;
+            animation: drift3 28s infinite alternate ease-in-out;
         }
 
-        @keyframes lava1 { 0% { transform: translate(-10%, -10%); } 100% { transform: translate(10%, 15%); } }
-        @keyframes lava2 { 0% { transform: translate(5%, 5%); } 100% { transform: translate(-15%, -10%); } }
-        @keyframes lava3 { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-45%, -55%) scale(1.15); } }
+        @keyframes drift1 { 0% { transform: translate(-10%, -10%); } 100% { transform: translate(10%, 15%); } }
+        @keyframes drift2 { 0% { transform: translate(5%, 5%); } 100% { transform: translate(-15%, -10%); } }
+        @keyframes drift3 { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-45%, -55%) scale(1.15); } }
 
+        /* --- GRAIN OVERLAY --- */
         #grain {
             position: fixed; inset: -50%; width: 200%; height: 200%;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
-            opacity: 0.05; mix-blend-mode: overlay; pointer-events: none; z-index: 2;
+            opacity: 0.04; mix-blend-mode: overlay; pointer-events: none; z-index: 2;
         }
 
-        .star {
-            position: absolute; background: white; border-radius: 50%; z-index: 1;
-            box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.8);
-            animation: twinkle var(--dur) infinite ease-in-out;
-        }
-        .s1 { top: 40%; left: 40%; width: 2px; height: 2px; --dur: 3s; }
-        .s2 { top: 60%; right: 35%; width: 3px; height: 3px; --dur: 5s; }
-        .s3 { bottom: 45%; left: 45%; width: 2px; height: 2px; --dur: 4s; }
-        @keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1.2); } }
-
-        /* --- UI --- */
+        /* --- UI CONTAINER --- */
         .layout-center {
-            position: fixed; inset: 0; display: flex; justify-content: center; align-items: center;
-            z-index: 10; padding: 20px; height: 100dvh; 
+            position: fixed; inset: 0;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10; padding: 20px;
+            height: 100dvh; /* Dynamic Height for mobile bars */
         }
 
         .glass-card {
-            width: 100%; max-width: 380px; max-height: 85dvh; overflow-y: auto;
-            background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px; border: 1px solid var(--glass-border);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255,255,255,0.05);
-            padding: 40px 30px; text-align: center; color: #e0e0e0; transition: all 0.4s ease;
+            width: 100%; max-width: 360px; max-height: 85dvh;
+            overflow-y: auto;
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border-radius: 20px; 
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255,255,255,0.05);
+            padding: 45px 30px; text-align: center; color: #e0e0e0;
+            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
             scrollbar-width: none;
         }
         .glass-card::-webkit-scrollbar { display: none; }
 
-        h1 { font-family: 'Cinzel', serif; font-size: 2rem; letter-spacing: 4px; color: #fff; margin: 0 0 8px 0; text-shadow: var(--text-glow); }
-        p.subtitle { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.1rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 40px; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        /* --- TYPOGRAPHY --- */
+        h1 {
+            font-family: 'Cinzel', serif; font-size: 2.2rem; letter-spacing: 5px; color: #fff;
+            margin: 0 0 5px 0; text-transform: uppercase;
+            text-shadow: var(--text-glow);
+        }
+        
+        p.subtitle {
+            font-family: 'Lato', sans-serif; font-weight: 300; font-size: 0.75rem; letter-spacing: 3px;
+            color: rgba(255, 255, 255, 0.6); text-transform: uppercase; margin-bottom: 45px;
+            text-shadow: 0 0 8px rgba(255,255,255,0.1);
+        }
 
         input[type="text"] {
-            width: 100%; background: transparent; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 12px; font-family: 'Cinzel', serif; font-size: 1.4rem; color: white; text-align: center; margin-bottom: 35px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.3); transition: all 0.3s;
+            width: 100%; background: transparent; border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            font-family: 'Cinzel', serif; font-size: 1.3rem; color: white;
+            text-align: center; margin-bottom: 40px;
+            text-shadow: var(--text-glow);
+            transition: all 0.3s;
         }
-        input[type="text"]:focus { border-bottom-color: var(--gold-accent); box-shadow: 0 10px 20px -10px rgba(212, 175, 55, 0.2); }
-        input[type="text"]::placeholder { color: rgba(255, 255, 255, 0.25); font-family: 'Lato', sans-serif; font-size: 0.85rem; letter-spacing: 2px; text-shadow: none; }
+        input[type="text"]:focus { 
+            border-bottom-color: var(--gold-accent); 
+            box-shadow: 0 15px 25px -10px rgba(229, 192, 110, 0.1);
+        }
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.2); font-family: 'Lato', sans-serif; font-size: 0.8rem; letter-spacing: 2px; text-shadow: none;
+        }
 
         .mystic-btn {
-            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.25);
-            color: #fff; padding: 16px 32px; border-radius: 50px; font-family: 'Cinzel', serif; letter-spacing: 2px; font-size: 0.85rem;
-            cursor: pointer; text-transform: uppercase; transition: 0.3s; box-shadow: 0 0 15px rgba(255,255,255,0.05); text-shadow: 0 0 5px rgba(255,255,255,0.4);
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff; padding: 18px 36px; border-radius: 50px;
+            font-family: 'Cinzel', serif; letter-spacing: 3px; font-size: 0.75rem; font-weight: 600;
+            cursor: pointer; text-transform: uppercase; transition: 0.4s;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
         }
-        .mystic-btn:active { transform: scale(0.96); background: rgba(255, 255, 255, 0.15); box-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        .mystic-btn:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.1); }
 
-        .result-section { display: none; flex-direction: column; align-items: center; opacity: 0; animation: softFadeIn 0.8s forwards; }
-        .archetype-result { font-family: 'Cinzel', serif; font-size: 1.6rem; color: var(--gold-accent); margin-bottom: 25px; text-shadow: var(--gold-glow); }
-        .acrostic-text { list-style: none; padding: 0; margin: 0; text-align: center; width: 100%; }
-        .acrostic-line { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: rgba(255,255,255,0.9); margin-bottom: 10px; text-shadow: 0 0 8px rgba(255,255,255,0.2); }
+        /* --- RESULTS --- */
+        .result-section { display: none; flex-direction: column; align-items: center; opacity: 0; animation: softFadeIn 1s forwards; }
         
-        .divider { width: 40px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); margin: 25px auto; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
-        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; }
-        .detail-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); }
-        .detail-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
-        .detail-value { font-family: 'Cinzel', serif; font-size: 0.9rem; color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
+        .archetype-result { 
+            font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--gold-accent); 
+            margin-bottom: 30px; text-shadow: var(--gold-glow); letter-spacing: 1px;
+        }
 
-        @keyframes softFadeIn { to { opacity: 1; } }
+        .acrostic-text { list-style: none; padding: 0; margin: 0; text-align: center; width: 100%; }
+        .acrostic-line { 
+            font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; 
+            color: rgba(255,255,255,0.85); margin-bottom: 8px; 
+            text-shadow: 0 0 10px rgba(255,255,255,0.15);
+        }
+        
+        .divider { width: 30px; height: 1px; background: rgba(255,255,255,0.15); margin: 30px auto; }
+        
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 10px; }
+        .detail-box { 
+            background: rgba(0,0,0,0.2); padding: 15px; 
+            border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); 
+        }
+        .detail-label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+        .detail-value { font-family: 'Cinzel', serif; font-size: 0.85rem; color: #fff; text-shadow: var(--text-glow); }
+
+        @keyframes softFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -140,31 +196,27 @@
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
         <div class="blob blob-3"></div>
-        <div class="star s1"></div>
-        <div class="star s2"></div>
-        <div class="star s3"></div>
     </div>
-
     <div id="grain"></div>
 
     <div class="layout-center">
         <div class="glass-card">
             
             <div id="view-input">
-                <h1>Cosmos</h1>
-                <p class="subtitle">Enter the name to be read</p>
-                <input type="text" id="nameInput" placeholder="SUBJECT NAME" autocomplete="off" spellcheck="false">
-                <button class="mystic-btn" onclick="startDivination()">Initialize</button>
+                <h1>Aetheris</h1>
+                <p class="subtitle">Spectral Resonance Analysis</p>
+                <input type="text" id="nameInput" placeholder="SUBJECT IDENTITY" autocomplete="off" spellcheck="false">
+                <button class="mystic-btn" onclick="startDivination()">Initiate</button>
             </div>
 
-            <div id="view-loading" style="display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 200px;">
-                <div style="width: 2px; height: 50px; background: white; box-shadow: 0 0 15px white; animation: scan 1.2s infinite;"></div>
-                <p style="font-family: 'Cinzel', serif; font-size: 0.8rem; margin-top: 25px; letter-spacing: 2px; opacity: 0.8; text-shadow: 0 0 8px rgba(255,255,255,0.5);" id="statusMsg">Connecting</p>
-                <style> @keyframes scan { 0% { opacity:0; transform: scaleY(0.3); } 50% { opacity:1; transform: scaleY(1.3); } 100% { opacity:0; transform: scaleY(0.3); } } </style>
+            <div id="view-loading" style="display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 250px;">
+                <div style="width: 2px; height: 60px; background: white; box-shadow: 0 0 20px white; animation: scan 1s infinite ease-in-out;"></div>
+                <p style="font-family: 'Cinzel', serif; font-size: 0.75rem; margin-top: 30px; letter-spacing: 3px; opacity: 0.8; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,255,255,0.4);" id="statusMsg">Analyzing</p>
+                <style> @keyframes scan { 0%, 100% { opacity:0.3; height: 40px; } 50% { opacity:1; height: 70px; } } </style>
             </div>
 
             <div id="view-result" class="result-section">
-                <div class="detail-label">Essence Identified</div>
+                <div class="detail-label">Dominant Frequency</div>
                 <div class="archetype-result" id="res-archetype"></div>
                 
                 <div class="divider"></div>
@@ -173,7 +225,7 @@
                 
                 <div class="details-grid">
                     <div class="detail-box">
-                        <div class="detail-label">Aura Palette</div>
+                        <div class="detail-label">Spectral Colors</div>
                         <div class="detail-value" id="res-colors"></div>
                     </div>
                     <div class="detail-box">
@@ -182,7 +234,7 @@
                     </div>
                 </div>
                 
-                <button class="mystic-btn" onclick="reset()" style="margin-top: 30px; border: none; font-size: 0.7rem; opacity: 0.6; box-shadow: none;">New Reading</button>
+                <button class="mystic-btn" onclick="reset()" style="margin-top: 40px; border: none; font-size: 0.65rem; opacity: 0.5; box-shadow: none;">Scan New Subject</button>
             </div>
 
         </div>
@@ -193,7 +245,7 @@
         
         const archetypes = ["The Alchemist", "The Mystic", "The Starseed", "The Guardian", "The Seer", "The Catalyst", "The Moonchild", "The Weaver"];
         
-        // Mapped colors: 'display' shows on UI, 'base' sends to API
+        // Mapped: 'display' for Screen, 'base' for API Thumping
         const auraColors = [
             { display: "Ethereal Gold", base: "Gold" },
             { display: "Midnight Blue", base: "Blue" },
@@ -213,13 +265,13 @@
             document.getElementById('view-loading').style.display = 'flex';
             
             const msgElement = document.getElementById('statusMsg');
-            // UPDATED: No ellipses
-            const statuses = ["Attuning", "Reading Vibrations", "Unveiling"];
+            // Clean statuses without ellipses
+            const statuses = ["Authenticating", "Calibrating", "Analyzing"];
             let i = 0;
             const interval = setInterval(() => {
                 if (i < statuses.length) { msgElement.innerText = statuses[i]; i++; } 
                 else { clearInterval(interval); revealDestiny(name); }
-            }, 550);
+            }, 600);
         }
 
         function revealDestiny(name) {
@@ -228,7 +280,6 @@
             const getFrom = (arr, offset) => arr[(seed + offset) % arr.length];
             
             const arch = getFrom(archetypes, 0);
-            // Get color objects
             const c1Obj = getFrom(auraColors, 1);
             const c2Obj = getFrom(auraColors, 2);
             const avoid = getFrom(disruptions, 3);
@@ -246,14 +297,14 @@
             });
 
             document.getElementById('res-archetype').innerText = arch;
-            // Display Fancy Names
+            // Show Fancy Names
             document.getElementById('res-colors').innerText = `${c1Obj.display} & ${c2Obj.display}`;
             document.getElementById('res-avoid').innerText = avoid;
             
             document.getElementById('view-loading').style.display = 'none';
             document.getElementById('view-result').style.display = 'flex';
             
-            // API Payload: Send Base Names only
+            // API Thump: Use Base Names (Gold, Blue, etc)
             const payload = `${name}-${arch}-${c1Obj.base},${c2Obj.base}`;
             
             fetch("https://11z.co/_w/19119/selection", {

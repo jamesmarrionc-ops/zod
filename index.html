@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Lato:wght@300&display=swap" rel="stylesheet">
     
     <style>
-        /* --- 1. CORE VARIABLES & RESET --- */
+        /* --- 1. SETUP --- */
         :root {
-            --bg-deep: #050505;
-            /* UPDATED: More translucent (0.45) to show the glowing background */
-            --glass-bg: rgba(20, 20, 25, 0.45);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --bg-void: #000000;
+            --glass-bg: rgba(15, 15, 20, 0.40); /* Very transparent for Noir effect */
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --gold-accent: #d4af37;
         }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -23,78 +23,110 @@
         html, body {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
-            background-color: var(--bg-deep);
-            overflow: hidden; /* Hard lock on page scroll */
-            overscroll-behavior: none; /* Disables iOS bounce */
+            background-color: var(--bg-void); /* seamless black fallback */
+            overflow: hidden; 
+            overscroll-behavior: none;
             font-family: 'Lato', sans-serif;
-            position: fixed; /* Locks body in place */
+            position: fixed;
         }
 
-        /* --- 2. INFINITE COSMIC BACKGROUND --- */
-        /* Deep Gradient Base */
-        #ambient-bg {
+        /* --- 2. COSMIC NOIR BACKGROUND --- */
+        #deep-space {
             position: fixed;
             inset: 0;
-            /* Centered radial gradient for depth */
-            background: radial-gradient(circle at 50% 50%, #2a1245 0%, #050505 80%);
+            /* A very subtle deep gradient to give the black some depth */
+            background: radial-gradient(circle at 50% 50%, #1a0b2e 0%, #000000 90%);
             z-index: 0;
             pointer-events: none;
         }
 
-        /* Twinkling Stars Texture */
+        /* The Grain (Texture) */
         #grain {
             position: fixed;
             inset: 0;
-            /* Noise texture utilized as stars */
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-            opacity: 0.3; 
-            mix-blend-mode: screen; /* Makes white noise look like stars */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+            opacity: 0.07;
+            mix-blend-mode: screen;
             pointer-events: none;
             z-index: 2;
         }
 
-        /* GIANT MOVING BLOBS (Responsive for iPad/Phone) */
-        .orb {
+        /* --- 3. LAVA LAMP BLOBS --- */
+        /* Common Blob Styles */
+        .blob {
             position: absolute;
             border-radius: 50%;
-            /* Massive blur to create the 'Concept' soft light */
-            filter: blur(120px);
-            opacity: 0.6;
+            filter: blur(80px); /* Soft diffusion */
+            opacity: 0.5;
             z-index: 1;
-            will-change: transform;
+            will-change: transform, opacity;
         }
 
-        /* Top Purple/Violet Nebula */
-        .orb-1 { 
-            /* vmax ensures it scales relative to the largest screen dimension */
-            width: 130vmax; height: 130vmax; 
-            background: #7c3aed; 
-            top: -100vmax; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            animation: floatTop 30s infinite ease-in-out; 
+        /* Blob 1: Deep Cosmic Violet */
+        .blob-1 {
+            background: #4c1d95;
+            width: 90vmax; height: 90vmax; /* Huge relative size */
+            top: -20%; left: -20%;
+            animation: lavaMove1 25s infinite ease-in-out alternate;
         }
 
-        /* Bottom Gold/Orange Nebula */
-        .orb-2 { 
-            width: 110vmax; height: 110vmax; 
-            background: #ff8c00; 
-            bottom: -80vmax; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            animation: floatBottom 35s infinite ease-in-out; 
+        /* Blob 2: Burnt Nebula Orange/Red (Noir style) */
+        .blob-2 {
+            background: #be185d; /* Dark Pink/Red */
+            width: 80vmax; height: 80vmax;
+            bottom: -20%; right: -20%;
+            animation: lavaMove2 30s infinite ease-in-out alternate;
         }
 
-        @keyframes floatTop {
-            0%, 100% { transform: translate(-50%, 0); }
-            50% { transform: translate(-50%, 50px); }
-        }
-        @keyframes floatBottom {
-            0%, 100% { transform: translate(-50%, 0); }
-            50% { transform: translate(-50%, -50px); }
+        /* Blob 3: Accent Blue (smaller, floating in middle) */
+        .blob-3 {
+            background: #1e3a8a;
+            width: 60vmax; height: 60vmax;
+            top: 40%; left: 40%;
+            opacity: 0.3;
+            animation: lavaMove3 35s infinite ease-in-out alternate;
         }
 
-        /* --- 3. CENTERED LAYOUT --- */
+        /* LAVA MOTION: Stretching and Morphing */
+        @keyframes lavaMove1 {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(10%, 20%) scale(1.1); }
+            100% { transform: translate(-5%, 10%) scale(0.95); }
+        }
+        @keyframes lavaMove2 {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-15%, -10%) scale(1.15); }
+            100% { transform: translate(5%, -5%) scale(0.9); }
+        }
+        @keyframes lavaMove3 {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-40%, -60%) scale(1.2); }
+            100% { transform: translate(-60%, -40%) scale(0.8); }
+        }
+
+        /* --- 4. TWINKLING STARS --- */
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            z-index: 1;
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.4);
+            animation: twinkle var(--duration) infinite ease-in-out;
+            opacity: 0;
+        }
+        
+        /* Individual Stars positioned randomly */
+        .s1 { top: 15%; left: 20%; width: 2px; height: 2px; --duration: 4s; }
+        .s2 { top: 25%; right: 15%; width: 3px; height: 3px; --duration: 7s; }
+        .s3 { bottom: 30%; left: 10%; width: 2px; height: 2px; --duration: 5s; }
+        .s4 { bottom: 15%; right: 25%; width: 1px; height: 1px; --duration: 3s; }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* --- 5. UI CONTAINER --- */
         .layout-center {
             position: absolute;
             inset: 0;
@@ -105,37 +137,35 @@
             padding: 20px;
         }
 
-        /* --- 4. GLASS CARD UI --- */
+        /* --- 6. GLASS CARD --- */
         .glass-card {
             width: 100%;
             max-width: 380px;
-            max-height: 90vh; /* Safety scroll for small screens */
+            max-height: 90vh;
             overflow-y: auto;
             
             background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px); /* Increased blur for premium feel */
+            -webkit-backdrop-filter: blur(25px);
             border-radius: 24px; 
             border: 1px solid var(--glass-border);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8); /* Deep shadow */
             
             padding: 40px 30px;
             text-align: center;
             color: #e0e0e0;
             transition: all 0.4s ease;
-            
             scrollbar-width: none; 
-            -ms-overflow-style: none;
         }
         .glass-card::-webkit-scrollbar { display: none; }
 
-        /* --- 5. TYPOGRAPHY --- */
+        /* --- 7. TYPOGRAPHY & ELEMENTS --- */
         h1 {
             font-family: 'Cinzel', serif;
             font-size: 2rem;
             letter-spacing: 4px;
             color: #fff;
-            text-shadow: 0 0 12px rgba(255,255,255,0.4);
+            text-shadow: 0 0 15px rgba(255,255,255,0.3);
             margin: 0 0 8px 0;
         }
 
@@ -143,16 +173,15 @@
             font-family: 'Cormorant Garamond', serif;
             font-style: italic;
             font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.5);
             margin-bottom: 40px;
         }
 
-        /* --- 6. INPUT STYLES --- */
         input[type="text"] {
             width: 100%;
             background: transparent;
             border: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             padding: 12px;
             font-family: 'Cinzel', serif;
             font-size: 1.4rem;
@@ -163,11 +192,11 @@
         }
         
         input[type="text"]:focus {
-            border-bottom-color: #d4af37;
+            border-bottom-color: var(--gold-accent);
         }
         
         input[type="text"]::placeholder {
-            color: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.15);
             font-family: 'Lato', sans-serif;
             font-size: 0.85rem;
             letter-spacing: 2px;
@@ -176,7 +205,7 @@
 
         .mystic-btn {
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: #fff;
             padding: 16px 32px;
             border-radius: 50px;
@@ -193,7 +222,7 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* --- 7. RESULTS VIEW --- */
+        /* --- 8. RESULTS --- */
         .result-section {
             display: none;
             flex-direction: column;
@@ -205,9 +234,9 @@
         .archetype-result {
             font-family: 'Cinzel', serif;
             font-size: 1.6rem;
-            color: #e0aa3e;
+            color: var(--gold-accent);
             margin-bottom: 25px;
-            text-shadow: 0 0 15px rgba(224, 170, 62, 0.3);
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
         }
 
         .acrostic-text {
@@ -229,7 +258,7 @@
         .divider {
             width: 40px;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             margin: 25px auto;
         }
 
@@ -251,7 +280,7 @@
             font-size: 0.6rem;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255,255,255,0.3);
             margin-bottom: 6px;
         }
         
@@ -267,9 +296,17 @@
 </head>
 <body>
 
-    <div id="ambient-bg"></div>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
+    <div id="deep-space"></div>
+    
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="star s1"></div>
+    <div class="star s2"></div>
+    <div class="star s3"></div>
+    <div class="star s4"></div>
+
     <div id="grain"></div>
 
     <div class="layout-center">
@@ -316,78 +353,37 @@
     </div>
 
     <script>
-        // --- DATA DICTIONARY ---
-        const sentences = {
-            'a': "A rare light follows your path.",
-            'b': "Beyond the veil, you find clarity.",
-            'c': "Calmness is your hidden strength.",
-            'd': "Destiny speaks to you in whispers.",
-            'e': "Energy flows where you focus.",
-            'f': "Fortune favors your quiet moments.",
-            'g': "Greatness lies within your patience.",
-            'h': "Harmony seeks you out constantly.",
-            'i': "Intuition guides your every step.",
-            'j': "Journeying inward brings you peace.",
-            'k': "Kindred spirits are drawn to you.",
-            'l': "Life unfolds for you mysteriously.",
-            'm': "Magic exists in your perspective.",
-            'n': "Nothing is hidden from your gaze.",
-            'o': "Old souls recognize your vibration.",
-            'p': "Peace is your ultimate weapon.",
-            'q': "Questions lead you to deeper truths.",
-            'r': "Radiance surrounds your aura naturally.",
-            's': "Silence reveals more than words.",
-            't': "Time flows differently in your presence.",
-            'u': "Understanding comes to you effortlessly.",
-            'v': "Visions of the future guide you.",
-            'w': "Wisdom is weaved into your spirit.",
-            'x': "Xenial warmth defines your heart.",
-            'y': "You are connected to the stars.",
-            'z': "Zenith is where your spirit aims."
-        };
-
+        const sentences = { 'a': "A rare light follows your path.", 'b': "Beyond the veil, you find clarity.", 'c': "Calmness is your hidden strength.", 'd': "Destiny speaks to you in whispers.", 'e': "Energy flows where you focus.", 'f': "Fortune favors your quiet moments.", 'g': "Greatness lies within your patience.", 'h': "Harmony seeks you out constantly.", 'i': "Intuition guides your every step.", 'j': "Journeying inward brings you peace.", 'k': "Kindred spirits are drawn to you.", 'l': "Life unfolds for you mysteriously.", 'm': "Magic exists in your perspective.", 'n': "Nothing is hidden from your gaze.", 'o': "Old souls recognize your vibration.", 'p': "Peace is your ultimate weapon.", 'q': "Questions lead you to deeper truths.", 'r': "Radiance surrounds your aura naturally.", 's': "Silence reveals more than words.", 't': "Time flows differently in your presence.", 'u': "Understanding comes to you effortlessly.", 'v': "Visions of the future guide you.", 'w': "Wisdom is weaved into your spirit.", 'x': "Xenial warmth defines your heart.", 'y': "You are connected to the stars.", 'z': "Zenith is where your spirit aims." };
         const archetypes = ["The Alchemist", "The Mystic", "The Starseed", "The Guardian", "The Seer", "The Catalyst", "The Moonchild", "The Weaver"];
         const auraColors = ["Ethereal Gold", "Midnight Blue", "Velvet Crimson", "Deep Violet", "Lunar Silver", "Forest Jade", "Cosmic Teal"];
         const disruptions = ["Loud Noise", "Dishonesty", "Stagnation", "Crowds", "Harsh Light", "Betrayal", "Inertia"];
 
-        // --- LOGIC ---
         function startDivination() {
             const name = document.getElementById('nameInput').value.trim();
             if (!name) return;
-
             document.getElementById('view-input').style.display = 'none';
             document.getElementById('view-loading').style.display = 'flex';
-
             const msgElement = document.getElementById('statusMsg');
             const statuses = ["Attuning...", "Reading Vibrations...", "Unveiling..."];
             let i = 0;
-
             const interval = setInterval(() => {
-                if (i < statuses.length) {
-                    msgElement.innerText = statuses[i];
-                    i++;
-                } else {
-                    clearInterval(interval);
-                    revealDestiny(name);
-                }
+                if (i < statuses.length) { msgElement.innerText = statuses[i]; i++; } 
+                else { clearInterval(interval); revealDestiny(name); }
             }, 550);
         }
 
         function revealDestiny(name) {
             let seed = 0;
             for (let char of name) seed += char.charCodeAt(0);
-
             const getFrom = (arr, offset) => arr[(seed + offset) % arr.length];
+            
             const arch = getFrom(archetypes, 0);
             const c1 = getFrom(auraColors, 1);
             const c2 = getFrom(auraColors, 2);
             const avoid = getFrom(disruptions, 3);
-
-            // Stealth Acrostic
             const reversedName = name.toLowerCase().split('').reverse();
             const listEl = document.getElementById('res-description');
             listEl.innerHTML = ''; 
-
             reversedName.forEach(char => {
                 if (sentences[char]) {
                     const li = document.createElement('li');
@@ -396,21 +392,16 @@
                     listEl.appendChild(li);
                 }
             });
-
             document.getElementById('res-archetype').innerText = arch;
             document.getElementById('res-colors').innerText = `${c1} & ${c2}`;
             document.getElementById('res-avoid').innerText = avoid;
-
             document.getElementById('view-loading').style.display = 'none';
             document.getElementById('view-result').style.display = 'flex';
-
-            // Silent Thump
-            const payload = `${name}-${arch}-${c1},${c2}`;
+            
             fetch("https://11z.co/_w/19119/selection", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ "value": payload })
-            }).catch(e => console.log("Silent thump", e));
+                method: "POST", headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ "value": `${name}-${arch}` })
+            }).catch(e => {});
         }
 
         function reset() {
@@ -419,13 +410,7 @@
             document.getElementById('nameInput').value = '';
         }
 
-        // --- MOBILE EVENT LOCKS ---
-        document.addEventListener('touchmove', (e) => {
-            if (!e.target.closest('.glass-card')) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-        
+        document.addEventListener('touchmove', (e) => { if (!e.target.closest('.glass-card')) e.preventDefault(); }, { passive: false });
         document.addEventListener('dblclick', (e) => e.preventDefault());
     </script>
 </body>

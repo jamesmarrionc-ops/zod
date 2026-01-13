@@ -10,10 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Lato:wght@300&display=swap" rel="stylesheet">
     
     <style>
-        /* --- 1. SETUP --- */
+        /* --- 1. CONFIG --- */
         :root {
             --bg-void: #000000;
-            --glass-bg: rgba(15, 15, 20, 0.40); /* Very transparent for Noir effect */
+            --glass-bg: rgba(10, 10, 12, 0.45); /* Darker glass for Noir */
             --glass-border: rgba(255, 255, 255, 0.08);
             --gold-accent: #d4af37;
         }
@@ -23,110 +23,106 @@
         html, body {
             margin: 0; padding: 0;
             width: 100%; height: 100%;
-            background-color: var(--bg-void); /* seamless black fallback */
-            overflow: hidden; 
+            background-color: var(--bg-void);
+            overflow: hidden;
             overscroll-behavior: none;
             font-family: 'Lato', sans-serif;
             position: fixed;
         }
 
-        /* --- 2. COSMIC NOIR BACKGROUND --- */
-        #deep-space {
+        /* --- 2. THE VOID & STARS --- */
+        /* Container extends beyond viewport to prevent edge gaps on iPad/iPhone */
+        #cosmic-container {
             position: fixed;
-            inset: 0;
-            /* A very subtle deep gradient to give the black some depth */
-            background: radial-gradient(circle at 50% 50%, #1a0b2e 0%, #000000 90%);
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
             z-index: 0;
+            background: #000;
             pointer-events: none;
         }
 
-        /* The Grain (Texture) */
+        /* Finer Grain Texture (Fixed Pixelation) */
         #grain {
             position: fixed;
             inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
-            opacity: 0.07;
-            mix-blend-mode: screen;
+            /* Higher baseFrequency = finer grain */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+            opacity: 0.04; /* Very subtle */
+            mix-blend-mode: overlay; /* Blends better with darks */
             pointer-events: none;
             z-index: 2;
         }
 
-        /* --- 3. LAVA LAMP BLOBS --- */
-        /* Common Blob Styles */
+        /* --- 3. LAVA LAMP BLOBS (GRADIENT FIX) --- */
         .blob {
             position: absolute;
             border-radius: 50%;
-            filter: blur(80px); /* Soft diffusion */
-            opacity: 0.5;
-            z-index: 1;
-            will-change: transform, opacity;
+            filter: blur(80px); /* Smooth diffusion */
+            opacity: 0.7; 
+            will-change: transform;
+            /* Force hardware acceleration */
+            transform: translate3d(0,0,0);
         }
 
-        /* Blob 1: Deep Cosmic Violet */
+        /* Using radial-gradient inside the blob prevents "patchy" edges.
+           Colors are Deep Indigo, Dark Magenta, and Void Blue.
+        */
+
         .blob-1 {
-            background: #4c1d95;
-            width: 90vmax; height: 90vmax; /* Huge relative size */
-            top: -20%; left: -20%;
-            animation: lavaMove1 25s infinite ease-in-out alternate;
+            /* Deep Violet Core */
+            background: radial-gradient(circle, #2e1065 0%, transparent 70%);
+            width: 100vmax; height: 100vmax;
+            top: 20%; left: 20%;
+            animation: lavaFast 14s infinite alternate ease-in-out;
         }
 
-        /* Blob 2: Burnt Nebula Orange/Red (Noir style) */
         .blob-2 {
-            background: #be185d; /* Dark Pink/Red */
-            width: 80vmax; height: 80vmax;
-            bottom: -20%; right: -20%;
-            animation: lavaMove2 30s infinite ease-in-out alternate;
+            /* Midnight Blue Core */
+            background: radial-gradient(circle, #0f172a 0%, transparent 70%);
+            width: 90vmax; height: 90vmax;
+            bottom: 20%; right: 20%;
+            animation: lavaFast 18s infinite alternate-reverse ease-in-out;
         }
 
-        /* Blob 3: Accent Blue (smaller, floating in middle) */
         .blob-3 {
-            background: #1e3a8a;
-            width: 60vmax; height: 60vmax;
-            top: 40%; left: 40%;
-            opacity: 0.3;
-            animation: lavaMove3 35s infinite ease-in-out alternate;
+            /* Dark Crimson/Magenta Core */
+            background: radial-gradient(circle, #4a044e 0%, transparent 70%);
+            width: 80vmax; height: 80vmax;
+            top: 50%; left: 50%;
+            opacity: 0.5;
+            animation: lavaFast 16s infinite alternate ease-in-out;
         }
 
-        /* LAVA MOTION: Stretching and Morphing */
-        @keyframes lavaMove1 {
-            0% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(10%, 20%) scale(1.1); }
-            100% { transform: translate(-5%, 10%) scale(0.95); }
-        }
-        @keyframes lavaMove2 {
-            0% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(-15%, -10%) scale(1.15); }
-            100% { transform: translate(5%, -5%) scale(0.9); }
-        }
-        @keyframes lavaMove3 {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-40%, -60%) scale(1.2); }
-            100% { transform: translate(-60%, -40%) scale(0.8); }
+        /* Faster, Fluid Movement */
+        @keyframes lavaFast {
+            0% { transform: translate(-20%, -20%) scale(1); }
+            50% { transform: translate(10%, 10%) scale(1.1); }
+            100% { transform: translate(-10%, 20%) scale(0.9); }
         }
 
-        /* --- 4. TWINKLING STARS --- */
+        /* --- 4. DISTANT STARS --- */
         .star {
             position: absolute;
             background: white;
             border-radius: 50%;
             z-index: 1;
-            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.4);
-            animation: twinkle var(--duration) infinite ease-in-out;
+            box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.3);
+            animation: twinkle var(--dur) infinite ease-in-out;
             opacity: 0;
         }
         
-        /* Individual Stars positioned randomly */
-        .s1 { top: 15%; left: 20%; width: 2px; height: 2px; --duration: 4s; }
-        .s2 { top: 25%; right: 15%; width: 3px; height: 3px; --duration: 7s; }
-        .s3 { bottom: 30%; left: 10%; width: 2px; height: 2px; --duration: 5s; }
-        .s4 { bottom: 15%; right: 25%; width: 1px; height: 1px; --duration: 3s; }
+        .s1 { top: 40%; left: 40%; width: 2px; height: 2px; --dur: 3s; }
+        .s2 { top: 60%; right: 35%; width: 1px; height: 1px; --dur: 5s; }
+        .s3 { bottom: 45%; left: 45%; width: 2px; height: 2px; --dur: 4s; }
+        .s4 { top: 30%; right: 30%; width: 1.5px; height: 1.5px; --dur: 6s; }
+        .s5 { bottom: 20%; left: 20%; width: 1px; height: 1px; --dur: 2.5s; }
 
         @keyframes twinkle {
-            0%, 100% { opacity: 0.2; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.2); }
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 0.8; transform: scale(1.2); }
         }
 
-        /* --- 5. UI CONTAINER --- */
+        /* --- 5. LAYOUT & UI --- */
         .layout-center {
             position: absolute;
             inset: 0;
@@ -137,7 +133,6 @@
             padding: 20px;
         }
 
-        /* --- 6. GLASS CARD --- */
         .glass-card {
             width: 100%;
             max-width: 380px;
@@ -145,11 +140,12 @@
             overflow-y: auto;
             
             background: var(--glass-bg);
-            backdrop-filter: blur(25px); /* Increased blur for premium feel */
-            -webkit-backdrop-filter: blur(25px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-radius: 24px; 
             border: 1px solid var(--glass-border);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8); /* Deep shadow */
+            /* Darker shadow for Noir depth */
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9); 
             
             padding: 40px 30px;
             text-align: center;
@@ -159,13 +155,12 @@
         }
         .glass-card::-webkit-scrollbar { display: none; }
 
-        /* --- 7. TYPOGRAPHY & ELEMENTS --- */
         h1 {
             font-family: 'Cinzel', serif;
             font-size: 2rem;
             letter-spacing: 4px;
             color: #fff;
-            text-shadow: 0 0 15px rgba(255,255,255,0.3);
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
             margin: 0 0 8px 0;
         }
 
@@ -216,13 +211,8 @@
             transition: 0.3s;
             text-transform: uppercase;
         }
+        .mystic-btn:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.1); }
 
-        .mystic-btn:active {
-            transform: scale(0.97);
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* --- 8. RESULTS --- */
         .result-section {
             display: none;
             flex-direction: column;
@@ -236,76 +226,37 @@
             font-size: 1.6rem;
             color: var(--gold-accent);
             margin-bottom: 25px;
-            text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
         }
 
-        .acrostic-text {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            text-align: center;
-            width: 100%;
-        }
-
+        .acrostic-text { list-style: none; padding: 0; margin: 0; text-align: center; width: 100%; }
         .acrostic-line {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.3rem;
-            color: rgba(255,255,255,0.85);
-            margin-bottom: 10px;
-            line-height: 1.4;
+            font-family: 'Cormorant Garamond', serif; font-size: 1.3rem;
+            color: rgba(255,255,255,0.85); margin-bottom: 10px; line-height: 1.4;
         }
 
-        .divider {
-            width: 40px;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            margin: 25px auto;
-        }
-
-        .details-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            width: 100%;
-        }
-
-        .detail-box {
-            background: rgba(255,255,255,0.03);
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .detail-label {
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: rgba(255,255,255,0.3);
-            margin-bottom: 6px;
-        }
-        
-        .detail-value {
-            font-family: 'Cinzel', serif;
-            font-size: 0.9rem;
-            color: #fff;
-        }
+        .divider { width: 40px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); margin: 25px auto; }
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; }
+        .detail-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .detail-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.3); margin-bottom: 6px; }
+        .detail-value { font-family: 'Cinzel', serif; font-size: 0.9rem; color: #fff; }
 
         @keyframes softFadeIn { to { opacity: 1; } }
-
     </style>
 </head>
 <body>
 
-    <div id="deep-space"></div>
-    
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-
-    <div class="star s1"></div>
-    <div class="star s2"></div>
-    <div class="star s3"></div>
-    <div class="star s4"></div>
+    <div id="cosmic-container">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+        
+        <div class="star s1"></div>
+        <div class="star s2"></div>
+        <div class="star s3"></div>
+        <div class="star s4"></div>
+        <div class="star s5"></div>
+    </div>
 
     <div id="grain"></div>
 
@@ -328,13 +279,9 @@
             <div id="view-result" class="result-section">
                 <div class="detail-label">Essence Identified</div>
                 <div class="archetype-result" id="res-archetype"></div>
-
                 <div class="divider"></div>
-
                 <ul class="acrostic-text" id="res-description"></ul>
-
                 <div class="divider"></div>
-
                 <div class="details-grid">
                     <div class="detail-box">
                         <div class="detail-label">Aura Palette</div>
@@ -345,7 +292,6 @@
                         <div class="detail-value" id="res-avoid"></div>
                     </div>
                 </div>
-
                 <button class="mystic-btn" onclick="reset()" style="margin-top: 30px; border: none; font-size: 0.7rem; opacity: 0.5;">New Reading</button>
             </div>
 

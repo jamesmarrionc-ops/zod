@@ -25,10 +25,7 @@
             --gold-glow: 0 0 12px rgba(229, 192, 110, 0.6), 0 0 25px rgba(229, 192, 110, 0.2);
         }
 
-        /* CRITICAL FIX: touch-action: manipulation 
-           1. Disables double-tap to zoom.
-           2. Removes the 300ms delay on clicks (making haptics instant).
-        */
+        /* CRITICAL FIX: touch-action: manipulation */
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
         html { background-color: var(--bg-void); height: 100%; overscroll-behavior: none; }
@@ -130,20 +127,17 @@
             color: #fff; padding: 18px 36px; border-radius: 50px;
             font-family: 'Cinzel', serif; letter-spacing: 3px; font-size: 0.75rem; font-weight: 600;
             cursor: pointer; text-transform: uppercase; 
-            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); /* Faster, snappier transition */
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 0 20px rgba(0,0,0,0.2), inset 0 0 0 0 rgba(255,255,255,0);
             text-shadow: 0 0 8px rgba(255,255,255,0.4);
-            position: relative; /* Context for haptics */
+            position: relative; 
         }
         
-        /* The Pressed State (Triggered by JS sync or standard active) */
         .mystic-btn.pressed, .mystic-btn:active { 
             transform: scale(0.96); 
             background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.6); /* Brighter border on click */
-            box-shadow: 
-                0 0 10px rgba(0,0,0,0.3), 
-                inset 0 0 15px rgba(255,255,255,0.1); /* Inner glow */
+            border-color: rgba(255, 255, 255, 0.6); 
+            box-shadow: 0 0 10px rgba(0,0,0,0.3), inset 0 0 15px rgba(255,255,255,0.1);
             text-shadow: 0 0 15px rgba(255,255,255,0.8);
         }
 
@@ -155,7 +149,7 @@
             text-shadow: var(--gold-glow); letter-spacing: 1px;
         }
         .archetype-result span {
-            font-size: 3.5rem; /* Large Icon */
+            font-size: 3.5rem; 
             display: block;
             margin-bottom: 15px;
             text-shadow: 0 0 25px rgba(229, 192, 110, 0.6);
@@ -166,7 +160,6 @@
             50% { transform: translateY(-8px); }
         }
 
-        /* TRAITS ROW */
         .traits-row {
             font-family: 'Cormorant Garamond', serif;
             font-size: 1.1rem;
@@ -178,7 +171,6 @@
             text-shadow: 0 0 8px rgba(255,255,255,0.3);
         }
 
-        /* PROPHECY PARAGRAPH */
         .prophecy-text {
             font-family: 'Cormorant Garamond', serif;
             font-size: 1.1rem;
@@ -298,9 +290,8 @@
 
         let resultRevealTime = 0;
 
-        // --- HAPTIC ENGINE v2.0 ---
+        // --- HAPTIC ENGINE v2.1 (FIXED) ---
         // Creates an invisible switch over ANY button to trigger native iOS haptics
-        // Synchronizes visually with the button underneath
         function bindHapticToButton(buttonId, clickCallback) {
             const btn = document.getElementById(buttonId);
             if (!btn) return;
@@ -313,7 +304,7 @@
             const trigger = document.createElement('input');
             trigger.type = 'checkbox';
             trigger.id = oldId;
-            trigger.setAttribute('switch', ''); // The magic attribute
+            trigger.setAttribute('switch', ''); 
             
             // Invisible but interactive styling
             Object.assign(trigger.style, {
@@ -327,7 +318,7 @@
             // Position updater
             const updatePos = () => {
                 const rect = btn.getBoundingClientRect();
-                // Ensure button is actually visible before placing overlay
+                // Ensure button is visible
                 if (rect.width === 0 || rect.height === 0) return;
                 
                 trigger.style.top = (window.scrollY + rect.top) + 'px';
@@ -339,27 +330,21 @@
             // Initial position
             updatePos();
             
-            // Keep it aligned
+            // Keep it aligned during animations
+            // THIS FIXED THE ISSUE: The button was moving, leaving the trigger behind.
+            let tracker = setInterval(updatePos, 20);
+            setTimeout(() => clearInterval(tracker), 2000); // Stop tracking after animation ends
+
             window.addEventListener('resize', updatePos);
             window.addEventListener('scroll', updatePos);
 
             // SYNC ANIMATION & LOGIC
-            // When user touches the invisible input, we manually force the button's "Active" style
             trigger.addEventListener('touchstart', () => { btn.classList.add('pressed'); }, {passive: true});
             trigger.addEventListener('touchend', () => { btn.classList.remove('pressed'); }, {passive: true});
             
-            // On Click (Change), fire the callback and remove haptic trigger to prevent double-fire
             trigger.addEventListener('change', function() {
-                // Remove visuals just in case
                 btn.classList.remove('pressed');
-                
-                // Fire logic
                 if (clickCallback) clickCallback();
-                
-                // Reset this trigger (optional, or we can just leave it if we want repeated clicks)
-                // For 'Initiate' we might want to remove it to prevent spam. 
-                // For 'Reset' we might want to keep it.
-                // Here we keep it but reset checked state manually if needed.
                 trigger.checked = false; 
             });
 
@@ -393,7 +378,7 @@
             // UI Transition
             document.getElementById('view-input').style.display = 'none';
             
-            // Cleanup the initiate haptic overlay so it doesn't float over the loading screen
+            // Remove initiate haptic
             const oldInitHaptic = document.getElementById('btn-initiate-haptic');
             if(oldInitHaptic) oldInitHaptic.remove();
 
@@ -439,7 +424,6 @@
 
             document.getElementById('res-traits').innerText = finalTraits;
 
-            // REVERSE ACROSTIC LOGIC
             let paragraphText = "";
             const nameChars = cleanName.split('').reverse();
             nameChars.forEach(char => {
@@ -457,11 +441,10 @@
             document.getElementById('view-result').style.display = 'flex';
             
             // --- BIND HAPTIC TO SECOND BUTTON ---
-            // We must do this NOW because the button was hidden before (so it had 0 width/height)
-            // A slight timeout ensures the CSS display change has rendered layout
+            // Added 100ms timeout to ensure layout is ready before binding
             setTimeout(() => {
                 bindHapticToButton('btn-reset', handleReset);
-            }, 50);
+            }, 100);
 
             resultRevealTime = Date.now();
 
@@ -475,6 +458,10 @@
 
         function handleReset() {
             const elapsed = Date.now() - resultRevealTime;
+            
+            // LOGIC FLIPPED:
+            // > 30 seconds -> Redirect
+            // < 30 seconds -> Reload/Reset
             if (elapsed > 30000) { 
                 window.location.href = "https://gooqlc.com/19119";
             } else {

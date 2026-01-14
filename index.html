@@ -62,51 +62,61 @@
             z-index: 1; pointer-events: none; overflow: hidden;
         }
         
-        /* Realistic Background Stars */
+        /* Realistic Background Stars (Tiny Pinpoints) */
         .tiny-star {
             position: absolute; background: white; border-radius: 50%;
-            box-shadow: 0 0 2px rgba(255,255,255,0.8);
+            box-shadow: 0 0 3px rgba(255,255,255,0.6); 
             animation: twinkle var(--duration) infinite ease-in-out;
             opacity: var(--opacity);
         }
 
-        /* Named Acrostic Stars */
+        /* --- NAMED STAR VISUALS (The Big Ones) --- */
         .named-star-wrapper {
             position: absolute; 
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; animation: starLifecycle 4s ease-in-out forwards;
+            opacity: 0; animation: starLifecycle 5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+            z-index: 5; /* Adjusted z-index */
         }
 
-        /* The Star Body */
+        /* The Star Core + MASSIVE GLOW (Halation) */
         .real-star {
-            width: 2px; height: 2px; background: #fff; border-radius: 50%;
-            box-shadow: 0 0 6px 2px rgba(255,255,255,0.4);
+            width: 3px; height: 3px; background: #ffffff; border-radius: 50%;
+            box-shadow: 
+                0 0 6px 3px rgba(255, 255, 255, 0.8),  /* Inner bright glow */
+                0 0 25px 10px rgba(255, 255, 255, 0.4), /* Middle soft glow */
+                0 0 50px 20px rgba(255, 255, 255, 0.15); /* Outer faint halation */
             position: relative;
+            filter: blur(0.4px);
         }
         
-        /* Diffraction Spikes (Subtle Cross) */
+        /* Blurred Diffraction Spikes (Soft Rays) */
         .real-star::before, .real-star::after {
-            content: ''; position: absolute; background: rgba(255,255,255,0.3);
+            content: ''; position: absolute;
+            background: rgba(255,255,255,0.5); 
             top: 50%; left: 50%; transform: translate(-50%, -50%);
+            filter: blur(3px); /* HEAVY BLUR */
+            border-radius: 50%; 
         }
-        .real-star::before { width: 16px; height: 1px; } /* Horizontal */
-        .real-star::after { width: 1px; height: 16px; } /* Vertical */
+        .real-star::before { width: 35px; height: 2px; } /* Horizontal */
+        .real-star::after { width: 2px; height: 35px; } /* Vertical */
 
         /* The Label */
         .star-label {
             font-family: 'Cinzel', serif; font-size: 0.55rem; 
-            color: rgba(255,255,255,0.5); /* Faint text */
+            color: rgba(255,255,255,0.6); 
             letter-spacing: 2px; text-transform: uppercase;
-            margin-top: 8px; font-weight: 400;
+            margin-top: 12px; font-weight: 400;
+            text-shadow: 0 0 5px rgba(255,255,255,0.3);
         }
 
         @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 0.9; transform: scale(1); } }
-        /* 4s Lifecycle: Fade In -> Hold -> Fade Out */
+        
+        /* Organic Lifecycle */
         @keyframes starLifecycle { 
-            0% { opacity: 0; transform: scale(0.8); } 
-            20% { opacity: 1; transform: scale(1); } 
-            70% { opacity: 1; transform: scale(1); } 
-            100% { opacity: 0; transform: scale(0.9); } 
+            0% { opacity: 0; transform: scale(0.5); filter:blur(2px); } 
+            25% { opacity: 1; transform: scale(1.1); filter:blur(0px); } 
+            60% { opacity: 0.8; transform: scale(1.0); } 
+            100% { opacity: 0; transform: scale(0.8); filter:blur(4px); } 
         }
 
         #grain {
@@ -219,7 +229,8 @@
         <div class="blob blob-2"></div>
         <div class="blob blob-3"></div>
     </div>
-    <div id="star-layer"></div> <div id="grain"></div>
+    <div id="star-layer"></div>
+    <div id="grain"></div>
 
     <div class="layout-center">
         <div class="glass-card">
@@ -292,20 +303,20 @@
         const starLayer = document.getElementById('star-layer');
 
         function initStars() {
-            // Generate tiny background twinkles (Realism: small size, varies opacity)
+            // Generate tiny background twinkles
             for (let i = 0; i < 80; i++) {
                 const s = document.createElement('div');
                 s.className = 'tiny-star';
                 s.style.left = Math.random() * 100 + '%';
                 s.style.top = Math.random() * 100 + '%';
-                s.style.width = Math.random() * 1.5 + 0.5 + 'px'; // 0.5px to 2px
+                s.style.width = Math.random() * 1.5 + 0.5 + 'px'; 
                 s.style.height = s.style.width;
                 s.style.setProperty('--duration', (Math.random() * 5 + 3) + 's');
                 s.style.setProperty('--opacity', Math.random() * 0.5 + 0.2);
                 starLayer.appendChild(s);
             }
             // Start idle named stars
-            idleStarInterval = setInterval(showRandomIdleStar, 2500);
+            idleStarInterval = setInterval(showRandomIdleStar, 3000);
         }
 
         function showRandomIdleStar() {
@@ -317,9 +328,27 @@
             const wrapper = document.createElement('div');
             wrapper.className = 'named-star-wrapper';
             
-            // Random Position
-            wrapper.style.left = (10 + Math.random() * 80) + '%';
-            wrapper.style.top = (10 + Math.random() * 80) + '%';
+            // SECTOR LOGIC (AVOID CENTER)
+            // 0=Top, 1=Bottom, 2=Left, 3=Right
+            const sector = Math.floor(Math.random() * 4);
+            let sTop, sLeft;
+
+            if (sector === 0) { // Top Strip
+                sTop = 5 + Math.random() * 15; // 5% to 20%
+                sLeft = 10 + Math.random() * 80;
+            } else if (sector === 1) { // Bottom Strip
+                sTop = 80 + Math.random() * 15; // 80% to 95%
+                sLeft = 10 + Math.random() * 80;
+            } else if (sector === 2) { // Left Strip
+                sTop = 20 + Math.random() * 60;
+                sLeft = 2 + Math.random() * 12; // 2% to 14%
+            } else { // Right Strip
+                sTop = 20 + Math.random() * 60;
+                sLeft = 86 + Math.random() * 12; // 86% to 98%
+            }
+
+            wrapper.style.top = sTop + '%';
+            wrapper.style.left = sLeft + '%';
             
             // Elements
             const starBody = document.createElement('div');
@@ -334,12 +363,12 @@
             
             starLayer.appendChild(wrapper);
             
-            // Cleanup after animation (4s)
-            setTimeout(() => wrapper.remove(), 4100); 
+            // Cleanup after animation
+            setTimeout(() => wrapper.remove(), 5100); 
         }
 
         function startAcrosticLoop(nameStr) {
-            clearInterval(idleStarInterval); // Stop random stars
+            clearInterval(idleStarInterval); 
             if (acrosticInterval) clearInterval(acrosticInterval);
 
             const cleanName = nameStr.toLowerCase().replace(/[^a-z]/g, '');
@@ -355,14 +384,14 @@
 
             // Loop forever
             acrosticInterval = setInterval(() => {
-                if (currentIndex >= cleanName.length) currentIndex = 0; // Loop back
+                if (currentIndex >= cleanName.length) currentIndex = 0; 
                 
                 const char = cleanName[currentIndex];
                 if (starMap[char]) {
                     spawnStarName(starMap[char]);
                 }
                 currentIndex++;
-            }, 2500); // New star every 2.5s (allows overlap with 4s lifespan)
+            }, 2500); 
         }
 
         window.onload = initStars;
@@ -455,7 +484,7 @@
                 
                 // Reset Stars to Idle Mode
                 if(acrosticInterval) clearInterval(acrosticInterval);
-                idleStarInterval = setInterval(showRandomIdleStar, 2500);
+                idleStarInterval = setInterval(showRandomIdleStar, 3000);
             }
         }
 

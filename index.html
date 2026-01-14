@@ -68,59 +68,6 @@
         @keyframes drift2 { 0% { transform: translate(5%, 5%); } 100% { transform: translate(-15%, -10%); } }
         @keyframes drift3 { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-45%, -55%) scale(1.15); } }
 
-        /* --- STAR LAYER (Visual Constellation) --- */
-        #star-layer {
-            position: fixed; inset: 0; z-index: 5; pointer-events: none;
-        }
-
-        .celestial-body {
-            position: absolute; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; 
-            animation: emergeDissolve 7s ease-in-out forwards;
-            mix-blend-mode: screen; 
-        }
-
-        .flare-core {
-            position: relative; width: 0; height: 0;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        .flare-center {
-            position: absolute; width: 3px; height: 3px; 
-            background: #fff; border-radius: 50%;
-            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.9);
-            z-index: 2;
-        }
-
-        .flare-h {
-            position: absolute; width: 100px; height: 1px;
-            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);
-            opacity: 0.6;
-        }
-        .flare-v {
-            position: absolute; width: 1px; height: 80px;
-            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);
-            opacity: 0.6;
-        }
-        
-        .star-label {
-            margin-top: 30px; 
-            font-family: 'Cinzel', serif; font-size: 0.6rem; 
-            color: rgba(255, 255, 255, 0.5); letter-spacing: 2px; text-transform: uppercase;
-        }
-
-        @keyframes emergeDissolve {
-            0% { opacity: 0; transform: scale(0.5) rotate(-10deg); }
-            20% { opacity: 1; transform: scale(1) rotate(0deg); }
-            80% { opacity: 1; transform: scale(1) rotate(0deg); }
-            100% { opacity: 0; transform: scale(0.8) rotate(10deg); }
-        }
-
-        .flare-h, .flare-v { animation: subtleRotate 10s infinite linear; }
-        @keyframes subtleRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(10deg); } }
-
-
         #grain {
             position: fixed; inset: -50%; width: 200%; height: 200%;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
@@ -233,8 +180,6 @@
         <div class="blob blob-2"></div>
         <div class="blob blob-3"></div>
     </div>
-    
-    <div id="star-layer"></div>
     <div id="grain"></div>
 
     <div class="layout-center">
@@ -283,9 +228,6 @@
     </div>
 
     <script>
-        // Star Names mapped to letters for background visuals
-        const starMap = { 'a': "Acruch", 'b': "Bellatrix", 'c': "Canopus", 'd': "Deneb", 'e': "Elnath", 'f': "Fomalhaut", 'g': "Gacrux", 'h': "Hadar", 'i': "Izar", 'j': "Jabbah", 'k': "Kaus", 'l': "Lesath", 'm': "Miaplacidus", 'n': "Nunki", 'o': "Okab", 'p': "Pollux", 'q': "Qakh", 'r': "Rigel", 's': "Sirius", 't': "Toliman", 'u': "Unukalhai", 'v': "Vega", 'w': "Wezen", 'x': "Xuange", 'y': "Yed", 'z': "Zuben" };
-
         const sentences = { 'a': "A rare light follows your path.", 'b': "Beyond the veil, you find clarity.", 'c': "Calmness is your hidden strength.", 'd': "Destiny speaks to you in whispers.", 'e': "Energy flows where you focus.", 'f': "Fortune favors your quiet moments.", 'g': "Greatness lies within your patience.", 'h': "Harmony seeks you out constantly.", 'i': "Intuition guides your every step.", 'j': "Journeying inward brings you peace.", 'k': "Kindred spirits are drawn to you.", 'l': "Life unfolds for you mysteriously.", 'm': "Magic exists in your perspective.", 'n': "Nothing is hidden from your gaze.", 'o': "Old souls recognize your vibration.", 'p': "Peace is your ultimate weapon.", 'q': "Questions lead you to deeper truths.", 'r': "Radiance surrounds your aura naturally.", 's': "Silence reveals more than words.", 't': "Time flows differently in your presence.", 'u': "Understanding comes to you effortlessly.", 'v': "Visions of the future guide you.", 'w': "Wisdom is weaved into your spirit.", 'x': "Xenial warmth defines your heart.", 'y': "You are connected to the stars.", 'z': "Zenith is where your spirit aims." };
         
         const archetypes = ["The Alchemist", "The Mystic", "The Starseed", "The Guardian", "The Seer", "The Catalyst", "The Moonchild", "The Weaver"];
@@ -312,55 +254,6 @@
         };
 
         let resultRevealTime = 0;
-        let acrosticInterval;
-        const starLayer = document.getElementById('star-layer');
-
-        // --- BACKGROUND STAR SYSTEM LOGIC ---
-        function spawnStar(name) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'celestial-body';
-
-            // Random position: avoid dead center slightly so it doesn't overlap text too much
-            const sector = Math.floor(Math.random() * 4);
-            let sTop, sLeft;
-            if (sector === 0) { sTop = 10 + Math.random()*20; sLeft = 10 + Math.random()*80; } 
-            else if (sector === 1) { sTop = 70 + Math.random()*20; sLeft = 10 + Math.random()*80; } 
-            else if (sector === 2) { sTop = 20 + Math.random()*60; sLeft = 5 + Math.random()*15; } 
-            else { sTop = 20 + Math.random()*60; sLeft = 80 + Math.random()*15; }
-
-            wrapper.style.top = sTop + '%';
-            wrapper.style.left = sLeft + '%';
-
-            wrapper.innerHTML = `
-                <div class="flare-core">
-                    <div class="flare-center"></div>
-                    <div class="flare-h"></div>
-                    <div class="flare-v"></div>
-                </div>
-                <div class="star-label">${name}</div>
-            `;
-
-            starLayer.appendChild(wrapper);
-            // Remove after animation finishes
-            setTimeout(() => wrapper.remove(), 7100);
-        }
-
-        function startAcrostic(nameStr) {
-            const clean = nameStr.toLowerCase().replace(/[^a-z]/g, '');
-            if(!clean) return;
-
-            let idx = 0;
-            // Immediate first star
-            if(starMap[clean[idx]]) spawnStar(starMap[clean[idx]]);
-            idx++;
-
-            // Sequence remaining letters
-            acrosticInterval = setInterval(() => {
-                if(idx >= clean.length) idx = 0; 
-                if(starMap[clean[idx]]) spawnStar(starMap[clean[idx]]);
-                idx++;
-            }, 3000); 
-        }
 
         function startDivination() {
             const name = document.getElementById('nameInput').value.trim();
@@ -378,9 +271,6 @@
         }
 
         function revealDestiny(name) {
-            // Trigger visual stars
-            startAcrostic(name);
-
             let seed = 0;
             for (let char of name) seed += char.charCodeAt(0);
             const getFrom = (arr, offset) => arr[(seed + offset) % arr.length];

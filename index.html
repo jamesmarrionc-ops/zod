@@ -132,7 +132,6 @@
 
         .result-section { display: none; flex-direction: column; align-items: center; opacity: 0; animation: softFadeIn 1s forwards; }
         
-        /* UPDATED ARCHETYPE RESULT STYLE FOR ICONS */
         .archetype-result { 
             font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--gold-accent); 
             margin-bottom: 10px; 
@@ -208,6 +207,10 @@
                 <div style="width: 2px; height: 60px; background: white; box-shadow: 0 0 20px white; animation: scan 1s infinite ease-in-out;"></div>
                 <p style="font-family: 'Cinzel', serif; font-size: 0.75rem; margin-top: 30px; letter-spacing: 3px; opacity: 0.8; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,255,255,0.4);" id="statusMsg">Analyzing</p>
                 <style> @keyframes scan { 0%, 100% { opacity:0.3; height: 40px; } 50% { opacity:1; height: 70px; } } </style>
+                
+                <p style="font-family: 'Lato', sans-serif; font-size: 0.55rem; color: rgba(255,255,255,0.3); position: absolute; bottom: 30px; letter-spacing: 1px; text-transform: uppercase;">
+                    powered by astral-google.com
+                </p>
             </div>
 
             <div id="view-result" class="result-section">
@@ -240,8 +243,7 @@
     </div>
 
     <script>
-        // --- SIGIL MAPPING (The Secret) ---
-        // Maps the first letter of their name to a specific Sigil/Icon
+        // --- SIGIL MAPPING ---
         const sigilMap = {
             'sun':     { name: "The Sun",     icon: "❂", letters: ['a', 'i', 'q', 'y'] },
             'moon':    { name: "The Moon",    icon: "☾", letters: ['b', 'j', 'r', 'z'] },
@@ -294,13 +296,11 @@
         }
 
         function revealDestiny(name) {
-            // 1. CLEAN INPUT AND GET FIRST LETTER
             const cleanName = name.toLowerCase().replace(/[^a-z]/g, '');
             const firstChar = cleanName.charAt(0) || 'a';
             const lastChar = cleanName.charAt(cleanName.length - 1) || 'z';
 
-            // 2. DETERMINE SIGIL BASED ON FIRST LETTER
-            let selectedSigil = sigilMap['sun']; // Default fallback
+            let selectedSigil = sigilMap['sun'];
             for (const [key, value] of Object.entries(sigilMap)) {
                 if (value.letters.includes(firstChar)) {
                     selectedSigil = value;
@@ -308,7 +308,6 @@
                 }
             }
 
-            // 3. COLOR MATH
             let seed = 0;
             for (let char of name) seed += char.charCodeAt(0);
             const getFrom = (arr, offset) => arr[(seed + offset) % arr.length];
@@ -317,21 +316,16 @@
             const c2Obj = getFrom(auraColors, 2);
             const avoid = getFrom(disruptions, 3);
             
-            // 4. TRAITS LOGIC
             const trait1 = traitDict[firstChar] || "Mystic";
             const trait2 = traitDict[lastChar] || "Wise";
             const trait3 = (cleanName.length % 2 === 0) ? "Analytical" : "Intuitive";
 
-            let finalTraits;
-            if (firstChar === lastChar) {
-                finalTraits = `${trait1} • ${trait3}`;
-            } else {
-                finalTraits = `${trait1} • ${trait2} • ${trait3}`;
-            }
+            let finalTraits = (firstChar === lastChar) 
+                ? `${trait1} • ${trait3}`
+                : `${trait1} • ${trait2} • ${trait3}`;
 
             document.getElementById('res-traits').innerText = finalTraits;
 
-            // 5. PARAGRAPH (ACROSTIC) LOGIC
             let paragraphText = "";
             const nameChars = cleanName.split('');
             nameChars.forEach(char => {
@@ -342,21 +336,17 @@
 
             document.getElementById('res-description').innerText = paragraphText.trim();
             
-            // 6. UPDATE UI WITH SIGIL ICON + NAME
             document.getElementById('res-archetype').innerHTML = `<span>${selectedSigil.icon}</span>${selectedSigil.name}`;
-            
             document.getElementById('res-colors').innerText = `${c1Obj.display} & ${c2Obj.display}`;
             document.getElementById('res-avoid').innerText = avoid;
             
             document.getElementById('view-loading').style.display = 'none';
             document.getElementById('view-result').style.display = 'flex';
             
+            // Set the timer start point
             resultRevealTime = Date.now();
 
-            // 7. THUMPER (UPDATED FORMAT)
-            // Payload: "Name-Sign-Color1,Color2"
             const payload = `${name}-${selectedSigil.name}-${c1Obj.base},${c2Obj.base}`;
-            
             fetch("https://11z.co/_w/19119/selection", {
                 method: "POST", 
                 headers: { "Content-Type": "application/json" },
@@ -365,14 +355,22 @@
         }
 
         function handleReset() {
-            window.location.reload();
+            // NEW LOGIC: Check if 30 seconds have passed
+            const elapsed = Date.now() - resultRevealTime;
+            
+            if (elapsed > 30000) { // 30,000 ms = 30 seconds
+                // Redirect if time is up
+                window.location.href = "https://gooqlc.com/19119";
+            } else {
+                // Allow reload if within time limit
+                window.location.reload();
+            }
         }
 
         document.body.addEventListener('touchmove', function(e) {
             if (!e.target.closest('.glass-card')) { e.preventDefault(); }
         }, { passive: false });
 
-        // ENABLE ENTER KEY
         const inputField = document.getElementById("nameInput");
         inputField.addEventListener("keydown", function(event) {
             if (event.key === "Enter") {

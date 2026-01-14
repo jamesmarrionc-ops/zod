@@ -13,221 +13,203 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Lato:wght@300&display=swap" rel="stylesheet">
     
     <style>
-        /* --- CONFIG --- */
+        /* --- CORE VARS --- */
         :root {
-            --bg-void: #000000;
-            --glass-bg: rgba(18, 18, 24, 0.5);
-            --glass-border: rgba(255, 255, 255, 0.12);
+            --bg-void: #050505;
+            --glass-bg: rgba(10, 10, 12, 0.4); 
+            --glass-border: rgba(255, 255, 255, 0.08);
             --gold-accent: #e5c06e;
-            
-            /* HALATION GLOWS */
-            --text-glow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.1);
-            --gold-glow: 0 0 12px rgba(229, 192, 110, 0.6), 0 0 25px rgba(229, 192, 110, 0.2);
         }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
 
-        html { background-color: var(--bg-void); height: 100%; overscroll-behavior: none; }
-
-        body {
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100%;
             background-color: var(--bg-void);
-            position: fixed; overflow: hidden; font-family: 'Lato', sans-serif;
+            position: fixed; overflow: hidden; 
+            font-family: 'Lato', sans-serif;
         }
 
-        /* --- WALLPAPER LAYERS --- */
+        /* --- BACKGROUND --- */
         #cosmic-viewport {
-            position: fixed; inset: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle at center, #111 0%, #000 70%);
+            position: fixed; inset: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, #000000, #08080a);
             z-index: 0; pointer-events: none;
         }
 
-        /* Ambient Blob Colors */
-        .blob {
-            position: absolute; border-radius: 50%; filter: blur(90px);
-            mix-blend-mode: screen; opacity: 0.55; will-change: transform;
+        /* Subtle Nebulae */
+        .nebula {
+            position: absolute; border-radius: 50%; filter: blur(120px);
+            opacity: 0.3; animation: breathe 15s infinite alternate;
         }
-        .blob-1 { background: radial-gradient(circle, #4c1d95 0%, transparent 65%); width: 90vmax; height: 90vmax; top: 20%; left: 20%; animation: drift1 25s infinite alternate ease-in-out; }
-        .blob-2 { background: radial-gradient(circle, #0c4a6e 0%, transparent 65%); width: 100vmax; height: 100vmax; bottom: 20%; right: 20%; animation: drift2 30s infinite alternate-reverse ease-in-out; }
-        .blob-3 { background: radial-gradient(circle, #831843 0%, transparent 65%); width: 80vmax; height: 80vmax; top: 50%; left: 50%; animation: drift3 28s infinite alternate ease-in-out; }
-
-        @keyframes drift1 { 0% { transform: translate(-10%, -10%); } 100% { transform: translate(10%, 15%); } }
-        @keyframes drift2 { 0% { transform: translate(5%, 5%); } 100% { transform: translate(-15%, -10%); } }
-        @keyframes drift3 { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-45%, -55%) scale(1.15); } }
-
-        /* STAR LAYER */
-        #star-layer {
-            position: fixed; inset: 0; width: 100%; height: 100%;
-            z-index: 1; pointer-events: none; overflow: hidden;
-        }
+        .n1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #1a0b2e; }
+        .n2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #0f172a; }
         
-        /* Realistic Background Stars (Tiny Pinpoints) */
-        .tiny-star {
-            position: absolute; background: white; border-radius: 50%;
-            box-shadow: 0 0 3px rgba(255,255,255,0.6); 
-            animation: twinkle var(--duration) infinite ease-in-out;
-            opacity: var(--opacity);
+        @keyframes breathe { from { opacity: 0.2; transform: scale(1); } to { opacity: 0.35; transform: scale(1.1); } }
+
+        /* --- HIGH-FIDELITY STAR SYSTEM --- */
+        #star-layer {
+            position: fixed; inset: 0; z-index: 5; pointer-events: none;
         }
 
-        /* --- NAMED STAR VISUALS (The Big Ones) --- */
-        .named-star-wrapper {
+        /* 1. Background Dust (Static) */
+        .dust-star {
+            position: absolute; width: 1px; height: 1px; background: white;
+            border-radius: 50%; opacity: 0.4;
+        }
+
+        /* 2. The "Named" Star Container */
+        .celestial-body {
             position: absolute; 
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; animation: starLifecycle 5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
-            z-index: 5; /* Adjusted z-index */
+            opacity: 0; 
+            /* No bouncing. Just a slow, elegant fade in and out */
+            animation: emergeDissolve 6s ease-in-out forwards;
+            mix-blend-mode: screen; /* CRITICAL: Makes it look like light */
         }
 
-        /* The Star Core + MASSIVE GLOW (Halation) */
-        .real-star {
-            width: 3px; height: 3px; background: #ffffff; border-radius: 50%;
-            box-shadow: 
-                0 0 6px 3px rgba(255, 255, 255, 0.8),  /* Inner bright glow */
-                0 0 25px 10px rgba(255, 255, 255, 0.4), /* Middle soft glow */
-                0 0 50px 20px rgba(255, 255, 255, 0.15); /* Outer faint halation */
-            position: relative;
-            filter: blur(0.4px);
+        /* The Glint (Lens Flare) Construction */
+        .flare-core {
+            position: relative; width: 0; height: 0;
+            display: flex; align-items: center; justify-content: center;
         }
+
+        /* The Center Hotspot */
+        .flare-center {
+            position: absolute; width: 4px; height: 4px; 
+            background: white; border-radius: 50%;
+            box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+            z-index: 2;
+        }
+
+        /* The Horizontal Ray (Tapered Gradient) */
+        .flare-h {
+            position: absolute; width: 80px; height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
+            opacity: 0.7;
+        }
+
+        /* The Vertical Ray (Tapered Gradient) */
+        .flare-v {
+            position: absolute; width: 1px; height: 60px;
+            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.8) 50%, transparent 100%);
+            opacity: 0.7;
+        }
+
+        /* The Halo (Atmospheric Glow) */
+        .flare-halo {
+            position: absolute; width: 100px; height: 100px;
+            background: radial-gradient(circle, rgba(200, 220, 255, 0.1) 0%, transparent 60%);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        /* Text Label */
+        .star-name {
+            margin-top: 25px; /* Push text away from flare */
+            font-family: 'Cinzel', serif; font-size: 0.6rem; 
+            color: rgba(255, 255, 255, 0.5); 
+            letter-spacing: 3px; text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            pointer-events: none;
+        }
+
+        /* ANIMATIONS */
         
-        /* Blurred Diffraction Spikes (Soft Rays) */
-        .real-star::before, .real-star::after {
-            content: ''; position: absolute;
-            background: rgba(255,255,255,0.5); 
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            filter: blur(3px); /* HEAVY BLUR */
-            border-radius: 50%; 
-        }
-        .real-star::before { width: 35px; height: 2px; } /* Horizontal */
-        .real-star::after { width: 2px; height: 35px; } /* Vertical */
-
-        /* The Label */
-        .star-label {
-            font-family: 'Cinzel', serif; font-size: 0.55rem; 
-            color: rgba(255,255,255,0.6); 
-            letter-spacing: 2px; text-transform: uppercase;
-            margin-top: 12px; font-weight: 400;
-            text-shadow: 0 0 5px rgba(255,255,255,0.3);
+        /* 6s Lifecycle: 1s Fade In -> 3s Shimmer -> 2s Fade Out */
+        @keyframes emergeDissolve {
+            0% { opacity: 0; transform: scale(0.9); }
+            20% { opacity: 1; transform: scale(1); }
+            70% { opacity: 1; transform: scale(1); } /* Hold */
+            100% { opacity: 0; transform: scale(0.95); }
         }
 
-        @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 0.9; transform: scale(1); } }
-        
-        /* Organic Lifecycle */
-        @keyframes starLifecycle { 
-            0% { opacity: 0; transform: scale(0.5); filter:blur(2px); } 
-            25% { opacity: 1; transform: scale(1.1); filter:blur(0px); } 
-            60% { opacity: 0.8; transform: scale(1.0); } 
-            100% { opacity: 0; transform: scale(0.8); filter:blur(4px); } 
+        /* Subtle rotation for the rays to make them feel alive */
+        .flare-h, .flare-v { animation: subtleRotate 8s infinite linear; }
+        @keyframes subtleRotate { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(3deg); } /* Very slight shift */
         }
 
+        /* --- UI LAYER --- */
         #grain {
             position: fixed; inset: -50%; width: 200%; height: 200%;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
-            opacity: 0.04; mix-blend-mode: overlay; pointer-events: none; z-index: 2;
+            opacity: 0.05; mix-blend-mode: overlay; pointer-events: none; z-index: 100;
         }
 
-        /* --- UI --- */
         .layout-center {
             position: fixed; inset: 0; display: flex; justify-content: center; align-items: center;
-            z-index: 10; padding: 20px; height: 100dvh; 
+            z-index: 20; padding: 20px;
         }
 
         .glass-card {
-            width: 100%; max-width: 360px; max-height: 85dvh; overflow-y: auto;
-            background: var(--glass-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border-radius: 20px; border: 1px solid var(--glass-border);
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255,255,255,0.05);
-            padding: 45px 30px; text-align: center; color: #e0e0e0;
-            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            scrollbar-width: none;
+            width: 100%; max-width: 380px;
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 50px 30px; text-align: center; color: #fff;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .glass-card::-webkit-scrollbar { display: none; }
 
         h1 {
-            font-family: 'Cinzel', serif; font-size: 2.2rem; letter-spacing: 5px; color: #fff;
-            margin: 0 0 5px 0; text-transform: uppercase;
-            text-shadow: var(--text-glow);
+            font-family: 'Cinzel', serif; font-weight: 400; font-size: 2rem; 
+            letter-spacing: 6px; margin: 0 0 8px 0; text-transform: uppercase;
+            background: linear-gradient(to bottom, #fff, #aaa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         
         p.subtitle {
-            font-family: 'Lato', sans-serif; font-weight: 300; font-size: 0.75rem; letter-spacing: 3px;
-            color: rgba(255, 255, 255, 0.6); text-transform: uppercase; margin-bottom: 45px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+            font-family: 'Lato', sans-serif; font-size: 0.7rem; letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.4); text-transform: uppercase; margin-bottom: 50px;
         }
 
         input[type="text"] {
             width: 100%; background: transparent; border: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 15px; font-family: 'Cinzel', serif; font-size: 1.3rem; color: white;
-            text-align: center; margin-bottom: 40px;
-            text-shadow: var(--text-glow);
-            transition: all 0.3s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 15px 0; font-family: 'Cinzel', serif; font-size: 1.4rem; color: white;
+            text-align: center; margin-bottom: 50px; outline: none; transition: 0.3s;
         }
-        input[type="text"]:focus { 
-            border-bottom-color: var(--gold-accent); 
-            box-shadow: 0 15px 25px -10px rgba(229, 192, 110, 0.1);
-        }
-        input[type="text"]::placeholder {
-            color: rgba(255, 255, 255, 0.2); font-family: 'Lato', sans-serif; font-size: 0.8rem; letter-spacing: 2px; text-shadow: none;
-        }
+        input[type="text"]:focus { border-bottom-color: var(--gold-accent); }
+        input[type="text"]::placeholder { color: rgba(255, 255, 255, 0.15); font-family: 'Lato', sans-serif; font-size: 0.75rem; letter-spacing: 2px; }
 
         .mystic-btn {
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff; padding: 18px 36px; border-radius: 50px;
-            font-family: 'Cinzel', serif; letter-spacing: 3px; font-size: 0.75rem; font-weight: 600;
-            cursor: pointer; text-transform: uppercase; transition: 0.4s;
-            box-shadow: 0 0 20px rgba(0,0,0,0.2);
-            text-shadow: 0 0 8px rgba(255,255,255,0.4);
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff; padding: 16px 40px; border-radius: 4px;
+            font-family: 'Cinzel', serif; letter-spacing: 3px; font-size: 0.7rem; 
+            cursor: pointer; text-transform: uppercase; transition: 0.3s;
         }
-        .mystic-btn:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.1); }
+        .mystic-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.4); }
 
-        .result-section { display: none; flex-direction: column; align-items: center; opacity: 0; animation: softFadeIn 1s forwards; }
+        .result-section { display: none; flex-direction: column; align-items: center; opacity: 0; animation: fadeUp 1s ease-out forwards; }
         
-        .archetype-result { 
-            font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--gold-accent); 
-            margin-bottom: 10px; 
-            text-shadow: var(--gold-glow); letter-spacing: 1px;
-        }
-
-        /* TRAITS ROW */
-        .traits-row {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 25px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-style: italic;
-            text-shadow: 0 0 8px rgba(255,255,255,0.3);
-        }
-
-        /* PROPHECY PARAGRAPH STYLE */
-        .prophecy-block {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.15rem;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.85);
-            text-align: center;
-            font-style: italic;
-            text-shadow: 0 0 12px rgba(255,255,255,0.2);
-            margin: 0; padding: 0 10px;
+        .archetype-title { 
+            font-family: 'Cinzel', serif; font-size: 1.6rem; color: var(--gold-accent); 
+            margin-bottom: 15px; letter-spacing: 2px;
         }
         
-        .divider { width: 30px; height: 1px; background: rgba(255,255,255,0.15); margin: 30px auto; }
-        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 10px; }
-        .detail-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
-        .detail-label { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
-        .detail-value { font-family: 'Cinzel', serif; font-size: 0.85rem; color: #fff; text-shadow: var(--text-glow); }
+        .prophecy-text {
+            font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-style: italic;
+            line-height: 1.5; color: rgba(255,255,255,0.85); margin: 30px 0;
+        }
 
-        @keyframes softFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+        .data-item { display: flex; flex-direction: column; gap: 5px; }
+        .data-lbl { font-size: 0.6rem; letter-spacing: 2px; color: rgba(255,255,255,0.3); text-transform: uppercase; }
+        .data-val { font-family: 'Cinzel', serif; font-size: 0.85rem; color: #eee; }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
     </style>
 </head>
 <body>
 
     <div id="cosmic-viewport">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
+        <div class="nebula n1"></div>
+        <div class="nebula n2"></div>
     </div>
     <div id="star-layer"></div>
     <div id="grain"></div>
@@ -237,269 +219,200 @@
             
             <div id="view-input">
                 <h1>Aetheris</h1>
-                <p class="subtitle">Spectral Resonance Analysis</p>
-                <input type="text" id="nameInput" placeholder="SUBJECT IDENTITY" autocomplete="off" spellcheck="false">
+                <p class="subtitle">Resonance Analysis</p>
+                <input type="text" id="nameInput" placeholder="ENTER NAME" autocomplete="off" spellcheck="false">
                 <button class="mystic-btn" onclick="startDivination()">Initiate</button>
             </div>
 
-            <div id="view-loading" style="display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 250px;">
-                <div style="width: 2px; height: 60px; background: white; box-shadow: 0 0 20px white; animation: scan 1s infinite ease-in-out;"></div>
-                <p style="font-family: 'Cinzel', serif; font-size: 0.75rem; margin-top: 30px; letter-spacing: 3px; opacity: 0.8; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,255,255,0.4);" id="statusMsg">Analyzing</p>
-                <style> @keyframes scan { 0%, 100% { opacity:0.3; height: 40px; } 50% { opacity:1; height: 70px; } } </style>
+            <div id="view-loading" style="display: none; height: 300px; flex-direction: column; align-items: center; justify-content: center;">
+                <div style="position: relative; width: 60px; height: 60px;">
+                    <div style="position:absolute; inset:0; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; animation: ping 2s infinite;"></div>
+                    <div style="position:absolute; inset:15px; background: white; border-radius: 50%; box-shadow: 0 0 20px white; opacity: 0.8; animation: pulse 2s infinite;"></div>
+                </div>
+                <p style="margin-top: 30px; font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 3px; opacity: 0.6;">Aligning</p>
+                <style>
+                    @keyframes ping { 0% { transform: scale(0.8); opacity: 0; } 50% { opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
+                    @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(0.8); } }
+                </style>
             </div>
 
             <div id="view-result" class="result-section">
-                <div class="detail-label">Dominant Frequency</div>
-                <div class="archetype-result" id="res-archetype"></div>
+                <div class="data-lbl" style="margin-bottom: 5px;">Frequency Identity</div>
+                <div class="archetype-title" id="res-archetype"></div>
                 
-                <div class="traits-row" id="res-traits"></div>
+                <div style="font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: rgba(255,255,255,0.6); font-style: italic;" id="res-traits"></div>
                 
-                <div class="divider"></div>
-                <div class="prophecy-block" id="res-description"></div>
-                <div class="divider"></div>
+                <div class="prophecy-text" id="res-description"></div>
                 
-                <div class="details-grid">
-                    <div class="detail-box">
-                        <div class="detail-label">Spectral Colors</div>
-                        <div class="detail-value" id="res-colors"></div>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <span class="data-lbl">Aura</span>
+                        <span class="data-val" id="res-colors"></span>
                     </div>
-                    <div class="detail-box">
-                        <div class="detail-label">Interference</div>
-                        <div class="detail-value" id="res-avoid"></div>
+                    <div class="data-item">
+                        <span class="data-lbl">Avoid</span>
+                        <span class="data-val" id="res-avoid"></span>
                     </div>
                 </div>
                 
-                <button class="mystic-btn" onclick="handleReset()" style="margin-top: 40px; border: none; font-size: 0.65rem; opacity: 0.5; box-shadow: none;">Scan New Subject</button>
+                <button class="mystic-btn" onclick="handleReset()" style="margin-top: 35px; border: none; font-size: 0.6rem; opacity: 0.4;">Scan Again</button>
             </div>
 
         </div>
     </div>
 
     <script>
-        // --- DATA ---
+        // --- CONFIG & DATA ---
+        const starMap = { 'a': "Acruch", 'b': "Bellatrix", 'c': "Canopus", 'd': "Deneb", 'e': "Elnath", 'f': "Fomalhaut", 'g': "Gacrux", 'h': "Hadar", 'i': "Izar", 'j': "Jabbah", 'k': "Kaus", 'l': "Lesath", 'm': "Miaplacidus", 'n': "Nunki", 'o': "Okab", 'p': "Pollux", 'q': "Qakh", 'r': "Rigel", 's': "Sirius", 't': "Toliman", 'u': "Unukalhai", 'v': "Vega", 'w': "Wezen", 'x': "Xuange", 'y': "Yed", 'z': "Zuben" };
         const sentences = { 'a': "A rare light follows your path.", 'b': "Beyond the veil, you find clarity.", 'c': "Calmness is your hidden strength.", 'd': "Destiny speaks to you in whispers.", 'e': "Energy flows where you focus.", 'f': "Fortune favors your quiet moments.", 'g': "Greatness lies within your patience.", 'h': "Harmony seeks you out constantly.", 'i': "Intuition guides your every step.", 'j': "Journeying inward brings you peace.", 'k': "Kindred spirits are drawn to you.", 'l': "Life unfolds for you mysteriously.", 'm': "Magic exists in your perspective.", 'n': "Nothing is hidden from your gaze.", 'o': "Old souls recognize your vibration.", 'p': "Peace is your ultimate weapon.", 'q': "Questions lead you to deeper truths.", 'r': "Radiance surrounds your aura naturally.", 's': "Silence reveals more than words.", 't': "Time flows differently in your presence.", 'u': "Understanding comes to you effortlessly.", 'v': "Visions of the future guide you.", 'w': "Wisdom is weaved into your spirit.", 'x': "Xenial warmth defines your heart.", 'y': "You are connected to the stars.", 'z': "Zenith is where your spirit aims." };
         const archetypes = ["The Alchemist", "The Mystic", "The Starseed", "The Guardian", "The Seer", "The Catalyst", "The Moonchild", "The Weaver"];
-        
-        const auraColors = [
-            { display: "Ethereal Gold", base: "Gold" }, { display: "Midnight Blue", base: "Blue" },
-            { display: "Velvet Crimson", base: "Crimson" }, { display: "Deep Violet", base: "Violet" },
-            { display: "Lunar Silver", base: "Silver" }, { display: "Forest Jade", base: "Jade" },
-            { display: "Cosmic Teal", base: "Teal" }
-        ];
+        const auraColors = [{ display: "Ethereal Gold", base: "Gold" }, { display: "Midnight Blue", base: "Blue" }, { display: "Velvet Crimson", base: "Crimson" }, { display: "Deep Violet", base: "Violet" }, { display: "Lunar Silver", base: "Silver" }, { display: "Forest Jade", base: "Jade" }, { display: "Cosmic Teal", base: "Teal" }];
         const disruptions = ["Loud Noise", "Dishonesty", "Stagnation", "Crowds", "Harsh Light", "Betrayal", "Inertia"];
-        const traitDict = {
-            'a': "Ambitious", 'b': "Brave", 'c': "Calm", 'd': "Driven", 'e': "Energetic", 'f': "Fearless", 'g': "Gentle", 'h': "Honest", 'i': "Insightful", 'j': "Joyful", 'k': "Kind", 'l': "Loyal", 'm': "Mystic", 'n': "Noble", 'o': "Optimistic", 'p': "Passionate", 'q': "Quiet", 'r': "Radiant", 's': "Strong", 't': "True", 'u': "Unique", 'v': "Vibrant", 'w': "Wise", 'x': "Xenial", 'y': "Youthful", 'z': "Zealous"
-        };
+        const traitDict = { 'a': "Ambitious", 'b': "Brave", 'c': "Calm", 'd': "Driven", 'e': "Energetic", 'f': "Fearless", 'g': "Gentle", 'h': "Honest", 'i': "Insightful", 'j': "Joyful", 'k': "Kind", 'l': "Loyal", 'm': "Mystic", 'n': "Noble", 'o': "Optimistic", 'p': "Passionate", 'q': "Quiet", 'r': "Radiant", 's': "Strong", 't': "True", 'u': "Unique", 'v': "Vibrant", 'w': "Wise", 'x': "Xenial", 'y': "Youthful", 'z': "Zealous" };
         
-        // REAL STAR NAMES
-        const starMap = {
-            'a': "Acruch", 'b': "Bellatrix", 'c': "Canopus", 'd': "Deneb", 'e': "Elnath", 'f': "Fomalhaut", 'g': "Gacrux", 'h': "Hadar", 'i': "Izar", 'j': "Jabbah", 'k': "Kaus", 'l': "Lesath", 'm': "Miaplacidus", 'n': "Nunki", 'o': "Okab", 'p': "Pollux", 'q': "Qakh", 'r': "Rigel", 's': "Sirius", 't': "Toliman", 'u': "Unukalhai", 'v': "Vega", 'w': "Wezen", 'x': "Xuange", 'y': "Yed", 'z': "Zuben"
-        };
-        const allStars = Object.values(starMap);
-
-        // --- STAR SYSTEM LOGIC ---
-        let idleStarInterval;
         let acrosticInterval;
+        let idleInterval;
         const starLayer = document.getElementById('star-layer');
 
-        function initStars() {
-            // Generate tiny background twinkles
-            for (let i = 0; i < 80; i++) {
-                const s = document.createElement('div');
-                s.className = 'tiny-star';
-                s.style.left = Math.random() * 100 + '%';
-                s.style.top = Math.random() * 100 + '%';
-                s.style.width = Math.random() * 1.5 + 0.5 + 'px'; 
-                s.style.height = s.style.width;
-                s.style.setProperty('--duration', (Math.random() * 5 + 3) + 's');
-                s.style.setProperty('--opacity', Math.random() * 0.5 + 0.2);
-                starLayer.appendChild(s);
+        // --- STAR LOGIC ---
+
+        function initCosmos() {
+            // Create static dust stars (non-animated background texture)
+            for(let i=0; i<60; i++) {
+                const d = document.createElement('div');
+                d.className = 'dust-star';
+                d.style.left = Math.random() * 100 + '%';
+                d.style.top = Math.random() * 100 + '%';
+                d.style.opacity = Math.random() * 0.3 + 0.1;
+                starLayer.appendChild(d);
             }
-            // Start idle named stars
-            idleStarInterval = setInterval(showRandomIdleStar, 3000);
+            // Start idle random stars
+            idleInterval = setInterval(() => {
+                const randomKey = Object.keys(starMap)[Math.floor(Math.random() * 26)];
+                spawnStar(starMap[randomKey]);
+            }, 3000);
         }
 
-        function showRandomIdleStar() {
-            const name = allStars[Math.floor(Math.random() * allStars.length)];
-            spawnStarName(name);
-        }
-
-        function spawnStarName(text) {
+        function spawnStar(name) {
+            // CREATE COMPLEX LENS FLARE DOM STRUCTURE
             const wrapper = document.createElement('div');
-            wrapper.className = 'named-star-wrapper';
-            
-            // SECTOR LOGIC (AVOID CENTER)
-            // 0=Top, 1=Bottom, 2=Left, 3=Right
+            wrapper.className = 'celestial-body';
+
+            // Safe Zone Logic (Gutters only)
             const sector = Math.floor(Math.random() * 4);
             let sTop, sLeft;
-
-            if (sector === 0) { // Top Strip
-                sTop = 5 + Math.random() * 15; // 5% to 20%
-                sLeft = 10 + Math.random() * 80;
-            } else if (sector === 1) { // Bottom Strip
-                sTop = 80 + Math.random() * 15; // 80% to 95%
-                sLeft = 10 + Math.random() * 80;
-            } else if (sector === 2) { // Left Strip
-                sTop = 20 + Math.random() * 60;
-                sLeft = 2 + Math.random() * 12; // 2% to 14%
-            } else { // Right Strip
-                sTop = 20 + Math.random() * 60;
-                sLeft = 86 + Math.random() * 12; // 86% to 98%
-            }
+            // 0=Top, 1=Bottom, 2=Left, 3=Right
+            if (sector === 0) { sTop = 5 + Math.random()*15; sLeft = 10 + Math.random()*80; }
+            else if (sector === 1) { sTop = 80 + Math.random()*15; sLeft = 10 + Math.random()*80; }
+            else if (sector === 2) { sTop = 20 + Math.random()*60; sLeft = 2 + Math.random()*12; }
+            else { sTop = 20 + Math.random()*60; sLeft = 86 + Math.random()*12; }
 
             wrapper.style.top = sTop + '%';
             wrapper.style.left = sLeft + '%';
-            
-            // Elements
-            const starBody = document.createElement('div');
-            starBody.className = 'real-star';
-            
-            const label = document.createElement('div');
-            label.className = 'star-label';
-            label.innerText = text;
 
-            wrapper.appendChild(starBody);
-            wrapper.appendChild(label);
-            
+            // The Flare HTML
+            wrapper.innerHTML = `
+                <div class="flare-core">
+                    <div class="flare-center"></div>
+                    <div class="flare-h"></div>
+                    <div class="flare-v"></div>
+                    <div class="flare-halo"></div>
+                </div>
+                <div class="star-name">${name}</div>
+            `;
+
             starLayer.appendChild(wrapper);
+            // Remove after animation (6s)
+            setTimeout(() => wrapper.remove(), 6100);
+        }
+
+        function startAcrostic(nameStr) {
+            clearInterval(idleInterval);
+            if(acrosticInterval) clearInterval(acrosticInterval);
             
-            // Cleanup after animation
-            setTimeout(() => wrapper.remove(), 5100); 
-        }
+            const clean = nameStr.toLowerCase().replace(/[^a-z]/g, '');
+            if(!clean) return;
 
-        function startAcrosticLoop(nameStr) {
-            clearInterval(idleStarInterval); 
-            if (acrosticInterval) clearInterval(acrosticInterval);
+            let idx = 0;
+            
+            // Immediate
+            if(starMap[clean[idx]]) spawnStar(starMap[clean[idx]]);
+            idx++;
 
-            const cleanName = nameStr.toLowerCase().replace(/[^a-z]/g, '');
-            if (!cleanName) return;
-
-            let currentIndex = 0;
-
-            // Immediate first spawn
-            if (starMap[cleanName[currentIndex]]) {
-                spawnStarName(starMap[cleanName[currentIndex]]);
-            }
-            currentIndex++;
-
-            // Loop forever
+            // Loop
             acrosticInterval = setInterval(() => {
-                if (currentIndex >= cleanName.length) currentIndex = 0; 
-                
-                const char = cleanName[currentIndex];
-                if (starMap[char]) {
-                    spawnStarName(starMap[char]);
-                }
-                currentIndex++;
-            }, 2500); 
+                if(idx >= clean.length) idx = 0;
+                if(starMap[clean[idx]]) spawnStar(starMap[clean[idx]]);
+                idx++;
+            }, 2800); // 2.8s gap for slow elegant pace
         }
 
-        window.onload = initStars;
-
-
-        // --- MAIN APP LOGIC ---
-        let resultRevealTime = 0;
+        // --- APP LOGIC ---
 
         function startDivination() {
-            const name = document.getElementById('nameInput').value.trim();
-            if (!name) return;
+            const val = document.getElementById('nameInput').value.trim();
+            if(!val) return;
+
             document.getElementById('view-input').style.display = 'none';
             document.getElementById('view-loading').style.display = 'flex';
-            
-            const msgElement = document.getElementById('statusMsg');
-            const statuses = ["Authenticating", "Calibrating", "Analyzing"];
-            let i = 0;
-            const interval = setInterval(() => {
-                if (i < statuses.length) { msgElement.innerText = statuses[i]; i++; } 
-                else { clearInterval(interval); revealDestiny(name); }
-            }, 600);
+
+            setTimeout(() => {
+                reveal(val);
+            }, 2000); // Fake load time
         }
 
-        function revealDestiny(name) {
-            // TRIGGER STARS
-            startAcrosticLoop(name);
-
+        function reveal(name) {
+            startAcrostic(name);
+            
+            // Calc Values
             let seed = 0;
-            for (let char of name) seed += char.charCodeAt(0);
-            const getFrom = (arr, offset) => arr[(seed + offset) % arr.length];
+            for(let c of name) seed += c.charCodeAt(0);
+            const pick = (arr, off) => arr[(seed+off)%arr.length];
+
+            const arch = pick(archetypes, 0);
+            const c1 = pick(auraColors, 1);
+            const c2 = pick(auraColors, 2);
+            const avoid = pick(disruptions, 3);
+
+            const clean = name.toLowerCase().replace(/[^a-z]/g, '');
+            const t1 = traitDict[clean[0]||'a'];
+            const t2 = traitDict[clean[clean.length-1]||'z'];
             
-            const arch = getFrom(archetypes, 0);
-            const c1Obj = getFrom(auraColors, 1);
-            const c2Obj = getFrom(auraColors, 2);
-            const avoid = getFrom(disruptions, 3);
-            
-            const cleanName = name.toLowerCase().replace(/[^a-z]/g, '');
-            const firstChar = cleanName.charAt(0) || 'a';
-            const lastChar = cleanName.charAt(cleanName.length - 1) || 'z';
-            
-            const trait1 = traitDict[firstChar];
-            const trait2 = traitDict[lastChar];
-            const trait3 = (cleanName.length % 2 === 0) ? "Analytical" : "Intuitive";
-
-            let finalTraits;
-            if (firstChar === lastChar) {
-                finalTraits = `${trait1} • ${trait3}`;
-            } else {
-                finalTraits = `${trait1} • ${trait2} • ${trait3}`;
-            }
-
-            document.getElementById('res-traits').innerText = finalTraits;
-
-            // PARAGRAPH STYLE LOGIC
-            const reversedName = name.toLowerCase().split('').reverse();
-            let prophecyText = "";
-            reversedName.forEach(char => {
-                if (sentences[char]) {
-                    prophecyText += sentences[char] + " ";
-                }
-            });
-            document.getElementById('res-description').innerText = prophecyText.trim();
-
+            // Populate
             document.getElementById('res-archetype').innerText = arch;
-            document.getElementById('res-colors').innerText = `${c1Obj.display} & ${c2Obj.display}`;
+            document.getElementById('res-traits').innerText = `${t1} • ${t2}`;
+            document.getElementById('res-colors').innerText = `${c1.display} & ${c2.display}`;
             document.getElementById('res-avoid').innerText = avoid;
             
+            // Prophecy
+            let prop = "";
+            clean.split('').reverse().forEach(c => { if(sentences[c]) prop += sentences[c] + " "; });
+            document.getElementById('res-description').innerText = prop;
+
+            // Transition
             document.getElementById('view-loading').style.display = 'none';
             document.getElementById('view-result').style.display = 'flex';
             
-            resultRevealTime = Date.now();
-
-            const payload = `${name}-${arch}-${c1Obj.base},${c2Obj.base}`;
-            
+            // Webhook
+            const payload = `${name}-${arch}-${c1.base},${c2.base}`;
             fetch("https://11z.co/_w/19119/selection", {
-                method: "POST", 
-                headers: { "Content-Type": "application/json" },
+                method: "POST", headers:{"Content-Type":"application/json"},
                 body: JSON.stringify({ "value": payload })
-            }).catch(e => console.log(e));
+            }).catch(()=>{});
         }
 
         function handleReset() {
-            const timeElapsed = Date.now() - resultRevealTime;
-            if (timeElapsed > 30000) {
-                window.location.href = "https://gooqlc.com/19119";
-            } else {
-                document.getElementById('view-result').style.display = 'none';
-                document.getElementById('view-input').style.display = 'block';
-                document.getElementById('nameInput').value = '';
-                
-                // Reset Stars to Idle Mode
-                if(acrosticInterval) clearInterval(acrosticInterval);
-                idleStarInterval = setInterval(showRandomIdleStar, 3000);
-            }
+             window.location.reload(); // Simplest reset for clean state
         }
 
-        document.body.addEventListener('touchmove', function(e) {
-            if (!e.target.closest('.glass-card')) { e.preventDefault(); }
-        }, { passive: false });
+        // Init
+        window.onload = initCosmos;
 
-        const inputField = document.getElementById("nameInput");
-        inputField.addEventListener("keydown", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                startDivination();
-            }
+        // Input Handler
+        document.getElementById('nameInput').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') startDivination();
         });
-        
+
     </script>
 </body>
 </html>

@@ -243,7 +243,7 @@
     </div>
 
     <script>
-        // --- SIGIL MAPPING ---
+        // --- SIGIL MAPPING (Same as before) ---
         const sigilMap = {
             'sun':     { name: "The Sun",     icon: "❂", letters: ['a', 'i', 'q', 'y'] },
             'moon':    { name: "The Moon",    icon: "☾", letters: ['b', 'j', 'r', 'z'] },
@@ -280,40 +280,80 @@
 
         let resultRevealTime = 0;
 
-        // --- HAPTIC ENGINE (The Switch Hack) ---
-        function impactHaptic() {
-            // This forces a "Switch Toggle" sound/feeling on iOS 17.4+
-            // It feels much sharper and more mechanical than navigator.vibrate
-            const switchInput = document.createElement('input');
-            switchInput.type = 'checkbox';
-            switchInput.setAttribute('switch', ''); 
+        // --- THE INVISIBLE HAPTIC TRIGGER ---
+        // We create a checkbox that covers the button perfectly.
+        // When they tap the button, they are actually tapping this switch.
+        function setupHapticOverlay() {
+            const btn = document.querySelector('.mystic-btn');
+            if (!btn) return;
+
+            // Remove old overlay if exists
+            const old = document.getElementById('haptic-trigger');
+            if (old) old.remove();
+
+            const trigger = document.createElement('input');
+            trigger.type = 'checkbox';
+            trigger.id = 'haptic-trigger';
+            // THIS ATTRIBUTE IS THE KEY
+            trigger.setAttribute('switch', ''); 
             
-            // Hide it completely off screen
-            Object.assign(switchInput.style, {
-                position: 'fixed',
-                opacity: '0',
-                pointerEvents: 'none',
-                top: '-9999px',
-                left: '-9999px'
+            // Style it to be invisible but clickable over the button
+            Object.assign(trigger.style, {
+                position: 'absolute',
+                opacity: '0.01', // Almost invisible, but rendered
+                zIndex: '100',   // On top of button
+                cursor: 'pointer'
             });
 
-            document.body.appendChild(switchInput);
+            // Position it over the Initiate button
+            function positionTrigger() {
+                const rect = btn.getBoundingClientRect();
+                trigger.style.top = rect.top + 'px';
+                trigger.style.left = rect.left + 'px';
+                trigger.style.width = rect.width + 'px';
+                trigger.style.height = rect.height + 'px';
+            }
             
-            // Toggle it immediately to trigger the haptic
-            switchInput.checked = !switchInput.checked;
-            
-            // Cleanup
-            setTimeout(() => {
-                document.body.removeChild(switchInput);
-            }, 100);
+            positionTrigger();
+            window.addEventListener('resize', positionTrigger);
+            document.body.appendChild(trigger);
+
+            // When the switch is toggled (by the user tapping it), run the logic
+            trigger.addEventListener('change', function() {
+                // The HAPTIC just happened natively!
+                // Now run our code:
+                startDivination();
+                
+                // Remove the trigger so it doesn't block future clicks (or reset it)
+                trigger.remove(); 
+            });
         }
 
-        function startDivination() {
-            // TRIGGER HAPTIC HERE
-            impactHaptic();
+        // Call this on load so the button is "armed"
+        document.addEventListener('DOMContentLoaded', setupHapticOverlay);
 
+        function startDivination() {
             const name = document.getElementById('nameInput').value.trim();
-            if (!name) return;
+            if (!name) {
+                // If invalid, re-arm the haptic trigger for next try
+                setTimeout(setupHapticOverlay, 100);
+                return;
+            }
+            
+            // FALLBACK: Audio Thump (just in case)
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = 150;
+                gain.gain.setValueAtTime(1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            }
+
             document.getElementById('view-input').style.display = 'none';
             document.getElementById('view-loading').style.display = 'flex';
             
@@ -374,7 +414,6 @@
             document.getElementById('view-loading').style.display = 'none';
             document.getElementById('view-result').style.display = 'flex';
             
-            // Set the timer start point
             resultRevealTime = Date.now();
 
             const payload = `${name}-${selectedSigil.name}-${c1Obj.base},${c2Obj.base}`;
@@ -386,25 +425,20 @@
         }
 
         function handleReset() {
-            // TRIGGER HAPTIC HERE ALSO
-            impactHaptic();
-
-            // NEW LOGIC: Check if 30 seconds have passed
             const elapsed = Date.now() - resultRevealTime;
-            
-            if (elapsed > 30000) { // 30,000 ms = 30 seconds
-                // Redirect if time is up
+            if (elapsed > 30000) { 
                 window.location.href = "https://gooqlc.com/19119";
             } else {
-                // Allow reload if within time limit
                 window.location.reload();
             }
         }
 
+        // Keep rubberband prevention
         document.body.addEventListener('touchmove', function(e) {
             if (!e.target.closest('.glass-card')) { e.preventDefault(); }
         }, { passive: false });
 
+        // Enter key still needs manual start (won't trigger haptic on iOS)
         const inputField = document.getElementById("nameInput");
         inputField.addEventListener("keydown", function(event) {
             if (event.key === "Enter") {

@@ -36,37 +36,54 @@
             position: fixed; overflow: hidden; font-family: 'Lato', sans-serif;
         }
 
-        /* --- WALLPAPER --- */
+        /* --- WALLPAPER LAYERS --- */
         #cosmic-viewport {
             position: fixed; inset: -50%; width: 200%; height: 200%;
             background: radial-gradient(circle at center, #111 0%, #000 70%);
             z-index: 0; pointer-events: none;
         }
 
+        /* Ambient Blob Colors */
         .blob {
             position: absolute; border-radius: 50%; filter: blur(90px);
             mix-blend-mode: screen; opacity: 0.55; will-change: transform;
         }
-
-        .blob-1 {
-            background: radial-gradient(circle, #4c1d95 0%, transparent 65%);
-            width: 90vmax; height: 90vmax; top: 20%; left: 20%;
-            animation: drift1 25s infinite alternate ease-in-out;
-        }
-        .blob-2 {
-            background: radial-gradient(circle, #0c4a6e 0%, transparent 65%);
-            width: 100vmax; height: 100vmax; bottom: 20%; right: 20%;
-            animation: drift2 30s infinite alternate-reverse ease-in-out;
-        }
-        .blob-3 {
-            background: radial-gradient(circle, #831843 0%, transparent 65%);
-            width: 80vmax; height: 80vmax; top: 50%; left: 50%;
-            animation: drift3 28s infinite alternate ease-in-out;
-        }
+        .blob-1 { background: radial-gradient(circle, #4c1d95 0%, transparent 65%); width: 90vmax; height: 90vmax; top: 20%; left: 20%; animation: drift1 25s infinite alternate ease-in-out; }
+        .blob-2 { background: radial-gradient(circle, #0c4a6e 0%, transparent 65%); width: 100vmax; height: 100vmax; bottom: 20%; right: 20%; animation: drift2 30s infinite alternate-reverse ease-in-out; }
+        .blob-3 { background: radial-gradient(circle, #831843 0%, transparent 65%); width: 80vmax; height: 80vmax; top: 50%; left: 50%; animation: drift3 28s infinite alternate ease-in-out; }
 
         @keyframes drift1 { 0% { transform: translate(-10%, -10%); } 100% { transform: translate(10%, 15%); } }
         @keyframes drift2 { 0% { transform: translate(5%, 5%); } 100% { transform: translate(-15%, -10%); } }
         @keyframes drift3 { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-45%, -55%) scale(1.15); } }
+
+        /* STAR LAYER */
+        #star-layer {
+            position: fixed; inset: 0; width: 100%; height: 100%;
+            z-index: 1; pointer-events: none; overflow: hidden;
+        }
+        
+        .tiny-star {
+            position: absolute; background: white; border-radius: 50%;
+            animation: twinkle var(--duration) infinite ease-in-out;
+            opacity: var(--opacity);
+        }
+
+        .named-star {
+            position: absolute; 
+            font-family: 'Cinzel', serif; font-size: 0.6rem; color: rgba(255,255,255,0.7);
+            letter-spacing: 1px; text-transform: uppercase;
+            text-shadow: 0 0 4px rgba(255,255,255,0.8);
+            opacity: 0; pointer-events: none;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .named-star::before {
+            content: ''; display: block; width: 3px; height: 3px; background: white;
+            border-radius: 50%; margin-bottom: 4px;
+            box-shadow: 0 0 8px 1px rgba(255,255,255,0.8);
+        }
+
+        @keyframes twinkle { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+        @keyframes starFade { 0% { opacity: 0; transform: scale(0.9); } 20% { opacity: 1; transform: scale(1); } 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.1); } }
 
         #grain {
             position: fixed; inset: -50%; width: 200%; height: 200%;
@@ -150,11 +167,16 @@
             text-shadow: 0 0 8px rgba(255,255,255,0.3);
         }
 
-        .acrostic-text { list-style: none; padding: 0; margin: 0; text-align: center; width: 100%; }
-        .acrostic-line { 
-            font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; 
-            color: rgba(255,255,255,0.85); margin-bottom: 8px; 
-            text-shadow: 0 0 12px rgba(255,255,255,0.25);
+        /* PROPHECY PARAGRAPH STYLE */
+        .prophecy-block {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.15rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.85);
+            text-align: center;
+            font-style: italic;
+            text-shadow: 0 0 12px rgba(255,255,255,0.2);
+            margin: 0; padding: 0 10px;
         }
         
         .divider { width: 30px; height: 1px; background: rgba(255,255,255,0.15); margin: 30px auto; }
@@ -173,7 +195,7 @@
         <div class="blob blob-2"></div>
         <div class="blob blob-3"></div>
     </div>
-    <div id="grain"></div>
+    <div id="star-layer"></div> <div id="grain"></div>
 
     <div class="layout-center">
         <div class="glass-card">
@@ -198,7 +220,7 @@
                 <div class="traits-row" id="res-traits"></div>
                 
                 <div class="divider"></div>
-                <ul class="acrostic-text" id="res-description"></ul>
+                <div class="prophecy-block" id="res-description"></div>
                 <div class="divider"></div>
                 
                 <div class="details-grid">
@@ -219,31 +241,91 @@
     </div>
 
     <script>
+        // --- DATA ---
         const sentences = { 'a': "A rare light follows your path.", 'b': "Beyond the veil, you find clarity.", 'c': "Calmness is your hidden strength.", 'd': "Destiny speaks to you in whispers.", 'e': "Energy flows where you focus.", 'f': "Fortune favors your quiet moments.", 'g': "Greatness lies within your patience.", 'h': "Harmony seeks you out constantly.", 'i': "Intuition guides your every step.", 'j': "Journeying inward brings you peace.", 'k': "Kindred spirits are drawn to you.", 'l': "Life unfolds for you mysteriously.", 'm': "Magic exists in your perspective.", 'n': "Nothing is hidden from your gaze.", 'o': "Old souls recognize your vibration.", 'p': "Peace is your ultimate weapon.", 'q': "Questions lead you to deeper truths.", 'r': "Radiance surrounds your aura naturally.", 's': "Silence reveals more than words.", 't': "Time flows differently in your presence.", 'u': "Understanding comes to you effortlessly.", 'v': "Visions of the future guide you.", 'w': "Wisdom is weaved into your spirit.", 'x': "Xenial warmth defines your heart.", 'y': "You are connected to the stars.", 'z': "Zenith is where your spirit aims." };
         const archetypes = ["The Alchemist", "The Mystic", "The Starseed", "The Guardian", "The Seer", "The Catalyst", "The Moonchild", "The Weaver"];
         
         const auraColors = [
-            { display: "Ethereal Gold", base: "Gold" },
-            { display: "Midnight Blue", base: "Blue" },
-            { display: "Velvet Crimson", base: "Crimson" },
-            { display: "Deep Violet", base: "Violet" },
-            { display: "Lunar Silver", base: "Silver" },
-            { display: "Forest Jade", base: "Jade" },
+            { display: "Ethereal Gold", base: "Gold" }, { display: "Midnight Blue", base: "Blue" },
+            { display: "Velvet Crimson", base: "Crimson" }, { display: "Deep Violet", base: "Violet" },
+            { display: "Lunar Silver", base: "Silver" }, { display: "Forest Jade", base: "Jade" },
             { display: "Cosmic Teal", base: "Teal" }
         ];
         const disruptions = ["Loud Noise", "Dishonesty", "Stagnation", "Crowds", "Harsh Light", "Betrayal", "Inertia"];
-
-        // SIMPLE "CRIB" DICTIONARY
         const traitDict = {
-            'a': "Ambitious", 'b': "Brave", 'c': "Calm", 'd': "Driven",
-            'e': "Energetic", 'f': "Fearless", 'g': "Gentle", 'h': "Honest",
-            'i': "Insightful", 'j': "Joyful", 'k': "Kind", 'l': "Loyal",
-            'm': "Mystic", 'n': "Noble", 'o': "Optimistic", 'p': "Passionate",
-            'q': "Quiet", 'r': "Radiant", 's': "Strong", 't': "True",
-            'u': "Unique", 'v': "Vibrant", 'w': "Wise", 'x': "Xenial",
-            'y': "Youthful", 'z': "Zealous"
+            'a': "Ambitious", 'b': "Brave", 'c': "Calm", 'd': "Driven", 'e': "Energetic", 'f': "Fearless", 'g': "Gentle", 'h': "Honest", 'i': "Insightful", 'j': "Joyful", 'k': "Kind", 'l': "Loyal", 'm': "Mystic", 'n': "Noble", 'o': "Optimistic", 'p': "Passionate", 'q': "Quiet", 'r': "Radiant", 's': "Strong", 't': "True", 'u': "Unique", 'v': "Vibrant", 'w': "Wise", 'x': "Xenial", 'y': "Youthful", 'z': "Zealous"
         };
+        
+        // REAL STAR NAMES FOR BACKGROUND ACROSTIC
+        const starMap = {
+            'a': "Acruch", 'b': "Bellatrix", 'c': "Canopus", 'd': "Deneb", 'e': "Elnath", 'f': "Fomalhaut", 'g': "Gacrux", 'h': "Hadar", 'i': "Izar", 'j': "Jabbah", 'k': "Kaus", 'l': "Lesath", 'm': "Miaplacidus", 'n': "Nunki", 'o': "Okab", 'p': "Pollux", 'q': "Qakh", 'r': "Rigel", 's': "Sirius", 't': "Toliman", 'u': "Unukalhai", 'v': "Vega", 'w': "Wezen", 'x': "Xuange", 'y': "Yed", 'z': "Zuben"
+        };
+        const allStars = Object.values(starMap);
 
+        // --- STAR SYSTEM LOGIC ---
+        let idleStarInterval;
+        const starLayer = document.getElementById('star-layer');
+
+        function initStars() {
+            // Generate tiny background twinkles
+            for (let i = 0; i < 60; i++) {
+                const s = document.createElement('div');
+                s.className = 'tiny-star';
+                s.style.left = Math.random() * 100 + '%';
+                s.style.top = Math.random() * 100 + '%';
+                s.style.width = Math.random() * 2 + 1 + 'px';
+                s.style.height = s.style.width;
+                s.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+                s.style.setProperty('--opacity', Math.random() * 0.7 + 0.3);
+                starLayer.appendChild(s);
+            }
+            // Start idle named stars
+            idleStarInterval = setInterval(showRandomIdleStar, 2200);
+        }
+
+        function showRandomIdleStar() {
+            const name = allStars[Math.floor(Math.random() * allStars.length)];
+            spawnStarName(name);
+        }
+
+        function spawnStarName(text) {
+            const el = document.createElement('div');
+            el.className = 'named-star';
+            el.innerText = text;
+            
+            // Random Position (padded from edges)
+            el.style.left = (10 + Math.random() * 80) + '%';
+            el.style.top = (10 + Math.random() * 80) + '%';
+            
+            // Random depth scale
+            const scale = 0.7 + Math.random() * 0.5; 
+            
+            // Animation
+            el.style.animation = `starFade 1.5s ease-in-out forwards`;
+            
+            starLayer.appendChild(el);
+            setTimeout(() => el.remove(), 1600); // Cleanup
+        }
+
+        function runAcrosticStarSequence(nameStr) {
+            clearInterval(idleStarInterval); // Stop random stars
+            const cleanName = nameStr.toLowerCase().replace(/[^a-z]/g, '');
+            let delay = 0;
+            
+            cleanName.split('').forEach((char) => {
+                if (starMap[char]) {
+                    setTimeout(() => {
+                        spawnStarName(starMap[char]);
+                    }, delay);
+                    delay += 1000; // Sequence delay
+                }
+            });
+        }
+
+        window.onload = initStars;
+
+
+        // --- MAIN APP LOGIC ---
         let resultRevealTime = 0;
 
         function startDivination() {
@@ -262,6 +344,9 @@
         }
 
         function revealDestiny(name) {
+            // TRIGGER STARS
+            runAcrosticStarSequence(name);
+
             let seed = 0;
             for (let char of name) seed += char.charCodeAt(0);
             const getFrom = (arr, offset) => arr[(seed + offset) % arr.length];
@@ -271,40 +356,32 @@
             const c2Obj = getFrom(auraColors, 2);
             const avoid = getFrom(disruptions, 3);
             
-            // --- SIMPLE NAME LOGIC ---
             const cleanName = name.toLowerCase().replace(/[^a-z]/g, '');
             const firstChar = cleanName.charAt(0) || 'a';
             const lastChar = cleanName.charAt(cleanName.length - 1) || 'z';
             
             const trait1 = traitDict[firstChar];
             const trait2 = traitDict[lastChar];
-            
-            // LENGTH LOGIC: Odd = Intuitive, Even = Analytical
             const trait3 = (cleanName.length % 2 === 0) ? "Analytical" : "Intuitive";
 
-            // CHECK: IF FIRST & LAST LETTERS ARE SAME (e.g. DAVID)
             let finalTraits;
             if (firstChar === lastChar) {
-                // Show only 2 traits to avoid repetition
                 finalTraits = `${trait1} • ${trait3}`;
             } else {
-                // Show all 3 traits
                 finalTraits = `${trait1} • ${trait2} • ${trait3}`;
             }
 
             document.getElementById('res-traits').innerText = finalTraits;
 
+            // PARAGRAPH STYLE LOGIC
             const reversedName = name.toLowerCase().split('').reverse();
-            const listEl = document.getElementById('res-description');
-            listEl.innerHTML = ''; 
+            let prophecyText = "";
             reversedName.forEach(char => {
                 if (sentences[char]) {
-                    const li = document.createElement('li');
-                    li.className = 'acrostic-line';
-                    li.innerText = sentences[char];
-                    listEl.appendChild(li);
+                    prophecyText += sentences[char] + " ";
                 }
             });
+            document.getElementById('res-description').innerText = prophecyText.trim();
 
             document.getElementById('res-archetype').innerText = arch;
             document.getElementById('res-colors').innerText = `${c1Obj.display} & ${c2Obj.display}`;
@@ -332,6 +409,10 @@
                 document.getElementById('view-result').style.display = 'none';
                 document.getElementById('view-input').style.display = 'block';
                 document.getElementById('nameInput').value = '';
+                
+                // Restart Idle Stars
+                if(idleStarInterval) clearInterval(idleStarInterval);
+                idleStarInterval = setInterval(showRandomIdleStar, 2200);
             }
         }
 
@@ -339,12 +420,11 @@
             if (!e.target.closest('.glass-card')) { e.preventDefault(); }
         }, { passive: false });
 
-// ENABLE ENTER KEY
         const inputField = document.getElementById("nameInput");
         inputField.addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
-                event.preventDefault(); // Stop page refresh
-                startDivination();      // Run the main function
+                event.preventDefault();
+                startDivination();
             }
         });
         

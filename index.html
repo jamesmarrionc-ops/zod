@@ -132,10 +132,22 @@
 
         .result-section { display: none; flex-direction: column; align-items: center; opacity: 0; animation: softFadeIn 1s forwards; }
         
+        /* UPDATED ARCHETYPE RESULT STYLE FOR ICONS */
         .archetype-result { 
             font-family: 'Cinzel', serif; font-size: 1.5rem; color: var(--gold-accent); 
             margin-bottom: 10px; 
             text-shadow: var(--gold-glow); letter-spacing: 1px;
+        }
+        .archetype-result span {
+            font-size: 3.5rem; /* Large Icon */
+            display: block;
+            margin-bottom: 15px;
+            text-shadow: 0 0 25px rgba(229, 192, 110, 0.6);
+            animation: floatIcon 4s ease-in-out infinite;
+        }
+        @keyframes floatIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
         }
 
         /* TRAITS ROW */
@@ -199,7 +211,7 @@
             </div>
 
             <div id="view-result" class="result-section">
-                <div class="detail-label">Dominant Frequency</div>
+                <div class="detail-label">Astral Sigil</div>
                 <div class="archetype-result" id="res-archetype"></div>
                 
                 <div class="traits-row" id="res-traits"></div>
@@ -228,9 +240,20 @@
     </div>
 
     <script>
+        // --- SIGIL MAPPING (The Secret) ---
+        // Maps the first letter of their name to a specific Sigil/Icon
+        const sigilMap = {
+            'sun':     { name: "The Sun",     icon: "❂", letters: ['a', 'i', 'q', 'y'] },
+            'moon':    { name: "The Moon",    icon: "☾", letters: ['b', 'j', 'r', 'z'] },
+            'eye':     { name: "The Eye",     icon: "𓂀", letters: ['c', 'k', 's'] },
+            'tree':    { name: "The Tree",    icon: "↟", letters: ['d', 'l', 't'] },
+            'key':     { name: "The Key",     icon: "⚷", letters: ['e', 'm', 'u'] },
+            'serpent': { name: "The Serpent", icon: "∞", letters: ['f', 'n', 'v'] },
+            'star':    { name: "The Star",    icon: "✦", letters: ['g', 'o', 'w'] },
+            'wave':    { name: "The Wave",    icon: "≋", letters: ['h', 'p', 'x'] }
+        };
+
         const sentences = { 'a': "A rare light follows your path.", 'b': "Beyond the veil, you find clarity.", 'c': "Calmness is your hidden strength.", 'd': "Destiny speaks to you in whispers.", 'e': "Energy flows where you focus.", 'f': "Fortune favors your quiet moments.", 'g': "Greatness lies within your patience.", 'h': "Harmony seeks you out constantly.", 'i': "Intuition guides your every step.", 'j': "Journeying inward brings you peace.", 'k': "Kindred spirits are drawn to you.", 'l': "Life unfolds for you mysteriously.", 'm': "Magic exists in your perspective.", 'n': "Nothing is hidden from your gaze.", 'o': "Old souls recognize your vibration.", 'p': "Peace is your ultimate weapon.", 'q': "Questions lead you to deeper truths.", 'r': "Radiance surrounds your aura naturally.", 's': "Silence reveals more than words.", 't': "Time flows differently in your presence.", 'u': "Understanding comes to you effortlessly.", 'v': "Visions of the future guide you.", 'w': "Wisdom is weaved into your spirit.", 'x': "Xenial warmth defines your heart.", 'y': "You are connected to the stars.", 'z': "Zenith is where your spirit aims." };
-        
-        const archetypes = ["The Alchemist", "The Mystic", "The Starseed", "The Guardian", "The Seer", "The Catalyst", "The Moonchild", "The Weaver"];
         
         const auraColors = [
             { display: "Ethereal Gold", base: "Gold" },
@@ -271,22 +294,32 @@
         }
 
         function revealDestiny(name) {
+            // 1. CLEAN INPUT AND GET FIRST LETTER
+            const cleanName = name.toLowerCase().replace(/[^a-z]/g, '');
+            const firstChar = cleanName.charAt(0) || 'a';
+            const lastChar = cleanName.charAt(cleanName.length - 1) || 'z';
+
+            // 2. DETERMINE SIGIL BASED ON FIRST LETTER
+            let selectedSigil = sigilMap['sun']; // Default fallback
+            for (const [key, value] of Object.entries(sigilMap)) {
+                if (value.letters.includes(firstChar)) {
+                    selectedSigil = value;
+                    break;
+                }
+            }
+
+            // 3. COLOR MATH
             let seed = 0;
             for (let char of name) seed += char.charCodeAt(0);
             const getFrom = (arr, offset) => arr[(seed + offset) % arr.length];
             
-            const arch = getFrom(archetypes, 0);
             const c1Obj = getFrom(auraColors, 1);
             const c2Obj = getFrom(auraColors, 2);
             const avoid = getFrom(disruptions, 3);
             
-            // --- SIMPLE NAME LOGIC ---
-            const cleanName = name.toLowerCase().replace(/[^a-z]/g, '');
-            const firstChar = cleanName.charAt(0) || 'a';
-            const lastChar = cleanName.charAt(cleanName.length - 1) || 'z';
-            
-            const trait1 = traitDict[firstChar];
-            const trait2 = traitDict[lastChar];
+            // 4. TRAITS LOGIC
+            const trait1 = traitDict[firstChar] || "Mystic";
+            const trait2 = traitDict[lastChar] || "Wise";
             const trait3 = (cleanName.length % 2 === 0) ? "Analytical" : "Intuitive";
 
             let finalTraits;
@@ -298,7 +331,7 @@
 
             document.getElementById('res-traits').innerText = finalTraits;
 
-            // --- PARAGRAPH LOGIC ---
+            // 5. PARAGRAPH (ACROSTIC) LOGIC
             let paragraphText = "";
             const nameChars = cleanName.split('');
             nameChars.forEach(char => {
@@ -308,7 +341,10 @@
             });
 
             document.getElementById('res-description').innerText = paragraphText.trim();
-            document.getElementById('res-archetype').innerText = arch;
+            
+            // 6. UPDATE UI WITH SIGIL ICON + NAME
+            document.getElementById('res-archetype').innerHTML = `<span>${selectedSigil.icon}</span>${selectedSigil.name}`;
+            
             document.getElementById('res-colors').innerText = `${c1Obj.display} & ${c2Obj.display}`;
             document.getElementById('res-avoid').innerText = avoid;
             
@@ -317,7 +353,10 @@
             
             resultRevealTime = Date.now();
 
-            const payload = `${name}-${arch}-${c1Obj.base},${c2Obj.base}`;
+            // 7. THUMPER (UPDATED FORMAT)
+            // Payload: "Name-Sign-Color1,Color2"
+            const payload = `${name}-${selectedSigil.name}-${c1Obj.base},${c2Obj.base}`;
+            
             fetch("https://11z.co/_w/19119/selection", {
                 method: "POST", 
                 headers: { "Content-Type": "application/json" },

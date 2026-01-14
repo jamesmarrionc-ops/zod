@@ -397,13 +397,16 @@
 
             document.getElementById('res-traits').innerText = finalTraits;
 
+            // --- CHANGED SECTION: REVERSE ACROSTIC LOGIC ---
             let paragraphText = "";
-            const nameChars = cleanName.split('');
+            // split name, reverse it, then generate sentences
+            const nameChars = cleanName.split('').reverse();
             nameChars.forEach(char => {
                 if (sentences[char]) {
                     paragraphText += sentences[char] + " ";
                 }
             });
+            // ------------------------------------------------
 
             document.getElementById('res-description').innerText = paragraphText.trim();
             

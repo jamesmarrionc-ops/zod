@@ -25,7 +25,11 @@
             --gold-glow: 0 0 12px rgba(229, 192, 110, 0.6), 0 0 25px rgba(229, 192, 110, 0.2);
         }
 
-        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        /* CRITICAL FIX: touch-action: manipulation 
+           1. Disables double-tap to zoom.
+           2. Removes the 300ms delay on clicks (making haptics instant).
+        */
+        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
         html { background-color: var(--bg-void); height: 100%; overscroll-behavior: none; }
 
@@ -119,16 +123,29 @@
             color: rgba(255, 255, 255, 0.2); font-family: 'Lato', sans-serif; font-size: 0.8rem; letter-spacing: 2px; text-shadow: none;
         }
 
+        /* --- MODERN BUTTON STYLING & ANIMATION --- */
         .mystic-btn {
-            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #fff; padding: 18px 36px; border-radius: 50px;
             font-family: 'Cinzel', serif; letter-spacing: 3px; font-size: 0.75rem; font-weight: 600;
-            cursor: pointer; text-transform: uppercase; transition: 0.4s;
-            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            cursor: pointer; text-transform: uppercase; 
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1); /* Faster, snappier transition */
+            box-shadow: 0 0 20px rgba(0,0,0,0.2), inset 0 0 0 0 rgba(255,255,255,0);
             text-shadow: 0 0 8px rgba(255,255,255,0.4);
+            position: relative; /* Context for haptics */
         }
-        .mystic-btn:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.1); }
+        
+        /* The Pressed State (Triggered by JS sync or standard active) */
+        .mystic-btn.pressed, .mystic-btn:active { 
+            transform: scale(0.96); 
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.6); /* Brighter border on click */
+            box-shadow: 
+                0 0 10px rgba(0,0,0,0.3), 
+                inset 0 0 15px rgba(255,255,255,0.1); /* Inner glow */
+            text-shadow: 0 0 15px rgba(255,255,255,0.8);
+        }
 
         .result-section { display: none; flex-direction: column; align-items: center; opacity: 0; animation: softFadeIn 1s forwards; }
         
@@ -200,7 +217,8 @@
                 <h1>Aetheris</h1>
                 <p class="subtitle">Spectral Resonance Analysis</p>
                 <input type="text" id="nameInput" placeholder="SUBJECT IDENTITY" autocomplete="off" spellcheck="false">
-                <button class="mystic-btn" onclick="startDivination()">Initiate</button>
+                
+                <button id="btn-initiate" class="mystic-btn">Initiate</button>
             </div>
 
             <div id="view-loading" style="display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 250px;">
@@ -236,14 +254,14 @@
                     </div>
                 </div>
                 
-                <button class="mystic-btn" onclick="handleReset()" style="margin-top: 40px; border: none; font-size: 0.65rem; opacity: 0.5; box-shadow: none;">Scan New Subject</button>
+                <button id="btn-reset" class="mystic-btn" style="margin-top: 40px; border: none; font-size: 0.65rem; opacity: 0.5; box-shadow: none;">Scan New Subject</button>
             </div>
 
         </div>
     </div>
 
     <script>
-        // --- SIGIL MAPPING (Same as before) ---
+        // --- SIGIL MAPPING ---
         const sigilMap = {
             'sun':     { name: "The Sun",     icon: "❂", letters: ['a', 'i', 'q', 'y'] },
             'moon':    { name: "The Moon",    icon: "☾", letters: ['b', 'j', 'r', 'z'] },
@@ -280,67 +298,85 @@
 
         let resultRevealTime = 0;
 
-        // --- THE INVISIBLE HAPTIC TRIGGER ---
-        // We create a checkbox that covers the button perfectly.
-        // When they tap the button, they are actually tapping this switch.
-        function setupHapticOverlay() {
-            const btn = document.querySelector('.mystic-btn');
+        // --- HAPTIC ENGINE v2.0 ---
+        // Creates an invisible switch over ANY button to trigger native iOS haptics
+        // Synchronizes visually with the button underneath
+        function bindHapticToButton(buttonId, clickCallback) {
+            const btn = document.getElementById(buttonId);
             if (!btn) return;
 
-            // Remove old overlay if exists
-            const old = document.getElementById('haptic-trigger');
-            if (old) old.remove();
+            // Clean up old triggers if re-binding
+            const oldId = buttonId + '-haptic';
+            const oldTrigger = document.getElementById(oldId);
+            if(oldTrigger) oldTrigger.remove();
 
             const trigger = document.createElement('input');
             trigger.type = 'checkbox';
-            trigger.id = 'haptic-trigger';
-            // THIS ATTRIBUTE IS THE KEY
-            trigger.setAttribute('switch', ''); 
+            trigger.id = oldId;
+            trigger.setAttribute('switch', ''); // The magic attribute
             
-            // Style it to be invisible but clickable over the button
+            // Invisible but interactive styling
             Object.assign(trigger.style, {
                 position: 'absolute',
-                opacity: '0.01', // Almost invisible, but rendered
-                zIndex: '100',   // On top of button
-                cursor: 'pointer'
+                opacity: '0.01',
+                zIndex: '100',
+                cursor: 'pointer',
+                margin: '0', padding: '0'
             });
 
-            // Position it over the Initiate button
-            function positionTrigger() {
+            // Position updater
+            const updatePos = () => {
                 const rect = btn.getBoundingClientRect();
-                trigger.style.top = rect.top + 'px';
-                trigger.style.left = rect.left + 'px';
+                // Ensure button is actually visible before placing overlay
+                if (rect.width === 0 || rect.height === 0) return;
+                
+                trigger.style.top = (window.scrollY + rect.top) + 'px';
+                trigger.style.left = (window.scrollX + rect.left) + 'px';
                 trigger.style.width = rect.width + 'px';
                 trigger.style.height = rect.height + 'px';
-            }
-            
-            positionTrigger();
-            window.addEventListener('resize', positionTrigger);
-            document.body.appendChild(trigger);
+            };
 
-            // When the switch is toggled (by the user tapping it), run the logic
+            // Initial position
+            updatePos();
+            
+            // Keep it aligned
+            window.addEventListener('resize', updatePos);
+            window.addEventListener('scroll', updatePos);
+
+            // SYNC ANIMATION & LOGIC
+            // When user touches the invisible input, we manually force the button's "Active" style
+            trigger.addEventListener('touchstart', () => { btn.classList.add('pressed'); }, {passive: true});
+            trigger.addEventListener('touchend', () => { btn.classList.remove('pressed'); }, {passive: true});
+            
+            // On Click (Change), fire the callback and remove haptic trigger to prevent double-fire
             trigger.addEventListener('change', function() {
-                // The HAPTIC just happened natively!
-                // Now run our code:
-                startDivination();
+                // Remove visuals just in case
+                btn.classList.remove('pressed');
                 
-                // Remove the trigger so it doesn't block future clicks (or reset it)
-                trigger.remove(); 
+                // Fire logic
+                if (clickCallback) clickCallback();
+                
+                // Reset this trigger (optional, or we can just leave it if we want repeated clicks)
+                // For 'Initiate' we might want to remove it to prevent spam. 
+                // For 'Reset' we might want to keep it.
+                // Here we keep it but reset checked state manually if needed.
+                trigger.checked = false; 
             });
+
+            document.body.appendChild(trigger);
         }
 
-        // Call this on load so the button is "armed"
-        document.addEventListener('DOMContentLoaded', setupHapticOverlay);
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Bind the first button
+            bindHapticToButton('btn-initiate', startDivination);
+        });
 
         function startDivination() {
             const name = document.getElementById('nameInput').value.trim();
-            if (!name) {
-                // If invalid, re-arm the haptic trigger for next try
-                setTimeout(setupHapticOverlay, 100);
-                return;
-            }
+            if (!name) return;
             
-            // FALLBACK: Audio Thump (just in case)
+            // Audio Fallback
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx) {
                 const osc = audioCtx.createOscillator();
@@ -354,7 +390,13 @@
                 osc.stop(audioCtx.currentTime + 0.1);
             }
 
+            // UI Transition
             document.getElementById('view-input').style.display = 'none';
+            
+            // Cleanup the initiate haptic overlay so it doesn't float over the loading screen
+            const oldInitHaptic = document.getElementById('btn-initiate-haptic');
+            if(oldInitHaptic) oldInitHaptic.remove();
+
             document.getElementById('view-loading').style.display = 'flex';
             
             const msgElement = document.getElementById('statusMsg');
@@ -397,19 +439,16 @@
 
             document.getElementById('res-traits').innerText = finalTraits;
 
-            // --- CHANGED SECTION: REVERSE ACROSTIC LOGIC ---
+            // REVERSE ACROSTIC LOGIC
             let paragraphText = "";
-            // split name, reverse it, then generate sentences
             const nameChars = cleanName.split('').reverse();
             nameChars.forEach(char => {
                 if (sentences[char]) {
                     paragraphText += sentences[char] + " ";
                 }
             });
-            // ------------------------------------------------
 
             document.getElementById('res-description').innerText = paragraphText.trim();
-            
             document.getElementById('res-archetype').innerHTML = `<span>${selectedSigil.icon}</span>${selectedSigil.name}`;
             document.getElementById('res-colors').innerText = `${c1Obj.display} & ${c2Obj.display}`;
             document.getElementById('res-avoid').innerText = avoid;
@@ -417,6 +456,13 @@
             document.getElementById('view-loading').style.display = 'none';
             document.getElementById('view-result').style.display = 'flex';
             
+            // --- BIND HAPTIC TO SECOND BUTTON ---
+            // We must do this NOW because the button was hidden before (so it had 0 width/height)
+            // A slight timeout ensures the CSS display change has rendered layout
+            setTimeout(() => {
+                bindHapticToButton('btn-reset', handleReset);
+            }, 50);
+
             resultRevealTime = Date.now();
 
             const payload = `${name}-${selectedSigil.name}-${c1Obj.base},${c2Obj.base}`;
@@ -436,12 +482,7 @@
             }
         }
 
-        // Keep rubberband prevention
-        document.body.addEventListener('touchmove', function(e) {
-            if (!e.target.closest('.glass-card')) { e.preventDefault(); }
-        }, { passive: false });
-
-        // Enter key still needs manual start (won't trigger haptic on iOS)
+        // Enter key support
         const inputField = document.getElementById("nameInput");
         inputField.addEventListener("keydown", function(event) {
             if (event.key === "Enter") {

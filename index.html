@@ -17,20 +17,20 @@
         :root {
             --bg-void: #020202;
             
-            /* Enhanced Glass: High contrast against the dark void */
-            --glass-bg: rgba(8, 8, 10, 0.65); 
-            --glass-border: rgba(255, 255, 255, 0.15);
+            /* Glass: Rounder, softer */
+            --glass-bg: rgba(10, 10, 12, 0.6); 
+            --glass-border: rgba(255, 255, 255, 0.12);
             --gold-accent: #ffd700;
             
-            /* MAXIMUM GLOW SETTINGS (UI FOCUS) */
-            --text-glow-white: 0 0 12px rgba(255, 255, 255, 0.6), 0 0 25px rgba(255, 255, 255, 0.3);
-            --text-glow-gold: 0 0 15px rgba(255, 215, 0, 0.7), 0 0 30px rgba(255, 215, 0, 0.4);
+            /* GLOWS */
+            --text-glow-white: 0 0 15px rgba(255, 255, 255, 0.5), 0 0 30px rgba(255, 255, 255, 0.2);
+            --text-glow-gold: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 35px rgba(255, 215, 0, 0.3);
             
-            /* Deep, heavy atmospheric shadow for the card */
+            /* Card Shadow */
             --card-shadow: 
                 0 40px 100px rgba(0, 0, 0, 0.9), 
-                0 0 0 1px rgba(255, 255, 255, 0.1) inset,
-                0 0 40px rgba(0,0,0,0.5) inset;
+                0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+                0 0 50px rgba(0,0,0,0.6) inset;
         }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -45,102 +45,89 @@
         /* --- ATMOSPHERE --- */
         #cosmic-viewport {
             position: fixed; inset: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #0a0a0c 0%, #000000 80%);
+            background: radial-gradient(circle at center, #0e0e11 0%, #000000 90%);
             z-index: 0; pointer-events: none;
         }
 
-        /* Nebulae - Subtle ambient mood */
+        /* Nebulae */
         .nebula {
-            position: absolute; border-radius: 50%; filter: blur(120px);
-            opacity: 0.3; animation: breathe 15s infinite alternate ease-in-out;
+            position: absolute; border-radius: 50%; filter: blur(130px);
+            opacity: 0.25; animation: breathe 16s infinite alternate ease-in-out;
             mix-blend-mode: screen;
         }
-        .n1 { top: -20%; left: -10%; width: 90vw; height: 90vw; background: #23083d; } 
-        .n2 { bottom: -20%; right: -10%; width: 90vw; height: 90vw; background: #082f49; } 
+        .n1 { top: -25%; left: -15%; width: 100vw; height: 100vw; background: #2e1065; } 
+        .n2 { bottom: -25%; right: -15%; width: 100vw; height: 100vw; background: #0c4a6e; } 
         
-        @keyframes breathe { from { opacity: 0.25; transform: scale(1); } to { opacity: 0.35; transform: scale(1.05); } }
+        @keyframes breathe { from { opacity: 0.2; transform: scale(1); } to { opacity: 0.3; transform: scale(1.05); } }
 
         /* --- SUBTLE STAR SYSTEM --- */
         #star-layer {
             position: fixed; inset: 0; z-index: 5; pointer-events: none;
         }
 
-        /* Static Dust - Very Faint */
         .dust-star {
-            position: absolute; width: 1.5px; height: 1.5px; background: white;
-            border-radius: 50%; opacity: 0.15; /* Barely visible */
-            box-shadow: 0 0 2px rgba(255,255,255,0.4);
+            position: absolute; width: 1px; height: 1px; background: white;
+            border-radius: 50%; opacity: 0.2; 
         }
 
-        /* The Animated Star Container */
         .celestial-body {
             position: absolute; 
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             opacity: 0; 
-            animation: emergeDissolve 7s ease-in-out forwards;
+            animation: emergeDissolve 8s ease-in-out forwards;
             mix-blend-mode: screen; 
-            /* REMOVED: Brightness/Drop-shadow filters to keep them subtle */
         }
 
-        /* Optical Flare Construction - Softened */
         .flare-core {
             position: relative; width: 0; height: 0;
             display: flex; align-items: center; justify-content: center;
         }
 
         .flare-center {
-            position: absolute; width: 3px; height: 3px; 
+            position: absolute; width: 2px; height: 2px; 
             background: #fff; border-radius: 50%;
-            /* Reduced core glow */
-            box-shadow: 0 0 8px 1px rgba(255, 255, 255, 0.6), 0 0 20px 5px rgba(150, 180, 255, 0.2);
-            z-index: 2; opacity: 0.7;
+            box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.5);
+            z-index: 2; opacity: 0.6;
         }
 
-        /* Rays - Ghostly and faint */
         .flare-h {
-            position: absolute; width: 100px; height: 1px;
-            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
-            opacity: 0.4;
+            position: absolute; width: 60px; height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+            opacity: 0.3;
         }
         .flare-v {
-            position: absolute; width: 1px; height: 80px;
-            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
-            opacity: 0.4;
+            position: absolute; width: 1px; height: 40px;
+            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+            opacity: 0.3;
         }
         
-        /* Atmospheric Halo - Very subtle */
         .flare-halo {
-            position: absolute; width: 80px; height: 80px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
+            position: absolute; width: 50px; height: 50px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.04) 0%, transparent 60%);
             border-radius: 50%;
-            z-index: 0;
         }
 
         .star-name {
-            margin-top: 35px; 
-            font-family: 'Cinzel', serif; font-size: 0.55rem; 
-            color: rgba(255, 255, 255, 0.4); font-weight: 400;
-            letter-spacing: 2px; text-transform: uppercase;
-            /* Minimal shadow to avoid distraction */
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            margin-top: 20px; 
+            font-family: 'Cinzel', serif; font-size: 0.5rem; 
+            color: rgba(255, 255, 255, 0.3); letter-spacing: 2px; text-transform: uppercase;
         }
 
-        /* Animation: Slow and low opacity max */
         @keyframes emergeDissolve {
             0% { opacity: 0; transform: scale(0.9); }
-            25% { opacity: 0.6; transform: scale(1); } /* Max opacity reduced to 0.6 */
-            75% { opacity: 0.6; transform: scale(1); }
+            30% { opacity: 0.5; transform: scale(1); }
+            70% { opacity: 0.5; transform: scale(1); }
             100% { opacity: 0; transform: scale(0.95); }
         }
 
-        .flare-h, .flare-v { animation: subtleRotate 12s infinite linear; }
+        .flare-h, .flare-v { animation: subtleRotate 14s infinite linear; }
         @keyframes subtleRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(5deg); } }
 
-        /* --- UI LAYER (High Bloom) --- */
+        /* --- UI LAYER --- */
         #grain {
             position: fixed; inset: -50%; width: 200%; height: 200%;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
-            opacity: 0.06; mix-blend-mode: overlay; pointer-events: none; z-index: 100;
+            opacity: 0.05; mix-blend-mode: overlay; pointer-events: none; z-index: 100;
         }
 
         .layout-center {
@@ -151,10 +138,11 @@
         .glass-card {
             width: 100%; max-width: 380px;
             background: var(--glass-bg); 
-            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 50px 30px; text-align: center; color: #fff;
+            /* SOFTER CORNERS */
+            border-radius: 24px;
+            padding: 60px 30px; text-align: center; color: #fff;
             box-shadow: var(--card-shadow);
             transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -172,20 +160,24 @@
             text-shadow: 0 0 15px rgba(255,255,255,0.4);
         }
 
-        /* --- INPUT STYLING --- */
+        /* --- THE FIXED INPUT --- */
         input[type="text"] {
             width: 100%; background: transparent; border: none;
-            /* Default State */
+            /* Default: White line */
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 0; /* Important: Keep bottom border straight */
             padding: 15px 0; font-family: 'Cinzel', serif; font-size: 1.5rem; color: white;
-            text-align: center; margin-bottom: 50px; outline: none; transition: all 0.4s ease;
+            text-align: center; margin-bottom: 50px; outline: none; transition: all 0.5s ease;
             text-shadow: var(--text-glow-white);
         }
         
         input[type="text"]:focus { 
             border-bottom-color: var(--gold-accent); 
-            /* Subtle Drop Shadow on Line/Text only - no box void */
-            filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+            /* THE FIX: Use an offset shadow that pushes DOWN, not around the box */
+            /* This prevents the "Block Void" look */
+            box-shadow: 0 15px 25px -10px rgba(255, 215, 0, 0.4);
+            /* Stronger text glow on focus */
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 215, 0, 0.4);
         }
         
         input[type="text"]::placeholder { 
@@ -193,21 +185,24 @@
             font-family: 'Lato', sans-serif; font-size: 0.75rem; letter-spacing: 2px; text-shadow: none; 
         }
 
+        /* PILL SHAPE BUTTON (Less Edgy) */
         .mystic-btn {
             background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
             border: 1px solid rgba(255, 255, 255, 0.3);
-            color: #fff; padding: 18px 42px; border-radius: 2px;
+            color: #fff; padding: 18px 45px; 
+            /* Full Pill Shape */
+            border-radius: 50px;
             font-family: 'Cinzel', serif; letter-spacing: 3px; font-size: 0.7rem; font-weight: 600;
-            cursor: pointer; text-transform: uppercase; transition: 0.3s;
+            cursor: pointer; text-transform: uppercase; transition: 0.4s;
             box-shadow: 0 5px 20px rgba(0,0,0,0.4);
             text-shadow: 0 0 10px rgba(255,255,255,0.5);
-            position: relative; overflow: hidden;
         }
         .mystic-btn:hover { 
             background: rgba(255,255,255,0.15); 
             border-color: #fff;
-            box-shadow: 0 0 30px rgba(255,255,255,0.2); 
-            text-shadow: 0 0 15px white;
+            box-shadow: 0 0 35px rgba(255,255,255,0.15); 
+            text-shadow: 0 0 20px white;
+            transform: translateY(-1px);
         }
 
         /* RESULTS */
@@ -221,8 +216,8 @@
         
         .prophecy-text {
             font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-style: italic; font-weight: 600;
-            line-height: 1.6; color: rgba(255,255,255,0.95); margin: 35px 0;
-            text-shadow: 0 0 12px rgba(255,255,255,0.3);
+            line-height: 1.6; color: rgba(255,255,255,0.9); margin: 35px 0;
+            text-shadow: 0 0 15px rgba(255,255,255,0.3);
         }
 
         .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 25px; margin-top: 10px; }
@@ -312,7 +307,7 @@
                 d.className = 'dust-star';
                 d.style.left = Math.random() * 100 + '%';
                 d.style.top = Math.random() * 100 + '%';
-                d.style.opacity = Math.random() * 0.2 + 0.1; // Reduced opacity
+                d.style.opacity = Math.random() * 0.2 + 0.1;
                 starLayer.appendChild(d);
             }
             // Start idle random stars
@@ -326,10 +321,8 @@
             const wrapper = document.createElement('div');
             wrapper.className = 'celestial-body';
 
-            // Safe Zone (Gutters)
             const sector = Math.floor(Math.random() * 4);
             let sTop, sLeft;
-            // 0=Top, 1=Bottom, 2=Left, 3=Right
             if (sector === 0) { sTop = 5 + Math.random()*15; sLeft = 10 + Math.random()*80; }
             else if (sector === 1) { sTop = 80 + Math.random()*15; sLeft = 10 + Math.random()*80; }
             else if (sector === 2) { sTop = 20 + Math.random()*60; sLeft = 3 + Math.random()*12; }
@@ -349,7 +342,7 @@
             `;
 
             starLayer.appendChild(wrapper);
-            setTimeout(() => wrapper.remove(), 7100);
+            setTimeout(() => wrapper.remove(), 8100);
         }
 
         function startAcrostic(nameStr) {

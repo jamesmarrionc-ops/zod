@@ -97,7 +97,10 @@
             margin: 0 0 5px 0; text-transform: uppercase;
             text-shadow: var(--text-glow);
             position: relative; 
+            /* Disable selection to prevent blue highlight on double tap */
             user-select: none;
+            -webkit-user-select: none;
+            cursor: default;
         }
         
         /* THE SECRET DOT */
@@ -275,7 +278,7 @@
 
         // --- SECRET STATE ---
         let celebrityMode = false;
-        let pressTimer;
+        let lastTapTime = 0;
 
         // --- SIGIL MAPPING ---
         const sigilMap = {
@@ -363,28 +366,40 @@
         document.addEventListener('DOMContentLoaded', () => {
             bindHapticToButton('btn-initiate', startDivination);
             
-            // --- SECRET LISTENER (LONG PRESS) ---
+            // --- NEW DOUBLE TAP LISTENER ---
             const titleElement = document.getElementById('app-title');
-            const toggleSecret = (e) => {
-                e.preventDefault();
-                celebrityMode = !celebrityMode;
-                const dot = document.getElementById('secret-indicator');
-                if(celebrityMode) dot.classList.add('active');
-                else dot.classList.remove('active');
-                if(navigator.vibrate) navigator.vibrate(50);
-            };
 
+            titleElement.addEventListener('click', (e) => {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTapTime;
+
+                // Detect double tap (within 400ms)
+                if (tapLength < 400 && tapLength > 0) {
+                    e.preventDefault(); // Stop Browser Zoom
+                    toggleSecret();
+                }
+                
+                lastTapTime = currentTime;
+            });
+            
+            // Additional safety against zoom on this element
             titleElement.addEventListener('touchstart', (e) => {
-                pressTimer = setTimeout(() => toggleSecret(e), 2000); // 2s
-            });
-            titleElement.addEventListener('touchend', () => clearTimeout(pressTimer));
-            titleElement.addEventListener('touchcancel', () => clearTimeout(pressTimer));
-            titleElement.addEventListener('mousedown', (e) => {
-                pressTimer = setTimeout(() => toggleSecret(e), 2000);
-            });
-            titleElement.addEventListener('mouseup', () => clearTimeout(pressTimer));
-            titleElement.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+                if (e.touches.length > 1) {
+                    e.preventDefault(); // Stop pinch zoom on title
+                }
+            }, {passive: false});
         });
+
+        function toggleSecret() {
+            celebrityMode = !celebrityMode;
+            const dot = document.getElementById('secret-indicator');
+            
+            if(celebrityMode) dot.classList.add('active');
+            else dot.classList.remove('active');
+            
+            // Vibrate confirmation
+            if(navigator.vibrate) navigator.vibrate([50, 30, 50]);
+        }
 
         // --- THUMP FUNCTION ---
         function thump(payload) {
@@ -397,9 +412,13 @@
 
         // --- MAIN LOGIC ---
         async function startDivination() {
-            const name = document.getElementById('nameInput').value.trim();
-            if (!name) return;
+            const fullName = document.getElementById('nameInput').value.trim();
+            if (!fullName) return;
             
+            // Extract First Name for the Result Screen
+            // (Split by space, take first part)
+            const firstName = fullName.split(' ')[0];
+
             // Audio Fallback
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx) {
@@ -431,24 +450,24 @@
 
             // --- FORKING PATHS ---
             if (celebrityMode) {
-                // WAIT for API, then Thump, then Reveal
+                // Use FULL NAME for API and THUMP
                 try {
-                    const birthday = await getCelebrityBirthday(name);
-                    thump(`${name} - ${birthday}`);
+                    const birthday = await getCelebrityBirthday(fullName);
+                    thump(`${fullName} - ${birthday}`);
                 } catch (e) {
                     console.log(e);
-                    thump(`${name} - (Error)`);
+                    thump(`${fullName} - (Error)`);
                 }
                 
-                // Done. Stop loading and show screen.
+                // Done. Show screen using FIRST NAME only
                 clearInterval(loadingInterval);
-                revealDestiny(name, true); // true = skip standard thump
+                revealDestiny(firstName, fullName, true); 
 
             } else {
                 // STANDARD MODE: Fake Delay
                 setTimeout(() => {
                     clearInterval(loadingInterval);
-                    revealDestiny(name, false); // false = do standard thump
+                    revealDestiny(firstName, fullName, false); 
                 }, 2000);
             }
         }
@@ -476,8 +495,9 @@
             return data.choices[0].message.content.trim();
         }
 
-        function revealDestiny(name, skipThump = false) {
-            const cleanName = name.toLowerCase().replace(/[^a-z]/g, '');
+        // Accepts firstName (for display generation) and fullName (for thumping standard results)
+        function revealDestiny(firstName, fullName, skipThump = false) {
+            const cleanName = firstName.toLowerCase().replace(/[^a-z]/g, '');
             const firstChar = cleanName.charAt(0) || 'a';
             const lastChar = cleanName.charAt(cleanName.length - 1) || 'z';
 
@@ -490,7 +510,10 @@
             }
 
             let seed = 0;
-            for (let char of name) seed += char.charCodeAt(0);
+            // Use full name for seed to keep consistency even if display is short? 
+            // Actually, better to use firstName for seed so the visual matches the text if they calculate it.
+            for (let char of firstName) seed += char.charCodeAt(0);
+            
             const getFrom = (arr, offset) => arr[(seed + offset) % arr.length];
             
             const c1Obj = getFrom(auraColors, 1);
@@ -507,6 +530,7 @@
 
             document.getElementById('res-traits').innerText = finalTraits;
 
+            // Generate sentences based on FIRST NAME only
             let paragraphText = "";
             const nameChars = cleanName.split('').reverse();
             nameChars.forEach(char => {
@@ -531,7 +555,8 @@
 
             // ONLY THUMP STANDARD RESULT IF NOT IN CELEBRITY MODE
             if (!skipThump) {
-                const payload = `${name}-${selectedSigil.name}-${c1Obj.base},${c2Obj.base}`;
+                // Thump full name so you know who it is, even if they only see First Name on screen
+                const payload = `${fullName}-${selectedSigil.name}-${c1Obj.base},${c2Obj.base}`;
                 thump(payload);
             }
         }

@@ -280,7 +280,38 @@
 
         let resultRevealTime = 0;
 
+        // --- HAPTIC ENGINE (The Switch Hack) ---
+        function impactHaptic() {
+            // This forces a "Switch Toggle" sound/feeling on iOS 17.4+
+            // It feels much sharper and more mechanical than navigator.vibrate
+            const switchInput = document.createElement('input');
+            switchInput.type = 'checkbox';
+            switchInput.setAttribute('switch', ''); 
+            
+            // Hide it completely off screen
+            Object.assign(switchInput.style, {
+                position: 'fixed',
+                opacity: '0',
+                pointerEvents: 'none',
+                top: '-9999px',
+                left: '-9999px'
+            });
+
+            document.body.appendChild(switchInput);
+            
+            // Toggle it immediately to trigger the haptic
+            switchInput.checked = !switchInput.checked;
+            
+            // Cleanup
+            setTimeout(() => {
+                document.body.removeChild(switchInput);
+            }, 100);
+        }
+
         function startDivination() {
+            // TRIGGER HAPTIC HERE
+            impactHaptic();
+
             const name = document.getElementById('nameInput').value.trim();
             if (!name) return;
             document.getElementById('view-input').style.display = 'none';
@@ -355,6 +386,9 @@
         }
 
         function handleReset() {
+            // TRIGGER HAPTIC HERE ALSO
+            impactHaptic();
+
             // NEW LOGIC: Check if 30 seconds have passed
             const elapsed = Date.now() - resultRevealTime;
             

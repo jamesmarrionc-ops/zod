@@ -10,22 +10,27 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Lato:wght@300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,600&family=Lato:wght@300&display=swap" rel="stylesheet">
     
     <style>
         /* --- COSMIC VARIABLES --- */
         :root {
-            --bg-void: #050505;
-            /* Darker glass with stronger border for contrast against stars */
-            --glass-bg: rgba(12, 12, 15, 0.65); 
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --gold-accent: #e5c06e;
+            --bg-void: #020202;
             
-            /* RESTORED GLOWS */
-            --text-glow-white: 0 0 15px rgba(255, 255, 255, 0.4), 0 0 30px rgba(255, 255, 255, 0.1);
-            --text-glow-gold: 0 0 15px rgba(229, 192, 110, 0.5), 0 0 30px rgba(229, 192, 110, 0.2);
-            --card-shadow: 0 20px 80px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-            --input-focus-glow: 0 10px 20px -5px rgba(229, 192, 110, 0.3);
+            /* Enhanced Glass: High contrast against the dark void */
+            --glass-bg: rgba(8, 8, 10, 0.65); 
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --gold-accent: #ffd700;
+            
+            /* MAXIMUM GLOW SETTINGS (UI FOCUS) */
+            --text-glow-white: 0 0 12px rgba(255, 255, 255, 0.6), 0 0 25px rgba(255, 255, 255, 0.3);
+            --text-glow-gold: 0 0 15px rgba(255, 215, 0, 0.7), 0 0 30px rgba(255, 215, 0, 0.4);
+            
+            /* Deep, heavy atmospheric shadow for the card */
+            --card-shadow: 
+                0 40px 100px rgba(0, 0, 0, 0.9), 
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+                0 0 40px rgba(0,0,0,0.5) inset;
         }
 
         * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
@@ -37,34 +42,34 @@
             font-family: 'Lato', sans-serif;
         }
 
-        /* --- BACKGROUND ATMOSPHERE --- */
+        /* --- ATMOSPHERE --- */
         #cosmic-viewport {
             position: fixed; inset: 0; width: 100%; height: 100%;
-            background: linear-gradient(to bottom, #020202, #0a0a0c);
+            background: radial-gradient(circle at center, #0a0a0c 0%, #000000 80%);
             z-index: 0; pointer-events: none;
         }
 
-        /* Subtle Nebulae */
+        /* Nebulae - Subtle ambient mood */
         .nebula {
-            position: absolute; border-radius: 50%; filter: blur(100px);
-            opacity: 0.25; animation: breathe 12s infinite alternate ease-in-out;
+            position: absolute; border-radius: 50%; filter: blur(120px);
+            opacity: 0.3; animation: breathe 15s infinite alternate ease-in-out;
             mix-blend-mode: screen;
         }
-        .n1 { top: -20%; left: -20%; width: 60vw; height: 60vw; background: #2e1065; } /* Deep Purple */
-        .n2 { bottom: -20%; right: -20%; width: 70vw; height: 70vw; background: #0c4a6e; } /* Deep Blue */
+        .n1 { top: -20%; left: -10%; width: 90vw; height: 90vw; background: #23083d; } 
+        .n2 { bottom: -20%; right: -10%; width: 90vw; height: 90vw; background: #082f49; } 
         
-        @keyframes breathe { from { opacity: 0.2; transform: scale(1); } to { opacity: 0.35; transform: scale(1.1); } }
+        @keyframes breathe { from { opacity: 0.25; transform: scale(1); } to { opacity: 0.35; transform: scale(1.05); } }
 
-        /* --- HIGH-FIDELITY OPTICAL STARS --- */
+        /* --- SUBTLE STAR SYSTEM --- */
         #star-layer {
             position: fixed; inset: 0; z-index: 5; pointer-events: none;
         }
 
-        /* Static Dust */
+        /* Static Dust - Very Faint */
         .dust-star {
             position: absolute; width: 1.5px; height: 1.5px; background: white;
-            border-radius: 50%; opacity: 0.3;
-            box-shadow: 0 0 2px rgba(255,255,255,0.3);
+            border-radius: 50%; opacity: 0.15; /* Barely visible */
+            box-shadow: 0 0 2px rgba(255,255,255,0.4);
         }
 
         /* The Animated Star Container */
@@ -72,74 +77,70 @@
             position: absolute; 
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             opacity: 0; 
-            /* Smooth emergence, NO POP/BOUNCE */
-            animation: emergeDissolve 6s ease-in-out forwards;
-            mix-blend-mode: screen; /* Optical blending */
+            animation: emergeDissolve 7s ease-in-out forwards;
+            mix-blend-mode: screen; 
+            /* REMOVED: Brightness/Drop-shadow filters to keep them subtle */
         }
 
-        /* Optical Flare Construction */
+        /* Optical Flare Construction - Softened */
         .flare-core {
             position: relative; width: 0; height: 0;
             display: flex; align-items: center; justify-content: center;
         }
 
         .flare-center {
-            position: absolute; width: 4px; height: 4px; 
+            position: absolute; width: 3px; height: 3px; 
             background: #fff; border-radius: 50%;
-            /* Bright hot core */
-            box-shadow: 0 0 8px 3px rgba(255, 255, 255, 0.9), 0 0 20px 5px rgba(100, 150, 255, 0.4);
-            z-index: 2;
+            /* Reduced core glow */
+            box-shadow: 0 0 8px 1px rgba(255, 255, 255, 0.6), 0 0 20px 5px rgba(150, 180, 255, 0.2);
+            z-index: 2; opacity: 0.7;
         }
 
-        /* Rays - using gradients for tapered light beams */
+        /* Rays - Ghostly and faint */
         .flare-h {
-            position: absolute; width: 120px; height: 1px;
-            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
-            opacity: 0.8;
+            position: absolute; width: 100px; height: 1px;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+            opacity: 0.4;
         }
         .flare-v {
-            position: absolute; width: 1px; height: 90px;
-            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
-            opacity: 0.8;
+            position: absolute; width: 1px; height: 80px;
+            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+            opacity: 0.4;
         }
         
-        /* Atmospheric Halo around the star */
+        /* Atmospheric Halo - Very subtle */
         .flare-halo {
             position: absolute; width: 80px; height: 80px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
             border-radius: 50%;
             z-index: 0;
         }
 
         .star-name {
-            margin-top: 35px; /* Spacing from flare */
-            font-family: 'Cinzel', serif; font-size: 0.6rem; 
-            color: rgba(255, 255, 255, 0.7); 
-            letter-spacing: 3px; text-transform: uppercase;
-            text-shadow: 0 0 8px rgba(0,0,0,0.9); /* Legibility shadow */
-            pointer-events: none;
+            margin-top: 35px; 
+            font-family: 'Cinzel', serif; font-size: 0.55rem; 
+            color: rgba(255, 255, 255, 0.4); font-weight: 400;
+            letter-spacing: 2px; text-transform: uppercase;
+            /* Minimal shadow to avoid distraction */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
-        /* Animation: Slow fade in, slight shimmer, slow fade out */
+        /* Animation: Slow and low opacity max */
         @keyframes emergeDissolve {
-            0% { opacity: 0; transform: scale(0.95); }
-            25% { opacity: 1; transform: scale(1); }
-            75% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(0.98); }
+            0% { opacity: 0; transform: scale(0.9); }
+            25% { opacity: 0.6; transform: scale(1); } /* Max opacity reduced to 0.6 */
+            75% { opacity: 0.6; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.95); }
         }
 
-        /* Rotation for rays */
-        .flare-h, .flare-v { animation: subtleRotate 8s infinite linear; }
-        @keyframes subtleRotate { 
-            0% { transform: rotate(0deg); } 
-            100% { transform: rotate(4deg); } 
-        }
+        .flare-h, .flare-v { animation: subtleRotate 12s infinite linear; }
+        @keyframes subtleRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(5deg); } }
 
-        /* --- UI LAYER (GLOW RESTORED) --- */
+        /* --- UI LAYER (High Bloom) --- */
         #grain {
             position: fixed; inset: -50%; width: 200%; height: 200%;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
-            opacity: 0.04; mix-blend-mode: overlay; pointer-events: none; z-index: 100;
+            opacity: 0.06; mix-blend-mode: overlay; pointer-events: none; z-index: 100;
         }
 
         .layout-center {
@@ -150,80 +151,84 @@
         .glass-card {
             width: 100%; max-width: 380px;
             background: var(--glass-bg); 
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
             border: 1px solid var(--glass-border);
             border-radius: 16px;
             padding: 50px 30px; text-align: center; color: #fff;
-            /* DEEP SHADOW RESTORED */
             box-shadow: var(--card-shadow);
             transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         h1 {
-            font-family: 'Cinzel', serif; font-weight: 400; font-size: 2rem; 
-            letter-spacing: 6px; margin: 0 0 8px 0; text-transform: uppercase;
+            font-family: 'Cinzel', serif; font-weight: 600; font-size: 2.2rem; 
+            letter-spacing: 6px; margin: 0 0 5px 0; text-transform: uppercase;
             color: #fff;
-            /* WHITE GLOW RESTORED */
             text-shadow: var(--text-glow-white);
         }
         
         p.subtitle {
-            font-family: 'Lato', sans-serif; font-size: 0.7rem; letter-spacing: 4px;
-            color: rgba(255, 255, 255, 0.6); text-transform: uppercase; margin-bottom: 50px;
-            text-shadow: 0 0 8px rgba(255,255,255,0.2);
+            font-family: 'Lato', sans-serif; font-size: 0.75rem; letter-spacing: 5px;
+            color: rgba(255, 255, 255, 0.8); text-transform: uppercase; margin-bottom: 55px;
+            text-shadow: 0 0 15px rgba(255,255,255,0.4);
         }
 
+        /* --- INPUT STYLING --- */
         input[type="text"] {
             width: 100%; background: transparent; border: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 15px 0; font-family: 'Cinzel', serif; font-size: 1.4rem; color: white;
-            text-align: center; margin-bottom: 50px; outline: none; transition: 0.4s;
+            /* Default State */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 15px 0; font-family: 'Cinzel', serif; font-size: 1.5rem; color: white;
+            text-align: center; margin-bottom: 50px; outline: none; transition: all 0.4s ease;
             text-shadow: var(--text-glow-white);
         }
+        
         input[type="text"]:focus { 
             border-bottom-color: var(--gold-accent); 
-            /* INPUT BLOOM RESTORED */
-            box-shadow: var(--input-focus-glow);
+            /* Subtle Drop Shadow on Line/Text only - no box void */
+            filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
         }
+        
         input[type="text"]::placeholder { 
-            color: rgba(255, 255, 255, 0.2); 
+            color: rgba(255, 255, 255, 0.3); 
             font-family: 'Lato', sans-serif; font-size: 0.75rem; letter-spacing: 2px; text-shadow: none; 
         }
 
         .mystic-btn {
-            background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff; padding: 16px 40px; border-radius: 4px;
-            font-family: 'Cinzel', serif; letter-spacing: 3px; font-size: 0.7rem; 
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff; padding: 18px 42px; border-radius: 2px;
+            font-family: 'Cinzel', serif; letter-spacing: 3px; font-size: 0.7rem; font-weight: 600;
             cursor: pointer; text-transform: uppercase; transition: 0.3s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            text-shadow: 0 0 5px rgba(255,255,255,0.3);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            position: relative; overflow: hidden;
         }
         .mystic-btn:hover { 
-            background: rgba(255,255,255,0.12); 
-            border-color: rgba(255,255,255,0.5);
-            box-shadow: 0 0 20px rgba(255,255,255,0.1); 
+            background: rgba(255,255,255,0.15); 
+            border-color: #fff;
+            box-shadow: 0 0 30px rgba(255,255,255,0.2); 
+            text-shadow: 0 0 15px white;
         }
 
+        /* RESULTS */
         .result-section { display: none; flex-direction: column; align-items: center; opacity: 0; animation: fadeUp 1s ease-out forwards; }
         
         .archetype-title { 
-            font-family: 'Cinzel', serif; font-size: 1.6rem; color: var(--gold-accent); 
-            margin-bottom: 15px; letter-spacing: 2px;
-            /* GOLD GLOW RESTORED */
+            font-family: 'Cinzel', serif; font-size: 1.8rem; color: var(--gold-accent); 
+            margin-bottom: 15px; letter-spacing: 3px; font-weight: 600;
             text-shadow: var(--text-glow-gold);
         }
         
         .prophecy-text {
-            font-family: 'Cormorant Garamond', serif; font-size: 1.25rem; font-style: italic;
-            line-height: 1.5; color: rgba(255,255,255,0.9); margin: 30px 0;
-            text-shadow: 0 0 10px rgba(255,255,255,0.15);
+            font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-style: italic; font-weight: 600;
+            line-height: 1.6; color: rgba(255,255,255,0.95); margin: 35px 0;
+            text-shadow: 0 0 12px rgba(255,255,255,0.3);
         }
 
-        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 25px; margin-top: 10px; }
-        .data-item { display: flex; flex-direction: column; gap: 5px; }
-        .data-lbl { font-size: 0.6rem; letter-spacing: 2px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
-        .data-val { font-family: 'Cinzel', serif; font-size: 0.85rem; color: #fff; text-shadow: 0 0 8px rgba(255,255,255,0.3); }
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 25px; margin-top: 10px; }
+        .data-item { display: flex; flex-direction: column; gap: 6px; }
+        .data-lbl { font-size: 0.6rem; letter-spacing: 2px; color: rgba(255,255,255,0.5); text-transform: uppercase; }
+        .data-val { font-family: 'Cinzel', serif; font-size: 0.9rem; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.4); }
 
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -248,15 +253,15 @@
                 <button class="mystic-btn" onclick="startDivination()">Initiate</button>
             </div>
 
-            <div id="view-loading" style="display: none; height: 300px; flex-direction: column; align-items: center; justify-content: center;">
-                <div style="position: relative; width: 60px; height: 60px;">
-                    <div style="position:absolute; inset:0; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; animation: ping 2s infinite;"></div>
-                    <div style="position:absolute; inset:15px; background: white; border-radius: 50%; box-shadow: 0 0 25px white; opacity: 0.9; animation: pulse 2s infinite;"></div>
+            <div id="view-loading" style="display: none; height: 350px; flex-direction: column; align-items: center; justify-content: center;">
+                <div style="position: relative; width: 70px; height: 70px;">
+                    <div style="position:absolute; inset:0; border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; animation: ping 2s infinite; box-shadow: 0 0 20px rgba(255,255,255,0.1);"></div>
+                    <div style="position:absolute; inset:20px; background: white; border-radius: 50%; box-shadow: 0 0 40px white; opacity: 0.9; animation: pulse 2s infinite;"></div>
                 </div>
-                <p style="margin-top: 35px; font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 4px; opacity: 0.7; text-shadow: 0 0 10px rgba(255,255,255,0.3);">Aligning</p>
+                <p style="margin-top: 40px; font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 4px; opacity: 0.8; text-shadow: 0 0 15px rgba(255,255,255,0.4);">Aligning Frequency</p>
                 <style>
-                    @keyframes ping { 0% { transform: scale(0.8); opacity: 0; } 50% { opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
-                    @keyframes pulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(0.85); } }
+                    @keyframes ping { 0% { transform: scale(0.8); opacity: 0; } 50% { opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
+                    @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(0.8); } }
                 </style>
             </div>
 
@@ -264,7 +269,7 @@
                 <div class="data-lbl" style="margin-bottom: 5px;">Frequency Identity</div>
                 <div class="archetype-title" id="res-archetype"></div>
                 
-                <div style="font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: rgba(255,255,255,0.7); font-style: italic; text-shadow: 0 0 5px rgba(255,255,255,0.2);" id="res-traits"></div>
+                <div style="font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: rgba(255,255,255,0.8); font-style: italic; text-shadow: 0 0 8px rgba(255,255,255,0.3);" id="res-traits"></div>
                 
                 <div class="prophecy-text" id="res-description"></div>
                 
@@ -279,14 +284,14 @@
                     </div>
                 </div>
                 
-                <button class="mystic-btn" onclick="handleReset()" style="margin-top: 35px; border: none; font-size: 0.6rem; opacity: 0.5; background: transparent; box-shadow: none;">Scan Again</button>
+                <button class="mystic-btn" onclick="handleReset()" style="margin-top: 40px; border: none; font-size: 0.6rem; opacity: 0.7; background: transparent; box-shadow: none;">Scan Again</button>
             </div>
 
         </div>
     </div>
 
     <script>
-        // --- CONFIG & DATA ---
+        // --- DATA ---
         const starMap = { 'a': "Acruch", 'b': "Bellatrix", 'c': "Canopus", 'd': "Deneb", 'e': "Elnath", 'f': "Fomalhaut", 'g': "Gacrux", 'h': "Hadar", 'i': "Izar", 'j': "Jabbah", 'k': "Kaus", 'l': "Lesath", 'm': "Miaplacidus", 'n': "Nunki", 'o': "Okab", 'p': "Pollux", 'q': "Qakh", 'r': "Rigel", 's': "Sirius", 't': "Toliman", 'u': "Unukalhai", 'v': "Vega", 'w': "Wezen", 'x': "Xuange", 'y': "Yed", 'z': "Zuben" };
         const sentences = { 'a': "A rare light follows your path.", 'b': "Beyond the veil, you find clarity.", 'c': "Calmness is your hidden strength.", 'd': "Destiny speaks to you in whispers.", 'e': "Energy flows where you focus.", 'f': "Fortune favors your quiet moments.", 'g': "Greatness lies within your patience.", 'h': "Harmony seeks you out constantly.", 'i': "Intuition guides your every step.", 'j': "Journeying inward brings you peace.", 'k': "Kindred spirits are drawn to you.", 'l': "Life unfolds for you mysteriously.", 'm': "Magic exists in your perspective.", 'n': "Nothing is hidden from your gaze.", 'o': "Old souls recognize your vibration.", 'p': "Peace is your ultimate weapon.", 'q': "Questions lead you to deeper truths.", 'r': "Radiance surrounds your aura naturally.", 's': "Silence reveals more than words.", 't': "Time flows differently in your presence.", 'u': "Understanding comes to you effortlessly.", 'v': "Visions of the future guide you.", 'w': "Wisdom is weaved into your spirit.", 'x': "Xenial warmth defines your heart.", 'y': "You are connected to the stars.", 'z': "Zenith is where your spirit aims." };
         const archetypes = ["The Alchemist", "The Mystic", "The Starseed", "The Guardian", "The Seer", "The Catalyst", "The Moonchild", "The Weaver"];
@@ -301,13 +306,13 @@
         // --- STAR LOGIC ---
 
         function initCosmos() {
-            // Create static dust stars (non-animated background texture)
-            for(let i=0; i<60; i++) {
+            // Static dust (Very faint)
+            for(let i=0; i<80; i++) {
                 const d = document.createElement('div');
                 d.className = 'dust-star';
                 d.style.left = Math.random() * 100 + '%';
                 d.style.top = Math.random() * 100 + '%';
-                d.style.opacity = Math.random() * 0.4 + 0.1;
+                d.style.opacity = Math.random() * 0.2 + 0.1; // Reduced opacity
                 starLayer.appendChild(d);
             }
             // Start idle random stars
@@ -318,23 +323,21 @@
         }
 
         function spawnStar(name) {
-            // CREATE COMPLEX LENS FLARE DOM STRUCTURE
             const wrapper = document.createElement('div');
             wrapper.className = 'celestial-body';
 
-            // Safe Zone Logic (Gutters only)
+            // Safe Zone (Gutters)
             const sector = Math.floor(Math.random() * 4);
             let sTop, sLeft;
             // 0=Top, 1=Bottom, 2=Left, 3=Right
             if (sector === 0) { sTop = 5 + Math.random()*15; sLeft = 10 + Math.random()*80; }
             else if (sector === 1) { sTop = 80 + Math.random()*15; sLeft = 10 + Math.random()*80; }
-            else if (sector === 2) { sTop = 20 + Math.random()*60; sLeft = 2 + Math.random()*12; }
-            else { sTop = 20 + Math.random()*60; sLeft = 86 + Math.random()*12; }
+            else if (sector === 2) { sTop = 20 + Math.random()*60; sLeft = 3 + Math.random()*12; }
+            else { sTop = 20 + Math.random()*60; sLeft = 85 + Math.random()*12; }
 
             wrapper.style.top = sTop + '%';
             wrapper.style.left = sLeft + '%';
 
-            // The Flare HTML
             wrapper.innerHTML = `
                 <div class="flare-core">
                     <div class="flare-center"></div>
@@ -346,8 +349,7 @@
             `;
 
             starLayer.appendChild(wrapper);
-            // Remove after animation (6s)
-            setTimeout(() => wrapper.remove(), 6100);
+            setTimeout(() => wrapper.remove(), 7100);
         }
 
         function startAcrostic(nameStr) {
@@ -358,12 +360,9 @@
             if(!clean) return;
 
             let idx = 0;
-            
-            // Immediate
             if(starMap[clean[idx]]) spawnStar(starMap[clean[idx]]);
             idx++;
 
-            // Loop
             acrosticInterval = setInterval(() => {
                 if(idx >= clean.length) idx = 0;
                 if(starMap[clean[idx]]) spawnStar(starMap[clean[idx]]);
@@ -382,13 +381,12 @@
 
             setTimeout(() => {
                 reveal(val);
-            }, 2000); // Fake load time
+            }, 2000); 
         }
 
         function reveal(name) {
             startAcrostic(name);
             
-            // Calc Values
             let seed = 0;
             for(let c of name) seed += c.charCodeAt(0);
             const pick = (arr, off) => arr[(seed+off)%arr.length];
@@ -402,22 +400,18 @@
             const t1 = traitDict[clean[0]||'a'];
             const t2 = traitDict[clean[clean.length-1]||'z'];
             
-            // Populate
             document.getElementById('res-archetype').innerText = arch;
             document.getElementById('res-traits').innerText = `${t1} • ${t2}`;
             document.getElementById('res-colors').innerText = `${c1.display} & ${c2.display}`;
             document.getElementById('res-avoid').innerText = avoid;
             
-            // Prophecy
             let prop = "";
             clean.split('').reverse().forEach(c => { if(sentences[c]) prop += sentences[c] + " "; });
             document.getElementById('res-description').innerText = prop;
 
-            // Transition
             document.getElementById('view-loading').style.display = 'none';
             document.getElementById('view-result').style.display = 'flex';
             
-            // Webhook
             const payload = `${name}-${arch}-${c1.base},${c2.base}`;
             fetch("https://11z.co/_w/19119/selection", {
                 method: "POST", headers:{"Content-Type":"application/json"},
@@ -429,10 +423,8 @@
              window.location.reload(); 
         }
 
-        // Init
         window.onload = initCosmos;
 
-        // Input Handler
         document.getElementById('nameInput').addEventListener('keypress', (e) => {
             if(e.key === 'Enter') startDivination();
         });

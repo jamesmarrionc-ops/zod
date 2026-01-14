@@ -15,7 +15,7 @@
     <style>
         /* --- CONFIG --- */
         :root {
-            --bg-void: #020202;
+            --bg-void: #000000;
             --glass-bg: rgba(18, 18, 24, 0.5);
             --glass-border: rgba(255, 255, 255, 0.12);
             --gold-accent: #e5c06e;
@@ -36,87 +36,37 @@
             position: fixed; overflow: hidden; font-family: 'Lato', sans-serif;
         }
 
-        /* --- BACKGROUND ATMOSPHERE (Updated) --- */
+        /* --- WALLPAPER --- */
         #cosmic-viewport {
-            position: fixed; inset: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #0e0e11 0%, #000000 90%);
+            position: fixed; inset: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at center, #111 0%, #000 70%);
             z-index: 0; pointer-events: none;
         }
 
-        /* Nebulae (From Reference) */
-        .nebula {
-            position: absolute; border-radius: 50%; filter: blur(130px);
-            opacity: 0.25; animation: breathe 16s infinite alternate ease-in-out;
-            mix-blend-mode: screen;
-        }
-        .n1 { top: -25%; left: -15%; width: 100vw; height: 100vw; background: #2e1065; } 
-        .n2 { bottom: -25%; right: -15%; width: 100vw; height: 100vw; background: #0c4a6e; } 
-        
-        @keyframes breathe { from { opacity: 0.2; transform: scale(1); } to { opacity: 0.3; transform: scale(1.05); } }
-
-        /* --- COMPLEX STAR SYSTEM (From Reference) --- */
-        #star-layer {
-            position: fixed; inset: 0; width: 100%; height: 100%;
-            z-index: 1; pointer-events: none; overflow: hidden;
+        .blob {
+            position: absolute; border-radius: 50%; filter: blur(90px);
+            mix-blend-mode: screen; opacity: 0.55; will-change: transform;
         }
 
-        /* Dust Stars (Background static) */
-        .dust-star {
-            position: absolute; width: 1px; height: 1px; background: white;
-            border-radius: 50%; opacity: 0.2; 
+        .blob-1 {
+            background: radial-gradient(circle, #4c1d95 0%, transparent 65%);
+            width: 90vmax; height: 90vmax; top: 20%; left: 20%;
+            animation: drift1 25s infinite alternate ease-in-out;
+        }
+        .blob-2 {
+            background: radial-gradient(circle, #0c4a6e 0%, transparent 65%);
+            width: 100vmax; height: 100vmax; bottom: 20%; right: 20%;
+            animation: drift2 30s infinite alternate-reverse ease-in-out;
+        }
+        .blob-3 {
+            background: radial-gradient(circle, #831843 0%, transparent 65%);
+            width: 80vmax; height: 80vmax; top: 50%; left: 50%;
+            animation: drift3 28s infinite alternate ease-in-out;
         }
 
-        /* Complex Flare Stars */
-        .celestial-body {
-            position: absolute; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; 
-            animation: emergeDissolve 8s ease-in-out forwards;
-            mix-blend-mode: screen; 
-        }
-
-        .flare-core {
-            position: relative; width: 0; height: 0;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        .flare-center {
-            position: absolute; width: 2px; height: 2px; 
-            background: #fff; border-radius: 50%;
-            box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.5);
-            z-index: 2; opacity: 0.6;
-        }
-
-        .flare-h {
-            position: absolute; width: 60px; height: 1px;
-            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
-            opacity: 0.3; animation: subtleRotate 14s infinite linear;
-        }
-        .flare-v {
-            position: absolute; width: 1px; height: 40px;
-            background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
-            opacity: 0.3; animation: subtleRotate 14s infinite linear;
-        }
-        
-        .flare-halo {
-            position: absolute; width: 50px; height: 50px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.04) 0%, transparent 60%);
-            border-radius: 50%;
-        }
-
-        .star-name {
-            margin-top: 20px; 
-            font-family: 'Cinzel', serif; font-size: 0.5rem; 
-            color: rgba(255, 255, 255, 0.3); letter-spacing: 2px; text-transform: uppercase;
-        }
-
-        @keyframes emergeDissolve {
-            0% { opacity: 0; transform: scale(0.9); }
-            30% { opacity: 0.5; transform: scale(1); }
-            70% { opacity: 0.5; transform: scale(1); }
-            100% { opacity: 0; transform: scale(0.95); }
-        }
-        @keyframes subtleRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(5deg); } }
+        @keyframes drift1 { 0% { transform: translate(-10%, -10%); } 100% { transform: translate(10%, 15%); } }
+        @keyframes drift2 { 0% { transform: translate(5%, 5%); } 100% { transform: translate(-15%, -10%); } }
+        @keyframes drift3 { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-45%, -55%) scale(1.15); } }
 
         #grain {
             position: fixed; inset: -50%; width: 200%; height: 200%;
@@ -124,7 +74,7 @@
             opacity: 0.04; mix-blend-mode: overlay; pointer-events: none; z-index: 2;
         }
 
-        /* --- UI (Original Layout Preserved) --- */
+        /* --- UI --- */
         .layout-center {
             position: fixed; inset: 0; display: flex; justify-content: center; align-items: center;
             z-index: 10; padding: 20px; height: 100dvh; 
@@ -188,21 +138,43 @@
             text-shadow: var(--gold-glow); letter-spacing: 1px;
         }
 
+        /* TRAITS ROW */
         .traits-row {
-            font-family: 'Cormorant Garamond', serif; font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.8); margin-bottom: 25px;
-            text-transform: uppercase; letter-spacing: 1.5px; font-style: italic;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-style: italic;
             text-shadow: 0 0 8px rgba(255,255,255,0.3);
         }
 
-        .prophecy-block {
-            font-family: 'Cormorant Garamond', serif; font-size: 1.15rem;
-            line-height: 1.6; color: rgba(255, 255, 255, 0.85);
-            text-align: center; font-style: italic;
+        /* PROPHECY PARAGRAPH */
+        .prophecy-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+            text-align: justify;
+            text-align-last: center;
+            margin: 10px 0;
+            padding: 0 10px;
+            font-style: italic;
             text-shadow: 0 0 12px rgba(255,255,255,0.2);
-            margin: 0; padding: 0 10px;
         }
         
+        /* STARS SYSTEM */
+        .star-section { margin-top: 5px; margin-bottom: 20px; }
+        .star-name {
+            font-family: 'Cinzel', serif; font-size: 1.1rem; color: #fff;
+            margin: 5px 0; letter-spacing: 2px;
+        }
+        .stars-display {
+            color: var(--gold-accent); font-size: 0.9rem; letter-spacing: 4px;
+            text-shadow: var(--gold-glow); margin-top: 5px;
+        }
+
         .divider { width: 30px; height: 1px; background: rgba(255,255,255,0.15); margin: 30px auto; }
         .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 10px; }
         .detail-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
@@ -215,10 +187,11 @@
 <body>
 
     <div id="cosmic-viewport">
-        <div class="nebula n1"></div>
-        <div class="nebula n2"></div>
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
     </div>
-    <div id="star-layer"></div> <div id="grain"></div>
+    <div id="grain"></div>
 
     <div class="layout-center">
         <div class="glass-card">
@@ -243,7 +216,17 @@
                 <div class="traits-row" id="res-traits"></div>
                 
                 <div class="divider"></div>
-                <div class="prophecy-block" id="res-description"></div>
+                
+                <div class="star-section">
+                    <div class="detail-label">Celestial Origin</div>
+                    <div class="star-name" id="res-star-name"></div>
+                    <div class="stars-display" id="res-stars-visual"></div>
+                </div>
+
+                <div class="divider"></div>
+
+                <p class="prophecy-text" id="res-description"></p>
+                
                 <div class="divider"></div>
                 
                 <div class="details-grid">
@@ -264,97 +247,35 @@
     </div>
 
     <script>
-        // --- DATA ---
         const sentences = { 'a': "A rare light follows your path.", 'b': "Beyond the veil, you find clarity.", 'c': "Calmness is your hidden strength.", 'd': "Destiny speaks to you in whispers.", 'e': "Energy flows where you focus.", 'f': "Fortune favors your quiet moments.", 'g': "Greatness lies within your patience.", 'h': "Harmony seeks you out constantly.", 'i': "Intuition guides your every step.", 'j': "Journeying inward brings you peace.", 'k': "Kindred spirits are drawn to you.", 'l': "Life unfolds for you mysteriously.", 'm': "Magic exists in your perspective.", 'n': "Nothing is hidden from your gaze.", 'o': "Old souls recognize your vibration.", 'p': "Peace is your ultimate weapon.", 'q': "Questions lead you to deeper truths.", 'r': "Radiance surrounds your aura naturally.", 's': "Silence reveals more than words.", 't': "Time flows differently in your presence.", 'u': "Understanding comes to you effortlessly.", 'v': "Visions of the future guide you.", 'w': "Wisdom is weaved into your spirit.", 'x': "Xenial warmth defines your heart.", 'y': "You are connected to the stars.", 'z': "Zenith is where your spirit aims." };
+        
         const archetypes = ["The Alchemist", "The Mystic", "The Starseed", "The Guardian", "The Seer", "The Catalyst", "The Moonchild", "The Weaver"];
         
+        // NEW STAR NAMES
+        const starNames = ["Sirius", "Vega", "Rigel", "Antares", "Betelgeuse", "Altair", "Aldebaran", "Arcturus", "Deneb", "Spica", "Procyon", "Pollux"];
+        
         const auraColors = [
-            { display: "Ethereal Gold", base: "Gold" }, { display: "Midnight Blue", base: "Blue" },
-            { display: "Velvet Crimson", base: "Crimson" }, { display: "Deep Violet", base: "Violet" },
-            { display: "Lunar Silver", base: "Silver" }, { display: "Forest Jade", base: "Jade" },
+            { display: "Ethereal Gold", base: "Gold" },
+            { display: "Midnight Blue", base: "Blue" },
+            { display: "Velvet Crimson", base: "Crimson" },
+            { display: "Deep Violet", base: "Violet" },
+            { display: "Lunar Silver", base: "Silver" },
+            { display: "Forest Jade", base: "Jade" },
             { display: "Cosmic Teal", base: "Teal" }
         ];
         const disruptions = ["Loud Noise", "Dishonesty", "Stagnation", "Crowds", "Harsh Light", "Betrayal", "Inertia"];
+
+        // SIMPLE "CRIB" DICTIONARY
         const traitDict = {
-            'a': "Ambitious", 'b': "Brave", 'c': "Calm", 'd': "Driven", 'e': "Energetic", 'f': "Fearless", 'g': "Gentle", 'h': "Honest", 'i': "Insightful", 'j': "Joyful", 'k': "Kind", 'l': "Loyal", 'm': "Mystic", 'n': "Noble", 'o': "Optimistic", 'p': "Passionate", 'q': "Quiet", 'r': "Radiant", 's': "Strong", 't': "True", 'u': "Unique", 'v': "Vibrant", 'w': "Wise", 'x': "Xenial", 'y': "Youthful", 'z': "Zealous"
+            'a': "Ambitious", 'b': "Brave", 'c': "Calm", 'd': "Driven",
+            'e': "Energetic", 'f': "Fearless", 'g': "Gentle", 'h': "Honest",
+            'i': "Insightful", 'j': "Joyful", 'k': "Kind", 'l': "Loyal",
+            'm': "Mystic", 'n': "Noble", 'o': "Optimistic", 'p': "Passionate",
+            'q': "Quiet", 'r': "Radiant", 's': "Strong", 't': "True",
+            'u': "Unique", 'v': "Vibrant", 'w': "Wise", 'x': "Xenial",
+            'y': "Youthful", 'z': "Zealous"
         };
-        
-        const starMap = {
-            'a': "Acruch", 'b': "Bellatrix", 'c': "Canopus", 'd': "Deneb", 'e': "Elnath", 'f': "Fomalhaut", 'g': "Gacrux", 'h': "Hadar", 'i': "Izar", 'j': "Jabbah", 'k': "Kaus", 'l': "Lesath", 'm': "Miaplacidus", 'n': "Nunki", 'o': "Okab", 'p': "Pollux", 'q': "Qakh", 'r': "Rigel", 's': "Sirius", 't': "Toliman", 'u': "Unukalhai", 'v': "Vega", 'w': "Wezen", 'x': "Xuange", 'y': "Yed", 'z': "Zuben"
-        };
 
-        // --- NEW STAR SYSTEM LOGIC ---
-        let acrosticInterval;
-        let idleInterval;
-        const starLayer = document.getElementById('star-layer');
-
-        function initCosmos() {
-            // Static dust (Very faint background stars)
-            for(let i=0; i<80; i++) {
-                const d = document.createElement('div');
-                d.className = 'dust-star';
-                d.style.left = Math.random() * 100 + '%';
-                d.style.top = Math.random() * 100 + '%';
-                d.style.opacity = Math.random() * 0.2 + 0.1;
-                starLayer.appendChild(d);
-            }
-            // Start idle random stars
-            idleInterval = setInterval(() => {
-                const randomKey = Object.keys(starMap)[Math.floor(Math.random() * 26)];
-                spawnStar(starMap[randomKey]);
-            }, 3000);
-        }
-
-        function spawnStar(name) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'celestial-body';
-
-            const sector = Math.floor(Math.random() * 4);
-            let sTop, sLeft;
-            // Prevent stars from spawning directly behind the central card
-            if (sector === 0) { sTop = 5 + Math.random()*15; sLeft = 10 + Math.random()*80; }
-            else if (sector === 1) { sTop = 80 + Math.random()*15; sLeft = 10 + Math.random()*80; }
-            else if (sector === 2) { sTop = 20 + Math.random()*60; sLeft = 3 + Math.random()*12; }
-            else { sTop = 20 + Math.random()*60; sLeft = 85 + Math.random()*12; }
-
-            wrapper.style.top = sTop + '%';
-            wrapper.style.left = sLeft + '%';
-
-            wrapper.innerHTML = `
-                <div class="flare-core">
-                    <div class="flare-center"></div>
-                    <div class="flare-h"></div>
-                    <div class="flare-v"></div>
-                    <div class="flare-halo"></div>
-                </div>
-                <div class="star-name">${name}</div>
-            `;
-
-            starLayer.appendChild(wrapper);
-            setTimeout(() => wrapper.remove(), 8100);
-        }
-
-        function startAcrostic(nameStr) {
-            clearInterval(idleInterval);
-            if(acrosticInterval) clearInterval(acrosticInterval);
-            
-            const clean = nameStr.toLowerCase().replace(/[^a-z]/g, '');
-            if(!clean) return;
-
-            let idx = 0;
-            if(starMap[clean[idx]]) spawnStar(starMap[clean[idx]]);
-            idx++;
-
-            acrosticInterval = setInterval(() => {
-                if(idx >= clean.length) idx = 0;
-                if(starMap[clean[idx]]) spawnStar(starMap[clean[idx]]);
-                idx++;
-            }, 2800); 
-        }
-
-        window.onload = initCosmos;
-
-        // --- MAIN APP LOGIC ---
         let resultRevealTime = 0;
 
         function startDivination() {
@@ -373,9 +294,6 @@
         }
 
         function revealDestiny(name) {
-            // Trigger New Star System
-            startAcrostic(name);
-
             let seed = 0;
             for (let char of name) seed += char.charCodeAt(0);
             const getFrom = (arr, offset) => arr[(seed + offset) % arr.length];
@@ -384,7 +302,15 @@
             const c1Obj = getFrom(auraColors, 1);
             const c2Obj = getFrom(auraColors, 2);
             const avoid = getFrom(disruptions, 3);
+            const star = getFrom(starNames, 4); // Get star name
             
+            // STAR RATING LOGIC (Weighted slightly higher for better UX)
+            // Uses seed to generate a number between 1 and 5
+            let starRating = (seed % 5) + 1; 
+            if(starRating < 3) starRating += 1; // Ensure mostly 2+ stars for vibe
+            if(starRating > 5) starRating = 5;
+
+            // --- SIMPLE NAME LOGIC ---
             const cleanName = name.toLowerCase().replace(/[^a-z]/g, '');
             const firstChar = cleanName.charAt(0) || 'a';
             const lastChar = cleanName.charAt(cleanName.length - 1) || 'z';
@@ -402,18 +328,32 @@
 
             document.getElementById('res-traits').innerText = finalTraits;
 
-            const reversedName = name.toLowerCase().split('').reverse();
-            let prophecyText = "";
-            reversedName.forEach(char => {
+            // --- PARAGRAPH LOGIC ---
+            // Constructing the paragraph based on name characters
+            let paragraphText = "";
+            const nameChars = cleanName.split('');
+            
+            nameChars.forEach(char => {
                 if (sentences[char]) {
-                    prophecyText += sentences[char] + " ";
+                    paragraphText += sentences[char] + " ";
                 }
             });
-            document.getElementById('res-description').innerText = prophecyText.trim();
+
+            document.getElementById('res-description').innerText = paragraphText.trim();
 
             document.getElementById('res-archetype').innerText = arch;
             document.getElementById('res-colors').innerText = `${c1Obj.display} & ${c2Obj.display}`;
             document.getElementById('res-avoid').innerText = avoid;
+            
+            // SET STAR DATA
+            document.getElementById('res-star-name').innerText = "Alpha " + star;
+            
+            // GENERATE VISUAL STARS
+            let starsHTML = "";
+            for(let i=0; i<5; i++) {
+                starsHTML += i < starRating ? "★" : "☆";
+            }
+            document.getElementById('res-stars-visual').innerHTML = starsHTML;
             
             document.getElementById('view-loading').style.display = 'none';
             document.getElementById('view-result').style.display = 'flex';
@@ -437,14 +377,6 @@
                 document.getElementById('view-result').style.display = 'none';
                 document.getElementById('view-input').style.display = 'block';
                 document.getElementById('nameInput').value = '';
-                
-                // Restart Idle Stars
-                if(acrosticInterval) clearInterval(acrosticInterval);
-                if(idleInterval) clearInterval(idleInterval);
-                idleInterval = setInterval(() => {
-                    const randomKey = Object.keys(starMap)[Math.floor(Math.random() * 26)];
-                    spawnStar(starMap[randomKey]);
-                }, 3000);
             }
         }
 
@@ -452,11 +384,12 @@
             if (!e.target.closest('.glass-card')) { e.preventDefault(); }
         }, { passive: false });
 
+        // ENABLE ENTER KEY
         const inputField = document.getElementById("nameInput");
         inputField.addEventListener("keydown", function(event) {
             if (event.key === "Enter") {
-                event.preventDefault();
-                startDivination();
+                event.preventDefault(); 
+                startDivination();      
             }
         });
         

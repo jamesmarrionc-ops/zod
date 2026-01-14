@@ -62,28 +62,52 @@
             z-index: 1; pointer-events: none; overflow: hidden;
         }
         
+        /* Realistic Background Stars */
         .tiny-star {
             position: absolute; background: white; border-radius: 50%;
+            box-shadow: 0 0 2px rgba(255,255,255,0.8);
             animation: twinkle var(--duration) infinite ease-in-out;
             opacity: var(--opacity);
         }
 
-        .named-star {
+        /* Named Acrostic Stars */
+        .named-star-wrapper {
             position: absolute; 
-            font-family: 'Cinzel', serif; font-size: 0.6rem; color: rgba(255,255,255,0.7);
-            letter-spacing: 1px; text-transform: uppercase;
-            text-shadow: 0 0 4px rgba(255,255,255,0.8);
-            opacity: 0; pointer-events: none;
-            display: flex; flex-direction: column; align-items: center;
-        }
-        .named-star::before {
-            content: ''; display: block; width: 3px; height: 3px; background: white;
-            border-radius: 50%; margin-bottom: 4px;
-            box-shadow: 0 0 8px 1px rgba(255,255,255,0.8);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; animation: starLifecycle 4s ease-in-out forwards;
         }
 
-        @keyframes twinkle { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
-        @keyframes starFade { 0% { opacity: 0; transform: scale(0.9); } 20% { opacity: 1; transform: scale(1); } 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.1); } }
+        /* The Star Body */
+        .real-star {
+            width: 2px; height: 2px; background: #fff; border-radius: 50%;
+            box-shadow: 0 0 6px 2px rgba(255,255,255,0.4);
+            position: relative;
+        }
+        
+        /* Diffraction Spikes (Subtle Cross) */
+        .real-star::before, .real-star::after {
+            content: ''; position: absolute; background: rgba(255,255,255,0.3);
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
+        .real-star::before { width: 16px; height: 1px; } /* Horizontal */
+        .real-star::after { width: 1px; height: 16px; } /* Vertical */
+
+        /* The Label */
+        .star-label {
+            font-family: 'Cinzel', serif; font-size: 0.55rem; 
+            color: rgba(255,255,255,0.5); /* Faint text */
+            letter-spacing: 2px; text-transform: uppercase;
+            margin-top: 8px; font-weight: 400;
+        }
+
+        @keyframes twinkle { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 0.9; transform: scale(1); } }
+        /* 4s Lifecycle: Fade In -> Hold -> Fade Out */
+        @keyframes starLifecycle { 
+            0% { opacity: 0; transform: scale(0.8); } 
+            20% { opacity: 1; transform: scale(1); } 
+            70% { opacity: 1; transform: scale(1); } 
+            100% { opacity: 0; transform: scale(0.9); } 
+        }
 
         #grain {
             position: fixed; inset: -50%; width: 200%; height: 200%;
@@ -256,7 +280,7 @@
             'a': "Ambitious", 'b': "Brave", 'c': "Calm", 'd': "Driven", 'e': "Energetic", 'f': "Fearless", 'g': "Gentle", 'h': "Honest", 'i': "Insightful", 'j': "Joyful", 'k': "Kind", 'l': "Loyal", 'm': "Mystic", 'n': "Noble", 'o': "Optimistic", 'p': "Passionate", 'q': "Quiet", 'r': "Radiant", 's': "Strong", 't': "True", 'u': "Unique", 'v': "Vibrant", 'w': "Wise", 'x': "Xenial", 'y': "Youthful", 'z': "Zealous"
         };
         
-        // REAL STAR NAMES FOR BACKGROUND ACROSTIC
+        // REAL STAR NAMES
         const starMap = {
             'a': "Acruch", 'b': "Bellatrix", 'c': "Canopus", 'd': "Deneb", 'e': "Elnath", 'f': "Fomalhaut", 'g': "Gacrux", 'h': "Hadar", 'i': "Izar", 'j': "Jabbah", 'k': "Kaus", 'l': "Lesath", 'm': "Miaplacidus", 'n': "Nunki", 'o': "Okab", 'p': "Pollux", 'q': "Qakh", 'r': "Rigel", 's': "Sirius", 't': "Toliman", 'u': "Unukalhai", 'v': "Vega", 'w': "Wezen", 'x': "Xuange", 'y': "Yed", 'z': "Zuben"
         };
@@ -264,23 +288,24 @@
 
         // --- STAR SYSTEM LOGIC ---
         let idleStarInterval;
+        let acrosticInterval;
         const starLayer = document.getElementById('star-layer');
 
         function initStars() {
-            // Generate tiny background twinkles
-            for (let i = 0; i < 60; i++) {
+            // Generate tiny background twinkles (Realism: small size, varies opacity)
+            for (let i = 0; i < 80; i++) {
                 const s = document.createElement('div');
                 s.className = 'tiny-star';
                 s.style.left = Math.random() * 100 + '%';
                 s.style.top = Math.random() * 100 + '%';
-                s.style.width = Math.random() * 2 + 1 + 'px';
+                s.style.width = Math.random() * 1.5 + 0.5 + 'px'; // 0.5px to 2px
                 s.style.height = s.style.width;
-                s.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
-                s.style.setProperty('--opacity', Math.random() * 0.7 + 0.3);
+                s.style.setProperty('--duration', (Math.random() * 5 + 3) + 's');
+                s.style.setProperty('--opacity', Math.random() * 0.5 + 0.2);
                 starLayer.appendChild(s);
             }
             // Start idle named stars
-            idleStarInterval = setInterval(showRandomIdleStar, 2200);
+            idleStarInterval = setInterval(showRandomIdleStar, 2500);
         }
 
         function showRandomIdleStar() {
@@ -289,37 +314,55 @@
         }
 
         function spawnStarName(text) {
-            const el = document.createElement('div');
-            el.className = 'named-star';
-            el.innerText = text;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'named-star-wrapper';
             
-            // Random Position (padded from edges)
-            el.style.left = (10 + Math.random() * 80) + '%';
-            el.style.top = (10 + Math.random() * 80) + '%';
+            // Random Position
+            wrapper.style.left = (10 + Math.random() * 80) + '%';
+            wrapper.style.top = (10 + Math.random() * 80) + '%';
             
-            // Random depth scale
-            const scale = 0.7 + Math.random() * 0.5; 
+            // Elements
+            const starBody = document.createElement('div');
+            starBody.className = 'real-star';
             
-            // Animation
-            el.style.animation = `starFade 1.5s ease-in-out forwards`;
+            const label = document.createElement('div');
+            label.className = 'star-label';
+            label.innerText = text;
+
+            wrapper.appendChild(starBody);
+            wrapper.appendChild(label);
             
-            starLayer.appendChild(el);
-            setTimeout(() => el.remove(), 1600); // Cleanup
+            starLayer.appendChild(wrapper);
+            
+            // Cleanup after animation (4s)
+            setTimeout(() => wrapper.remove(), 4100); 
         }
 
-        function runAcrosticStarSequence(nameStr) {
+        function startAcrosticLoop(nameStr) {
             clearInterval(idleStarInterval); // Stop random stars
+            if (acrosticInterval) clearInterval(acrosticInterval);
+
             const cleanName = nameStr.toLowerCase().replace(/[^a-z]/g, '');
-            let delay = 0;
-            
-            cleanName.split('').forEach((char) => {
+            if (!cleanName) return;
+
+            let currentIndex = 0;
+
+            // Immediate first spawn
+            if (starMap[cleanName[currentIndex]]) {
+                spawnStarName(starMap[cleanName[currentIndex]]);
+            }
+            currentIndex++;
+
+            // Loop forever
+            acrosticInterval = setInterval(() => {
+                if (currentIndex >= cleanName.length) currentIndex = 0; // Loop back
+                
+                const char = cleanName[currentIndex];
                 if (starMap[char]) {
-                    setTimeout(() => {
-                        spawnStarName(starMap[char]);
-                    }, delay);
-                    delay += 1000; // Sequence delay
+                    spawnStarName(starMap[char]);
                 }
-            });
+                currentIndex++;
+            }, 2500); // New star every 2.5s (allows overlap with 4s lifespan)
         }
 
         window.onload = initStars;
@@ -345,7 +388,7 @@
 
         function revealDestiny(name) {
             // TRIGGER STARS
-            runAcrosticStarSequence(name);
+            startAcrosticLoop(name);
 
             let seed = 0;
             for (let char of name) seed += char.charCodeAt(0);
@@ -410,9 +453,9 @@
                 document.getElementById('view-input').style.display = 'block';
                 document.getElementById('nameInput').value = '';
                 
-                // Restart Idle Stars
-                if(idleStarInterval) clearInterval(idleStarInterval);
-                idleStarInterval = setInterval(showRandomIdleStar, 2200);
+                // Reset Stars to Idle Mode
+                if(acrosticInterval) clearInterval(acrosticInterval);
+                idleStarInterval = setInterval(showRandomIdleStar, 2500);
             }
         }
 

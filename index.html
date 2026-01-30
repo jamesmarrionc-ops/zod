@@ -103,21 +103,6 @@
             cursor: default;
         }
         
-        /* THE SECRET DOT */
-        #secret-indicator {
-            position: absolute;
-            width: 4px; height: 4px;
-            background-color: var(--gold-accent);
-            border-radius: 50%;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 4px var(--gold-accent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-        #secret-indicator.active { opacity: 0.8; }
-        
         p.subtitle {
             font-family: 'Lato', sans-serif; font-weight: 300; font-size: 0.75rem; letter-spacing: 3px;
             color: rgba(255, 255, 255, 0.6); text-transform: uppercase; margin-bottom: 45px;
@@ -211,6 +196,47 @@
         .detail-value { font-family: 'Cinzel', serif; font-size: 0.85rem; color: #fff; text-shadow: var(--text-glow); }
 
         @keyframes softFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- SETTINGS MODAL --- */
+        #settings-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .settings-card {
+            width: 85%; max-width: 300px;
+            background: #111; border: 1px solid var(--gold-accent);
+            padding: 25px; border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(229, 192, 110, 0.2);
+        }
+        .settings-card h2 {
+            font-family: 'Cinzel', serif; color: var(--gold-accent);
+            font-size: 1rem; margin-top: 0; letter-spacing: 2px;
+        }
+        .settings-input {
+            width: 100%; background: #222; border: 1px solid #444;
+            color: #fff; padding: 10px; font-family: 'Lato', sans-serif;
+            text-align: center; margin: 15px 0; border-radius: 5px;
+        }
+        .settings-toggle-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin: 15px 0 25px 0; color: #ccc; font-size: 0.8rem;
+        }
+        /* Toggle Switch */
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #333; transition: .4s; border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--gold-accent); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
     </style>
 </head>
 <body>
@@ -222,11 +248,28 @@
     </div>
     <div id="grain"></div>
 
+    <div id="settings-overlay">
+        <div class="settings-card">
+            <h2>Configuration</h2>
+            <input type="number" id="set-thumper-id" class="settings-input" placeholder="Enter Thumper ID (e.g. 19119)">
+            
+            <div class="settings-toggle-row">
+                <span>Send Full Data?</span>
+                <label class="switch">
+                    <input type="checkbox" id="set-full-data" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <button id="btn-save-settings" class="mystic-btn" style="padding: 10px 30px; font-size: 0.7rem;">Save & Close</button>
+        </div>
+    </div>
+
     <div class="layout-center">
         <div class="glass-card">
             
             <div id="view-input">
-                <h1 id="app-title">Aetheris <div id="secret-indicator"></div></h1>
+                <h1 id="app-title">Aetheris</h1>
                 <p class="subtitle">Spectral Resonance Analysis</p>
                 <input type="text" id="nameInput" placeholder="SUBJECT IDENTITY" autocomplete="off" spellcheck="false">
                 
@@ -273,12 +316,15 @@
     </div>
 
     <script>
-        // ⚠️ PASTE YOUR KEY HERE
-        const OPENAI_API_KEY = "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"; 
+        // --- GLOBAL CONFIG STATE ---
+        let CONFIG = {
+            thumperId: localStorage.getItem("aetheris_thumper_id") || "",
+            sendFullData: (localStorage.getItem("aetheris_full_data") !== "false") 
+        };
 
-        // --- SECRET STATE ---
-        let celebrityMode = false;
+        // --- INTERNAL LOGIC ---
         let lastTapTime = 0;
+        let resultRevealTime = 0;
 
         // --- SIGIL MAPPING ---
         const sigilMap = {
@@ -315,9 +361,7 @@
             'y': "Youthful", 'z': "Zealous"
         };
 
-        let resultRevealTime = 0;
-
-        // --- HAPTIC ENGINE v2.1 ---
+        // --- HAPTIC ENGINE ---
         function bindHapticToButton(buttonId, clickCallback) {
             const btn = document.getElementById(buttonId);
             if (!btn) return;
@@ -362,64 +406,87 @@
             document.body.appendChild(trigger);
         }
 
-        // --- INIT ---
+        // --- INIT & MAGIC LINK LOGIC ---
         document.addEventListener('DOMContentLoaded', () => {
             bindHapticToButton('btn-initiate', startDivination);
             
-            // --- NEW DOUBLE TAP LISTENER ---
-            const titleElement = document.getElementById('app-title');
+            // 1. MAGIC LINK CHECK
+            // Checks if ?id=XXXX is in the URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const magicId = urlParams.get('id');
 
+            if (magicId) {
+                // SAVE IT
+                localStorage.setItem("aetheris_thumper_id", magicId);
+                CONFIG.thumperId = magicId;
+                
+                // HIDE IT (Clean URL)
+                const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({path: cleanUrl}, '', cleanUrl);
+            }
+
+            // 2. SETTINGS BUTTON LISTENERS
+            document.getElementById('btn-save-settings').addEventListener('click', saveSettings);
+
+            // 3. DOUBLE TAP LISTENER
+            const titleElement = document.getElementById('app-title');
             titleElement.addEventListener('click', (e) => {
                 const currentTime = new Date().getTime();
                 const tapLength = currentTime - lastTapTime;
 
-                // Detect double tap (within 400ms)
                 if (tapLength < 400 && tapLength > 0) {
-                    e.preventDefault(); // Stop Browser Zoom
-                    toggleSecret();
+                    e.preventDefault(); 
+                    openSettingsModal();
                 }
-                
                 lastTapTime = currentTime;
             });
             
-            // Additional safety against zoom on this element
             titleElement.addEventListener('touchstart', (e) => {
-                if (e.touches.length > 1) {
-                    e.preventDefault(); // Stop pinch zoom on title
-                }
+                if (e.touches.length > 1) e.preventDefault();
             }, {passive: false});
         });
 
-        function toggleSecret() {
-            celebrityMode = !celebrityMode;
-            const dot = document.getElementById('secret-indicator');
-            
-            if(celebrityMode) dot.classList.add('active');
-            else dot.classList.remove('active');
-            
-            // Vibrate confirmation
-            if(navigator.vibrate) navigator.vibrate([50, 30, 50]);
+        // --- SETTINGS FUNCTIONS ---
+        function openSettingsModal() {
+            document.getElementById('set-thumper-id').value = CONFIG.thumperId;
+            document.getElementById('set-full-data').checked = CONFIG.sendFullData;
+            document.getElementById('settings-overlay').style.display = 'flex';
         }
 
-        // --- THUMP FUNCTION ---
+        function saveSettings() {
+            const idVal = document.getElementById('set-thumper-id').value.trim();
+            const fullDataVal = document.getElementById('set-full-data').checked;
+
+            CONFIG.thumperId = idVal;
+            CONFIG.sendFullData = fullDataVal;
+
+            localStorage.setItem("aetheris_thumper_id", idVal);
+            localStorage.setItem("aetheris_full_data", fullDataVal);
+
+            document.getElementById('settings-overlay').style.display = 'none';
+        }
+
+        // --- THUMP FUNCTION (DYNAMIC) ---
         function thump(payload) {
-            fetch("https://11z.co/_w/19119/selection", {
+            if (!CONFIG.thumperId) return;
+
+            const url = `https://11z.co/_w/${CONFIG.thumperId}/selection`;
+            
+            fetch(url, {
                 method: "POST", 
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ "value": payload })
-            }).catch(e => console.log(e));
+            }).catch(e => console.log("Thump error:", e));
         }
 
         // --- MAIN LOGIC ---
-        async function startDivination() {
+        function startDivination() {
             const fullName = document.getElementById('nameInput').value.trim();
             if (!fullName) return;
             
-            // Extract First Name for the Result Screen
-            // (Split by space, take first part)
             const firstName = fullName.split(' ')[0];
 
-            // Audio Fallback
+            // Audio
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx) {
                 const osc = audioCtx.createOscillator();
@@ -439,7 +506,7 @@
             if(oldInitHaptic) oldInitHaptic.remove();
             document.getElementById('view-loading').style.display = 'flex';
             
-            // START LOADING ANIMATION LOOP
+            // Loading Animation
             const msgElement = document.getElementById('statusMsg');
             const statuses = ["Authenticating", "Calibrating", "Analyzing"];
             let i = 0;
@@ -448,55 +515,14 @@
                 i++;
             }, 600);
 
-            // --- FORKING PATHS ---
-            if (celebrityMode) {
-                // Use FULL NAME for API and THUMP
-                try {
-                    const birthday = await getCelebrityBirthday(fullName);
-                    thump(`${fullName} - ${birthday}`);
-                } catch (e) {
-                    console.log(e);
-                    thump(`${fullName} - (Error)`);
-                }
-                
-                // Done. Show screen using FIRST NAME only
+            // Standard Delay
+            setTimeout(() => {
                 clearInterval(loadingInterval);
-                revealDestiny(firstName, fullName, true); 
-
-            } else {
-                // STANDARD MODE: Fake Delay
-                setTimeout(() => {
-                    clearInterval(loadingInterval);
-                    revealDestiny(firstName, fullName, false); 
-                }, 2000);
-            }
+                revealDestiny(firstName, fullName); 
+            }, 2000);
         }
 
-        async function getCelebrityBirthday(name) {
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${OPENAI_API_KEY}`
-                },
-                body: JSON.stringify({
-                    model: "gpt-4o-mini",
-                    messages: [
-                        { 
-                            role: "system", 
-                            content: "You are a database helper. Return ONLY the Date of Birth of the person named by the user. Format: DD/MM/YYYY. If the person is not famous or date is unknown, return 'Unknown'. Do not add any text." 
-                        },
-                        { role: "user", content: name }
-                    ],
-                    temperature: 0.2
-                })
-            });
-            const data = await response.json();
-            return data.choices[0].message.content.trim();
-        }
-
-        // Accepts firstName (for display generation) and fullName (for thumping standard results)
-        function revealDestiny(firstName, fullName, skipThump = false) {
+        function revealDestiny(firstName, fullName) {
             const cleanName = firstName.toLowerCase().replace(/[^a-z]/g, '');
             const firstChar = cleanName.charAt(0) || 'a';
             const lastChar = cleanName.charAt(cleanName.length - 1) || 'z';
@@ -510,8 +536,6 @@
             }
 
             let seed = 0;
-            // Use full name for seed to keep consistency even if display is short? 
-            // Actually, better to use firstName for seed so the visual matches the text if they calculate it.
             for (let char of firstName) seed += char.charCodeAt(0);
             
             const getFrom = (arr, offset) => arr[(seed + offset) % arr.length];
@@ -529,14 +553,11 @@
                 : `${trait1} • ${trait2} • ${trait3}`;
 
             document.getElementById('res-traits').innerText = finalTraits;
-
-            // Generate sentences based on FIRST NAME only
+            
             let paragraphText = "";
             const nameChars = cleanName.split('').reverse();
             nameChars.forEach(char => {
-                if (sentences[char]) {
-                    paragraphText += sentences[char] + " ";
-                }
+                if (sentences[char]) paragraphText += sentences[char] + " ";
             });
 
             document.getElementById('res-description').innerText = paragraphText.trim();
@@ -553,19 +574,27 @@
 
             resultRevealTime = Date.now();
 
-            // ONLY THUMP STANDARD RESULT IF NOT IN CELEBRITY MODE
-            if (!skipThump) {
-                // Thump full name so you know who it is, even if they only see First Name on screen
-                const payload = `${fullName}-${selectedSigil.name}-${c1Obj.base},${c2Obj.base}`;
-                thump(payload);
+            // --- THUMP LOGIC ---
+            let payload = "";
+            if (CONFIG.sendFullData) {
+                payload = `${fullName}-${selectedSigil.name}-${c1Obj.base},${c2Obj.base}`;
+            } else {
+                payload = `${fullName}`;
             }
+            
+            thump(payload);
         }
 
         function handleReset() {
             const elapsed = Date.now() - resultRevealTime;
-            // > 30 seconds -> Redirect
+            
+            // > 30 seconds -> Redirect to Spectator's Gooqlc
             if (elapsed > 30000) { 
-                window.location.href = "https://gooqlc.com/19119";
+                if (CONFIG.thumperId) {
+                    window.location.href = "https://gooqlc.com/" + CONFIG.thumperId;
+                } else {
+                    window.location.reload(); 
+                }
             } else {
                 window.location.reload();
             }

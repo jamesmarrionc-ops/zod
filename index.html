@@ -251,7 +251,7 @@
     <div id="settings-overlay">
         <div class="settings-card">
             <h2>Configuration</h2>
-            <input type="number" id="set-thumper-id" class="settings-input" placeholder="Enter Thumper ID (e.g. 19119)">
+            <input type="number" id="set-thumper-id" class="settings-input" placeholder="Enter Thumper ID (Inject ID)">
             
             <div class="settings-toggle-row">
                 <span>Send Full Data?</span>
@@ -411,7 +411,6 @@
             bindHapticToButton('btn-initiate', startDivination);
             
             // 1. MAGIC LINK CHECK
-            // Checks if ?id=XXXX is in the URL
             const urlParams = new URLSearchParams(window.location.search);
             const magicId = urlParams.get('id');
 
